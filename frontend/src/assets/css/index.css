@@ -11,3 +11,10 @@
     display: grid;
     grid-template-rows: max-content 1fr max-content;
 }
+
+.align-center{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
