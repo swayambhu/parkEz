@@ -1,7 +1,7 @@
 const Main = () => {
     return (
         <main>
-            Main
+            Main created from test branch
         </main>
     )
 }
