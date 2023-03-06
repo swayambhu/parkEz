@@ -1,12 +1,16 @@
 import React from 'react';
-import Footer from '../layouts/Footer';
-import Header from '../layouts/Header';
-import Main from '../layouts/Main';
+import {Main } from '../components/Layout.styled';
+import Footer from '../Layouts/Footer';
+import Header from '../Layouts/Header';
+import Router from '../routes/Router';
 function App() {
+  console.clear();
   return (
     <>
       <Header />
-      <Main />
+      <Main>
+        <Router />
+      </Main>
       <Footer />
     </>
   );
