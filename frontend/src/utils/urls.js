@@ -5,7 +5,7 @@ const urls = [
     },
     {
         path: "/browse-parking-lot",
-        text: "Browse Parking Lot",
+        text: "Browse Parking Lots",
     },
     {
         path: "/about",
