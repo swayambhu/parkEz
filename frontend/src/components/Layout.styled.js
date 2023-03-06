@@ -7,11 +7,13 @@ export const Header = styled.header`
 `
 
 export const Main = styled.main`
-    grid-column: span 11;
+    grid-column: span 12;
     overflow: auto;
 `
 
 export const Footer = styled.footer`
     grid-column: span 12;
-    padding: 15px 20px;
+    padding: 40px 120px;
+    background-color: #0A0C8A;
+    color: #ffffff;
 `

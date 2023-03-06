@@ -1,8 +1,10 @@
 import React from 'react';
-import { Footer, Main } from '../components/Layout.styled';
+import {Main } from '../components/Layout.styled';
+import Footer from '../Layouts/Footer';
 import Header from '../Layouts/Header';
 import Router from '../routes/Router';
 function App() {
+  console.clear();
   return (
     <>
       <Header />
