@@ -1,7 +1,8 @@
 import React from 'react';
 import {Main } from '../components/Layout.styled';
-import Footer from '../Layouts/Footer';
-import Header from '../Layouts/Header';
+// import Footer from '../Layouts/Footer';
+import Header from "../layouts/Header"
+import Footer from "../layouts/Footer"
 import Router from '../routes/Router';
 function App() {
   console.clear();

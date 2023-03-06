@@ -1,14 +1,5 @@
 import styled from 'styled-components'
 
-
-const Flex = styled`
-    display: flex;
-`
-
-const FlexCenter = styled(Flex)`
-    align-items: center;
-    justify-content: center;
-`
 export const ImageWrapper = styled.div`
     display: flex;
     align-items: center;
@@ -21,9 +12,4 @@ export const ImageWrapper = styled.div`
         height: 100%;
         object-fit: contain;
     }
-`
-
-export const Button = styled(FlexCenter).button`
-    padding: 7px 20px;
-    
 `
