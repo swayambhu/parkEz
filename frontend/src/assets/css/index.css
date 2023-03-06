@@ -64,3 +64,24 @@
 .flex-right{
   justify-content: flex-end;
 }
+
+a{
+  text-decoration: none;
+  outline: none;
+}
+
+button{
+  outline: none;
+  border: none;
+  background: none;
+}
+
+.prm-btn{
+  color: #ffffff;
+  background-color: #0A0C8A;
+}
+
+.scd-btn{
+  color: #000000;
+  background-color:#ffffff;
+}

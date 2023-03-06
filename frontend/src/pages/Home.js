@@ -1,7 +1,10 @@
+import HeroSection from "../components/Pages/Home Page/HeroSection"
+
+
 const Home = () => {
     return(
         <>
-            Home
+            <HeroSection/>
         </>
     )
 }

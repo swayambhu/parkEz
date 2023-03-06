@@ -3,7 +3,6 @@ import styled from 'styled-components'
 export const Header = styled.header`
     grid-column: span 12;
     padding: 0px 40px;
-    border-bottom: 1px solid #EAEAEA;
 `
 
 export const Main = styled.main`
