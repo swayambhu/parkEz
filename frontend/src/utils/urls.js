@@ -4,6 +4,10 @@ const urls = [
         text: "Home",
     },
     {
+        path: "/browse-parking-lot",
+        text: "Browse Parking Lot",
+    },
+    {
         path: "/about",
         text: "About",
     },

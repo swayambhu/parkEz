@@ -17,6 +17,7 @@ import Home from "./pages/Home"
 import Login from "./pages/Login"
 import Pricing from "./pages/Pricing"
 import SignUp from "./pages/SignUp"
+import BrowseParkingLot from './pages/BrowseParkingLots';
 
 const container = document.getElementById('root');
 const root = createRoot(container);
@@ -37,5 +38,6 @@ export const Pages = {
   Home,
   Login,
   Pricing,
-  SignUp
+  SignUp,
+  BrowseParkingLot
 }
