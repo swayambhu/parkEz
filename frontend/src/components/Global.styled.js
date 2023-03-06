@@ -27,11 +27,31 @@ export const Button = styled.button`
 `
 
 export const HeroSection = styled.section`
-    background-image:linear-gradient(rgba(0, 0, 0, 0.5),rgba(0, 0, 0, 0.5)), url(${({ image }) => image});
+    background-image:linear-gradient(rgba(0, 0, 0, 0.6),rgba(0, 0, 0, 0.6)), url(${({ image }) => image});
     background-repeat: no-repeat, repeat;
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
     padding: 65px 150px;
     width: 100%;
+`
+
+export const CommonSection = styled.section`
+    padding: ${({pd}) => pd ?? "50px 100px"};
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    h2{
+        font-size: 1.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: ${({color}) => color ?? "#0A0C8A"};
+        text-align: ${({align}) => align ?? "center"};
+    }
+`
+
+export const Card = styled.div`
+    padding: ${({pd}) => pd ?? "15px 35px"};
+    border-radius: 15px;
+    box-shadow: 2px 2px 6px 2px #0000001c;
 `
