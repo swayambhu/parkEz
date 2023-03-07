@@ -77,7 +77,7 @@ const KeyProperties = () => {
 
                 
                 <CarTextImageWrapper className="flex-center">
-                    <ImageBlock src={require("../../../assets/images/Home Page/properties_car.png")} alt="car-navigation" w={"220px"} h={"220px"}/>
+                    <ImageBlock src={require("../../../assets/images/logo.png")} alt="car-navigation" w={"220px"} h={"220px"}/>
                     <h3>ParkEz</h3>
                 </CarTextImageWrapper>
 
