@@ -54,4 +54,5 @@ export const Card = styled.div`
     padding: ${({pd}) => pd ?? "15px 35px"};
     border-radius: 15px;
     box-shadow: 2px 2px 6px 2px #0000001c;
+    background-color: #ffffff;
 `
