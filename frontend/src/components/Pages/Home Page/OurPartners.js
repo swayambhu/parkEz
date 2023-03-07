@@ -22,7 +22,7 @@ const OurPartners = () => {
 
             <BrandCard>
                 {brands.map(({brand_image}, idx) => (
-                    <Card>
+                    <Card key={idx}>
                         <ImageBlock src={brand_image} w="80px" h="80px" />  
                     </Card>
                 ))}
