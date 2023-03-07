@@ -116,7 +116,7 @@ const KeyProperties = () => {
 }
 
 const Section = styled(CommonSection)`
-    background-color: #0A0C8A;
+    background: linear-gradient(90deg, rgba(25,5,230,1) 0%, rgba(9,9,121,1) 50%, rgba(0,110,255,1) 100%);
 
     h2{
         color: #ffffff;
