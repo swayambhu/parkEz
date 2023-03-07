@@ -56,3 +56,27 @@ export const Card = styled.div`
     box-shadow: 2px 2px 6px 2px #0000001c;
     background-color: #ffffff;
 `
+
+export const InputWrapper = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+
+    label{
+        text-transform: capitalize;
+        font-weight: 500;
+        margin-left: 5px;
+    }
+
+    input{
+        width: 100%;
+        padding: 10px 20px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 12px 2px #00000024;
+    }
+    span{
+        margin-left: 7px;
+        font-size: 0.8rem;
+        color: red;
+    }
+`
