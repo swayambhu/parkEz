@@ -8,17 +8,17 @@ const Reviews = () => {
         {
             avatar: require("../../../assets/images/Home Page/Avatar1.png"),
             name: "Oliver Carter",
-            review: "This app is a game-changer! It detects parking spots with incredible accuracy and makes finding a spot a breeze. Highly recommend it!"
+            review: "This app is a game-changer! It detects parking lot usage with incredible accuracy and makes identifying overparking in my lot a breeze. Highly recommend it!"
         },
         {
             avatar: require("../../../assets/images/Home Page/Avatar2.png"),
             name: "Maya Patel",
-            review: "The parking detection system app is a lifesaver for busy city streets. No more circling the block endlessly, just pull up the app and find an available spot in seconds."
+            review: "The ParkEz parking detection app is a lifesaver for finding great spots in parking lots that use it. It tells me the best available spot in seconds."
         },
         {
             avatar: require("../../../assets/images/Home Page/Avatar3.png"),
             name: "Luna Chen",
-            review: "I was skeptical at first, but this app exceeded my expectations. It not only detects available parking spots, but also provides information on parking restrictions and rates. A must-have for any urban driver."
+            review: "I was skeptical at first, but this app exceeded my expectations. It not only detects total available parking spots in my business' parking lot, but also provides access to security footage in the event of an incident. A must-have for any business owner."
         }
     ]
     return(

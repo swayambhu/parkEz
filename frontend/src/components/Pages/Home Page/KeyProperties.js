@@ -6,38 +6,38 @@ const KeyProperties = () => {
 
     const properties_1 = [
         {
-            icon: "",
+            icon: "bi bi-ui-checks-grid",
             text: "Accuracy",
         },
         {
-            icon:"",
+            icon:"bi bi-ui-checks-grid",
             text: "Reliability",
         },
         {
-            icon:"",
+            icon:"bi bi-ui-checks-grid",
             text: "Speed",
         },
         {
-            icon:"",
+            icon:"bi bi-ui-checks-grid",
             text: "Compatibility",
         },
     ]
 
     const properties_2 = [
         {
-            icon: "",
+            icon: "bi bi-ui-checks-grid",
             text: "Easy installation",
         },
         {
-            icon:"",
+            icon:"bi bi-ui-checks-grid",
             text: "Low Maintenance",
         },
         {
-            icon:"",
+            icon:"bi bi-ui-checks-grid",
             text: "Energy efficiency",
         },
         {
-            icon:"",
+            icon:"bi bi-ui-checks-grid",
             text: "Integration",
         },
     ]
@@ -46,33 +46,14 @@ const KeyProperties = () => {
             <h2>Key Properties</h2>
             <PropertiesMainWrapper className="flex-center">
                 <PropertiesWrapper>
-                    <PropertiesCard className="flex-center">
-                        <i className="bi bi-bullseye"></i>
-                        <p>
-                            Property 1
-                        </p>
-                    </PropertiesCard>
+                    {properties_1.map(({icon, text}, idx) => (
 
-                    <PropertiesCard className="flex-center">
-                        <i className="bi bi-ui-checks-grid"></i>
-                        <p>
-                            Property 1
-                        </p>
-                    </PropertiesCard>
+                        <PropertiesCard key={`${idx}-text`} className="flex-center">
+                            <i className={icon}></i>
+                            <p>{text}</p>
+                        </PropertiesCard>
+                    ))}
 
-                    <PropertiesCard className="flex-center">
-                        <i className="bi bi-ui-checks-grid"></i>
-                        <p>
-                            Property 1
-                        </p>
-                    </PropertiesCard>
-
-                    <PropertiesCard className="flex-center">
-                        <i className="bi bi-ui-checks-grid"></i>
-                        <p>
-                            Property 1
-                        </p>
-                    </PropertiesCard>
                 </PropertiesWrapper>
 
                 
@@ -82,33 +63,13 @@ const KeyProperties = () => {
                 </CarTextImageWrapper>
 
                 <PropertiesWrapper>
-                    <PropertiesCard className="flex-center">
-                        <i className="bi bi-ui-checks-grid"></i>
-                        <p>
-                            Property 1
-                        </p>
-                    </PropertiesCard>
+                {properties_2.map(({icon="bi bi-ui-checks-grid", text}, idx) => (
 
-                    <PropertiesCard className="flex-center">
-                        <i className="bi bi-ui-checks-grid"></i>
-                        <p>
-                            Property 1
-                        </p>
+                    <PropertiesCard key={`${idx}-text`} className="flex-center">
+                        <i className={icon}></i>
+                        <p>{text}</p>
                     </PropertiesCard>
-
-                    <PropertiesCard className="flex-center">
-                        <i className="bi bi-ui-checks-grid"></i>
-                        <p>
-                            Property 1
-                        </p>
-                    </PropertiesCard>
-
-                    <PropertiesCard className="flex-center">
-                        <i className="bi bi-ui-checks-grid"></i>
-                        <p>
-                            Property 1
-                        </p>
-                    </PropertiesCard>
+                ))}
                 </PropertiesWrapper>
             </PropertiesMainWrapper>
         </Section>
@@ -131,9 +92,12 @@ const PropertiesWrapper = styled.div`
     display: flex;
     flex-direction: column;
     gap: 30px;
+    width: 30%;
 `
 
 const PropertiesCard = styled(Card)`
+    justify-content: flex-start;
+    width: 100%;
     gap: 10px;
     i{
         font-size: 3rem;
