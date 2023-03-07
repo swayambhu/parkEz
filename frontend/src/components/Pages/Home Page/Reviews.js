@@ -44,7 +44,7 @@ const Reviews = () => {
             </ReviewCardWrapper>
 
             <Button className="scd-btn" pd={"21px 40px"}> 
-                <NavLink to="#">LEARN MORE</NavLink>
+                <NavLink to="#">READ MORE</NavLink>
             </Button>
         </Section>
     )

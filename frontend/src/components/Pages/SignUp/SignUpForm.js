@@ -55,7 +55,7 @@ const SignUpForm = () => {
 
                 <input type="submit" value="Submit" />
                 <p>
-                    Already Registered? <NavLink to="/sign-up">Login Here</NavLink>
+                    Already Registered? <NavLink to="/login">Login Here</NavLink>
                 </p>
             </form>
         </SignUpCard>
