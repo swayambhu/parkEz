@@ -60,7 +60,7 @@ export const Card = styled.div`
 export const InputWrapper = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 7px;
+    gap: 10px;
 
     label{
         text-transform: capitalize;

@@ -1,49 +1,28 @@
-import styled from "styled-components"
-import { Card, InputWrapper } from "../../Global.styled";
-import { useForm } from "react-hook-form";
+import styled from "styled-components";
+import {Card, InputWrapper} from '../../Global.styled'
 import ImageBlock from "../../Reusable components/ImageBlock";
+import { useForm } from "react-hook-form";
 import {NavLink} from 'react-router-dom';
-
-const SignUpForm = () => {
+const LoginForm = () => {
     const { register, handleSubmit, watch, formState: { errors } } = useForm();
     const onSubmit = data => console.log(data);
     console.log(watch("example"));
 
     const formInputs = [
         {
-            label: "Company Name:",
-            type: "text",
-            placeholder: "Enter Company Name",
-        },
-        {
             label: "Company Email ID:",
             type: "email",
             placeholder: "Enter Company Email ID",
-        },
-        {
-            label: "Contact No:",
-            type: "tel",
-            placeholder: "Contact No",
-        },
-        {
-            label: "Address:",
-            type: "text",
-            placeholder: "Address",
         },
         {
             label: "Password:",
             type: "password",
             placeholder: "Enter Password",
         },
-        {
-            label: "Confirm Password:",
-            type: "password",
-            placeholder: "Confirm Password",
-        },
     ]
     return(
-        <SignUpCard>
-            <ImageBlock className="logo" src={require("../../../assets/images/logo.png")} w="200px"/>
+        <LoginFormCard className="flex-center">
+            <ImageBlock className="logo" src={require("../../../assets/images/logo.png")} w="150px"/>
             <form onSubmit={handleSubmit(onSubmit)}>
                 {formInputs.map(({label, type, placeholder}, idx) => (
                     <InputWrapper>
@@ -55,21 +34,17 @@ const SignUpForm = () => {
 
                 <input type="submit" value="Submit" />
                 <p>
-                    Already Registered? <NavLink to="/sign-up">Login Here</NavLink>
+                    Don't have an account? <NavLink to="/sign-up">Register Here</NavLink>
                 </p>
             </form>
-        </SignUpCard>
+        </LoginFormCard>
     )
 }
-
-const SignUpCard = styled(Card)`
-    max-width: 500px;
-    margin: 0px auto;
-    display: flex;
+const LoginFormCard = styled(Card)`
+    padding: 40px 60px;
+    width: 500px;
     flex-direction: column;
     gap: 40px;
-    align-items: center;
-   
 
     form{
         width: 100%;
@@ -98,10 +73,5 @@ const SignUpCard = styled(Card)`
             text-decoration: underline;
         }
     }
-
 `
-
-
-
-
-export default SignUpForm
+export default LoginForm
