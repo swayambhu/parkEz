@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import styled from "styled-components";
 import { CommonSection, Card } from "../../Global.styled";
 
@@ -21,8 +20,8 @@ const Services = () => {
         <CommonSection>
             <h2>Services</h2>
             <CardWrapper className="flex-center">
-                {services.map(({icon, text}) => (
-                    <ServicesCard className="flex-center">
+                {services.map(({icon, text}, idx) => (
+                    <ServicesCard key={idx} className="flex-center">
                         <div className="left-side">
                             <p>
                             <i className={icon}></i>
