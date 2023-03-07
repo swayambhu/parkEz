@@ -51,6 +51,10 @@
   display: none !important;
 } */
 
+.flex{
+  display: flex;
+  align-items: center;
+}
 .flex-center{
   display: flex;
   justify-content: center;
