@@ -13,31 +13,37 @@ const SignUpForm = () => {
         {
             label: "Company Name:",
             type: "text",
+            name: "name",
             placeholder: "Enter Company Name",
         },
         {
             label: "Company Email ID:",
             type: "email",
+            name: "email",
             placeholder: "Enter Company Email ID",
         },
         {
             label: "Contact No:",
             type: "tel",
+            name: "contact_no",
             placeholder: "Contact No",
         },
         {
             label: "Address:",
             type: "text",
+            name: "address",
             placeholder: "Address",
         },
         {
             label: "Password:",
             type: "password",
+            name: "password",
             placeholder: "Enter Password",
         },
         {
             label: "Confirm Password:",
             type: "password",
+            name: "confirm_password",
             placeholder: "Confirm Password",
         },
     ]
@@ -45,10 +51,10 @@ const SignUpForm = () => {
         <SignUpCard>
             <ImageBlock className="logo" src={require("../../../assets/images/logo.png")} w="200px"/>
             <form onSubmit={handleSubmit(onSubmit)}>
-                {formInputs.map(({label, type, placeholder}, idx) => (
-                    <InputWrapper>
-                        <label>{label}</label>
-                        <input type={type} {...register("exampleRequired", { required: true })} placeholder={placeholder} /> 
+                {formInputs.map(({label, type, placeholder, name}, idx) => (
+                    <InputWrapper key={`${name}-${idx}`}>
+                        <label htmlFor={name}>{label}</label>
+                        <input type={type} {...register("exampleRequired", { required: true })} placeholder={placeholder} id={name} name={name}/> 
                         {errors.exampleRequired && <span>This field is required</span>}
                     </InputWrapper>
                 ))}
