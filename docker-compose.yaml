@@ -24,23 +24,34 @@ services:
       - db
 
   backend:
-    build: ./backend
+    build:
+      context: ./backend
     container_name: backend_c
     ports:
       - "8000:8000"
     volumes:
       - ./backend:/backend
+      - /backend/venv
+    command: 
+      - uvicorn
+      - app.main:app
+      - --reload
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
     links:
       - db
       
 
   frontend:
-    build: ./frontend
+    build: 
+      context: ./frontend
     container_name: frontend_c
     ports:
       - "3000:3000"
     volumes:
-      - ./frontend:/parkEz/frontend
+      - ./frontend:/frontend
       - /parkEz/frontend/node_modules
     stdin_open: true
     tty: true
