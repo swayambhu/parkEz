@@ -1,5 +1,28 @@
 version: "3.8"
 services: 
+  db:
+    container_name: postgresql_db
+    image: postgres
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_DB=${DB_NAME}
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
+      - PGADMIN_LISTEN_PORT:80
+    ports:
+      - 5050:80
+    depends_on:
+      - db
+
   backend:
     build: ./backend
     container_name: backend_c
@@ -7,6 +30,8 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/backend
+    links:
+      - db
       
 
   frontend:
