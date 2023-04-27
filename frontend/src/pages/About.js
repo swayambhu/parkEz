@@ -1,7 +1,7 @@
 const About = () => {
     return(
         <>
-            Something changed
+            About
         </>
     )
 }
