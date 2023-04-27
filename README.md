@@ -6,8 +6,8 @@
 
 # Steps to download and code on this project:
 
-1. Download or clone the repo to the folder you want to work in.
-2. Be sure you are on the latest main branch.
+1. Download or clone the repo to the folder you want to work in. 
+2. Be sure you are on the latest main branch. \n
    a) git checkout main
    b) git pull origin main
 3. For development create one branch.
