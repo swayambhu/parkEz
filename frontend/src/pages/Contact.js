@@ -1,11 +1,11 @@
 import styled from "styled-components";
-import contactus from "../components/Pages/Contact/contactus";
+import ContactUs from "../components/Pages/Contact/ContactUs"
 
 const Contact = () => {
     return(
         <>
         <Wrapper className="flex-center"> 
-            <contactus />
+            <ContactUs />
         </Wrapper> 
             
         </>

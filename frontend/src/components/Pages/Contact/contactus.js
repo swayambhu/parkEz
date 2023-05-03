@@ -3,27 +3,40 @@ import {Card, InputWrapper} from '../../Global.styled'
 import ImageBlock from "../../Reusable components/ImageBlock";
 import { useForm } from "react-hook-form";
 import {NavLink} from 'react-router-dom';
-const contactus = () => {
+
+const ContactUs = () => {
     const { register, handleSubmit, watch, formState: { errors } } = useForm();
     const onSubmit = data => console.log(data);
     console.log(watch("example"));
 
     const formInputs = [
         {
-            label: "Company Email ID:",
-            type: "email",
-            name:"email",
-            placeholder: "Enter Company Email ID",
+            label: "Full Name",
+            type: "text",
+            name:"full_name",
+            placeholder: "Enter your full name",
         },
         {
-            label: "Password:",
-            type: "password",
-            name:"password",
-            placeholder: "Enter Password",
+            label: "Email ID:",
+            type: "email",
+            name:"email",
+            placeholder: "Enter Email ID",
         },
+        {
+            label: "Subject:",
+            type: "text",
+            name:"subject",
+            placeholder: "Enter the Subject",
+        },
+        // {
+        //     label: "Text:",
+        //     type: "text",
+        //     name:"contact_text",
+        //     placeholder: "",
+        // }
     ]
     return(
-        <contactusCard className="flex-center">
+        <ContactUsCard className="flex-center">
             <NavLink to="/">
                 <ImageBlock className="logo" src={require("../../../assets/images/logo.png")} w="150px"/>
             </NavLink>
@@ -35,26 +48,25 @@ const contactus = () => {
                         {errors.exampleRequired && <span>This field is required</span>}
                     </InputWrapper>
                 ))}
+                <InputWrapper>
+                
+                    <label>
+                        Text:
+                    </label>
+                    <textarea rows="10" col="20">
+
+                    </textarea>
+                </InputWrapper>
 
                 <div>
-                    <input type="submit" value="Submit" />  
-                    <div>
-                        <div className="flex-center">
-                            <input type="checkbox" id="remember_me" name="remember_me"/> <label htmlFor="remember_me">Remember Me</label>
-                        </div>
-                        <NavLink to="#">
-                            Forgot Password?
-                        </NavLink>
-                    </div>
+                    <input type="submit" value="Send Message" />  
                 </div>
-                <p>
-                    Don't have an account? <NavLink to="/sign-up">Register Here</NavLink>
-                </p>
+                
             </form>
-        </contactusCard>
+        </ContactUsCard>
     )
 }
-const LoginForcontactusCardmCard = styled(Card)`
+const ContactUsCard = styled(Card)`
     padding: 40px 60px;
     width: 500px;
     flex-direction: column;
@@ -90,6 +102,8 @@ const LoginForcontactusCardmCard = styled(Card)`
 
     input[type="submit"]{
         margin-bottom: 7px;
+        max-width: 200px;
+        margin: 0px auto;
     }
 
     input[type="submit"] ~ div{
@@ -112,5 +126,11 @@ const LoginForcontactusCardmCard = styled(Card)`
             text-transform: capitalize;
         }
     }
+
+    textarea{
+        border: 1px solid #000000;
+        border-radius: 5px;
+
+    }
 `
-export default contactus
+export default ContactUs
