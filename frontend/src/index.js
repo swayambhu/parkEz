@@ -1,8 +1,11 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-
 // React Router DOM Imports
 import {BrowserRouter} from 'react-router-dom';
+
+
+
+
 
 
 // User Imports
@@ -18,6 +21,7 @@ import Login from "./pages/Login"
 import Pricing from "./pages/Pricing"
 import SignUp from "./pages/SignUp"
 import BrowseParkingLot from './pages/BrowseParkingLots';
+import AuthRecords from './pages/AuthRecords';
 
 const container = document.getElementById('root');
 const root = createRoot(container);
@@ -39,5 +43,6 @@ export const Pages = {
   Login,
   Pricing,
   SignUp,
-  BrowseParkingLot
+  BrowseParkingLot,
+  AuthRecords,
 }

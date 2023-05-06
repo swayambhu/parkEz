@@ -14,7 +14,8 @@ const Router = () => {
             <Route path="/faq" element={<Pages.FAQ/>} />
             <Route path="/login" element={<Pages.Login/>} />
             <Route path="/pricing" element={<Pages.Pricing/>} />
-            <Route path="/sign-up" element={<Pages.SignUp />} />    
+            <Route path="/sign-up" element={<Pages.SignUp />} />
+            <Route path="/auth" element={<Pages.AuthRecords />} />    
         </Routes>
     )
 }
