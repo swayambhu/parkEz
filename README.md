@@ -10,8 +10,8 @@ ParkEZ is a parking lot monitoring platform with different webpages for both the
 3. [Implemented Module](#implemented-module)
 4. [Upcoming Modules](#upcoming-modules)
 5. [Usage Scenarios](#usage-scenarios)
-6. [External Interfaces](#external-interfaces)
-7. [Revenue Generation](#revenue-generation)
+6. [Revenue Generation](#revenue-generation)
+7. [Screenshots](#screenshots)
 
 ## Introduction
 
