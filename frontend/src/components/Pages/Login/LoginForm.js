@@ -1,92 +1,125 @@
 import axios from 'axios';
 import styled from "styled-components";
-import {Card, InputWrapper} from '../../Global.styled'
+import { Card, InputWrapper } from '../../Global.styled'
 import ImageBlock from "../../Reusable components/ImageBlock";
-import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import {NavLink} from 'react-router-dom';
+import React, { useEffect, useState, useContext } from "react";
+import { useNavigate, Link } from 'react-router-dom';
+import { useDispatch } from "react-redux";
+import MenuContext from '../../../MenuContext';
+
+
 const LoginForm = () => {
+    const { roleView, setRoleView } = useContext(MenuContext);
+
+
     const { register, handleSubmit, watch, formState: { errors } } = useForm();
     const [records, setRecords] = useState([]);
+    const navigate = useNavigate();
+
+
 
     useEffect(() => {
-      fetch("http://localhost:8000/auth_records")
-        .then((response) => response.json())
-        .then((data) => setRecords(data));
+        fetch("http://localhost:8000/auth_records")
+            .then((response) => response.json())
+            .then((data) => setRecords(data));
     }, []);
 
+    const dispatch = useDispatch();
+
     const onSubmit = async (data) => {
-        try {
-          const response = await axios.post('http://localhost:8000/authenticate', data);
-            console.log(response);
-        } catch (error) {
-          console.error(error);
+      try {
+        const response = await axios.post(
+          "http://localhost:8000/authenticate",
+          data
+        );
+        console.log(response);
+        if (response.data.password_valid) {
+          localStorage.setItem("user_email", response.data.username);
+          localStorage.setItem("user_role", response.data.userrole);
+          localStorage.setItem("full_name", response.data.fullname);
+          setRoleView(response.data.userrole);
+          dispatch({
+            type: "SET_USER",
+            payload: {
+              email: response.data.username,
+              role: response.data.userrole,
+              fullName: response.data.fullname,
+            },
+          });
+          navigate("/dashboard");
         }
-      };
+      } catch (error) {
+        console.error(error);
+      }
+    };
+        
+  
     const formInputs = [
         {
             label: "Company Email ID:",
             type: "email",
-            name:"email",
+            name: "email",
             placeholder: "Enter Company Email ID",
         },
         {
             label: "Password:",
             type: "password",
-            name:"password",
+            name: "password",
             placeholder: "Enter Password",
         },
     ]
-    return(
+    return (
         <LoginFormCard className="flex-center">
-            <NavLink to="/">
-                <ImageBlock className="logo" src={require("../../../assets/images/logo.png")} w="150px"/>
-            </NavLink>
+            <Link to="/">
+                <ImageBlock className="logo" src={require("../../../assets/images/logo.png")} w="150px" />
+            </Link>
             <form onSubmit={handleSubmit(onSubmit)}>
-                {formInputs.map(({label, type, name, placeholder}, idx) => (
+                {formInputs.map(({ label, type, name, placeholder }, idx) => (
                     <InputWrapper key={`${name}-idx`}>
-                    <label htmlFor={name}>{label}</label>
-                    <input type={type} {...register(name, { required: true })} placeholder={placeholder} id={name} name={name}/> 
-                    {errors[name] && <span>This field is required</span>}
+                        <label htmlFor={name}>{label}</label>
+                        <input type={type} {...register(name, { required: true })} placeholder={placeholder} id={name} name={name} />
+                        {errors[name] && <span>This field is required</span>}
                     </InputWrapper>
                 ))}
 
                 <div>
-                    <input type="submit" value="Submit" />  
+                    <input type="submit" value="Submit" />
                     <div>
                         <div className="flex-center">
-                            <input type="checkbox" id="remember_me" name="remember_me"/> <label htmlFor="remember_me">Remember Me</label>
+                            <input type="checkbox" id="remember_me" name="remember_me" /> <label htmlFor="remember_me">Remember Me</label>
                         </div>
-                        <NavLink to="#">
+                        <Link to="#">
                             Forgot Password?
-                        </NavLink>
+                        </Link>
                     </div>
                 </div>
                 <p>
-                    Don't have an account? <NavLink to="/sign-up">Register Here</NavLink>
+                    Don't have an account? <Link to="/sign-up">Register Here</Link>
                 </p>
             </form>
             <h1>Possible Logins</h1>
             <Table>
                 <thead>
-                <tr>
-                    <Th>Username</Th>
-                    <Th>Password</Th>
-                </tr>
+                    <tr>
+                        <Th>Username</Th>
+                        <Th>Password</Th>
+                    </tr>
                 </thead>
                 <tbody>
-                {records.map((record, i) => (
-                    <tr key={i}>
-                    <Td>{record.username}</Td>
-                    <Td>{record.password}</Td>
-                    </tr>
-                ))}
+                    {records.map((record, i) => (
+                        <tr key={i}>
+                            <Td>{record.username}</Td>
+                            <Td>{record.password}</Td>
+                        </tr>
+                    ))}
                 </tbody>
             </Table>
         </LoginFormCard>
-        
     )
 }
+
+
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;

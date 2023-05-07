@@ -1,25 +1,26 @@
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 import Navbar from "../components/Global Components/Navbar/Navbar";
+import { useSelector } from "react-redux";
 import { ImageWrapper } from "../components/Global.styled";
 import { Header as StyledHeader } from "../components/Layout.styled";
 
-
 const Header = () => {
-    
-    return(
-        <StyledHeader>
-            <StyledNav className="flex-between">
-                <div className="flex-left">
-                    <NavLink to="/">
-                        <ImageWrapper w="100px" h="auto">
-                            <img src={require('../assets/images/logo.png')} alt="logo"/>
-                        </ImageWrapper>
-                    </NavLink>
-                </div>
-                <Navbar/>
-            </StyledNav>
-        </StyledHeader>
+  const userRole = useSelector((state) => state.user.role);
+
+  return (
+    <StyledHeader>
+      <StyledNav className="flex-between">
+        <div className="flex-left">
+          <NavLink to="/">
+            <ImageWrapper w="100px" h="auto">
+              <img src={require('../assets/images/logo.png')} alt="logo" />
+            </ImageWrapper>
+          </NavLink>
+        </div>
+        <Navbar key={userRole} />
+      </StyledNav>
+    </StyledHeader>
     )
 }
 

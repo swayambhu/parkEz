@@ -28,6 +28,7 @@ async def add_cors_headers(request: Request, call_next):
     response.headers["Access-Control-Allow-Headers"] = "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With"
     return response
 
+
 authentication = Table(
     "authentication",
     metadata,
@@ -79,19 +80,33 @@ app.add_middleware(
 
 @app.post("/authenticate")
 async def authenticate(auth_data: AuthData):
-    with engine.begin() as connection:
-        result = connection.execute(
-            authentication.insert().values(
-                created_at=datetime.datetime.now(),
-                username=auth_data.email,
-                password=auth_data.password,
-            )
-        )
-        if result.rowcount:
-            return {"status": "success"}
-        else:
-            raise HTTPException(status_code=400, detail="Failed to insert data")
+    logging.info(f"Received data: {auth_data}")
+    user_found = False
+    password_valid = False
+    created_at = None
+    user_role = "N/A"
+    email = None
+    full_name = None
 
+
+    with engine.connect() as connection:
+        result = connection.execute(select(authentication).where(authentication.c.username == auth_data.email)).fetchone()
+        if result:
+            user_found = True
+            created_at = result.created_at
+            email = result.username
+            if result.password == auth_data.password:
+                password_valid = True
+                ext_user = connection.execute(select(external_users).where(external_users.c.email_id == auth_data.email)).fetchone()
+                if ext_user:
+                    full_name = ext_user.full_name
+                    if ext_user.business_id and not ext_user.advertisers_id:
+                        user_role = "lotoperator"
+                    elif ext_user.advertisers_id and not ext_user.business_id:
+                        user_role = "advertiser"
+
+    logging.info(f"Created at: {created_at}")
+    return {"status": "success", "user_found": user_found, "password_valid": password_valid, "userrole": user_role, "username": email, "fullname":full_name}
 
 @app.get("/auth_records")
 async def get_auth_records():
