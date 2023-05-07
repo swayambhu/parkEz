@@ -50,7 +50,7 @@ ParkEz consists of 5 major functional requirement modules:
 
 ## Usage Scenarios
 
-ParkEZ has various usage scenarios for external customers and internal users. External customers include parking customers, business owners, and security operators, while internal users consist of the customer support team, development group, advertising team, and administrators.
+ParkEZ has various usage scenarios for external customers and internal users. External customers include parking customers, business owners, and park lot operators, while internal users consist of employees in various roles, such as customer support.
 
 ## Revenue Generation
 
