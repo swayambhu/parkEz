@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from typing import Annotated
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import datetime, timedelta
-from app import config
+from app import config, utils
 
 
 router = APIRouter(
@@ -39,9 +39,10 @@ async def create_user(user: Users.UserCreate, db: Session = Depends(get_db)):
             status_code=status.HTTP_409_CONFLICT,
             detail="User already exists"
         )
-        
-    hashed_password = hash_password(user.password)
-    user_dict = user_query.create_user(username=user.username, password=hashed_password, db= db)
+    
+    user = Users.UserCreate(username= user.username, password=user.password)
+    
+    user_dict = utils.create_user_auth(user=user, db=db)
     return user_dict
 
 
