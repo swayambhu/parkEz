@@ -27,7 +27,16 @@ class Business(Base):
     date_joined = Column(DateTime, default=datetime.utcnow())
     is_active = Column(Boolean, default=True)
     type = Column(Enum(TypesOfBusiness))
+    user = relationship("ExternalUsers", back_populates="business")
 
+
+class ExternalUsers(Base):
+    __tablename__ = "external_users"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String)
+    email = Column(String, ForeignKey("users.username"), unique=True)
+    phone_no = Column(String, unique=True, index=True)
+    business = relationship("Business", back_populates="user")
 
 
     
