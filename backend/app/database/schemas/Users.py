@@ -11,7 +11,6 @@ class UserInDB(UserCreate):
     pass
 
 class User(UserBase):
-    id: int
     username: str
     is_active: bool
     created_at: datetime

@@ -1,12 +1,10 @@
-from app.database.database import get_db
-from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database.Models.Models import Business
 from app.database.schemas.Business import  BusinessBase
 
  
-def get_business(business_name: str, db: Session):
-    business = db.query(Business).filter(Business.name == business_name).first()
+def get_business_by_email(email: str, db: Session):
+    business = db.query(Business).filter(Business.email == email).first()
     return business
    
 def get_business_by_phone_number(phone_no: str, db: Session):

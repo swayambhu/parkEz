@@ -27,6 +27,7 @@ class Business(Base):
     date_joined = Column(DateTime, default=datetime.utcnow())
     is_active = Column(Boolean, default=True)
     type = Column(Enum(TypesOfBusiness))
+    business_user = relationship("Users", primaryjoin="Users.username == Business.email")
     user = relationship("ExternalUsers", back_populates="business")
 
 
@@ -36,7 +37,8 @@ class ExternalUsers(Base):
     name = Column(String)
     email = Column(String, ForeignKey("users.username"), unique=True)
     phone_no = Column(String, unique=True, index=True)
+    business_id = Column(Integer, ForeignKey("business.id"))
     business = relationship("Business", back_populates="user")
-
+    user = relationship("Users", primaryjoin="Users.username == ExternalUsers.email")
 
     

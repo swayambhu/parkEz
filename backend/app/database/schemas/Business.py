@@ -25,4 +25,9 @@ class Business(BusinessBase):
     
     class Config:
         orm_mode = True
-    
+
+class BusinessUsers(Business):
+    pass
+
+    class Config:
+        orm_mode = True

@@ -4,8 +4,10 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from .. import config
 from datetime import datetime, timedelta
-from app.database.Queries import user_query
+from app.database.Queries import user_query, business_query
 from app.database.database import get_db
+from app.database.schemas.Users import User
+from app.database.schemas.Business import Business
 from sqlalchemy.orm import Session
 from app.database.schemas import Token
 
@@ -72,4 +74,21 @@ def get_current_user(access_token: str = Cookie("access_token"), db: Session = D
     if user is None:
         raise credentials_exception
     return user
+    
+
+def get_business_user(access_token: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    business_dict = User(**access_token.__dict__)
+    business = business_query.get_business_by_email(email=business_dict.username, db=db)
+    
+    if not business:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authorized user"
+        )
+        
+    business.type = business.type.value
+    business_dict = business.__dict__
+    business = Business(**business_dict)
+    
+    return business
     
