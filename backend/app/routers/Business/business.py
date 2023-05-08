@@ -1,13 +1,13 @@
 from fastapi.routing import APIRouter
 from sqlalchemy.orm import Session
 from app.database.database import get_db
-from app.database.schemas.Users import User, UserCreate
+from app.database.schemas.Users import UserCreate
 from app.database.schemas.Business import BusinessCreate, Business, BusinessType
 from app.database.schemas.ExternalUsers import ExternalUserIn, ExternalUserCreate, ExternalUser
-from app.database.Queries import business_query, user_query, external_users_query
+from app.database.Queries import business_query, external_users_query
 from app.database.Models import Models
 from fastapi import Depends
-from app.auth.OAuth2 import hash_password, get_business_user
+from app.auth.OAuth2 import get_business_user
 from . import HTTPErrors, utils as business_utils
 from app import utils
 router = APIRouter(
