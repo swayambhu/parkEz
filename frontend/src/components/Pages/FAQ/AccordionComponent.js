@@ -1,10 +1,9 @@
-import { useState } from "react";
-import "./Accordion.css"; // Import custom CSS file for additional styling
-
-const Accordion = () => {
-    const [activeIndex, setActiveIndex] = useState(null);
+import Accordion from "react-bootstrap/Accordion"
+import "./Accordion.css"
+const AccordionComponent = () => {
+    
   
-    const faq = [
+    const faqs = [
       {
         title: 'What is ParkEZ?',
         content: 'ParkEZ is an innovative parking monitoring solution provider that offers a seamless parking experience for businesses, property owners, and customers. We provide an efficient platform for monitoring parking spaces, maximizing revenue, and offering local businesses advertising opportunities to reach potential customers.'
@@ -42,58 +41,43 @@ const Accordion = () => {
       }
     ];
   
-    const handleClick = (index) => {
-      setActiveIndex(index === activeIndex ? null : index);
-    };
+    
 
     return (
         <div>
-        <div className="logo-container">
-            <img src={require('../../../assets/images/logo.png')} alt="Logo" className="logo" />
-        </div>
-            <h1 className="page-title">Frequently Asked Questions</h1>
-        <div className="container">
-        <div className="accordion" id="accordionExample">
-          {faq.map((faq, index) => (
-            <div key={index}>
-            {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-            <a
-              href="#"
-              className="accordion-item"
-              onClick={() => handleClick(index)}
-            >
-              <h2 className="accordion-header" id={`heading${index}`}>
-                <button
-                  className={`accordion-button ${index === activeIndex ? 'active' : ''}`}
-                  type="button"
-                  onClick={() => handleClick(index)}
-                  data-bs-toggle="collapse"
-                  data-bs-target={`#collapse${index}`}
-                  aria-expanded={index === activeIndex ? 'true' : 'false'}
-                  aria-controls={`collapse${index}`}
-                >
-                  {faq.title}
-                </button>
-              </h2>
-              {index === activeIndex && (
-                <div
-                  id={`collapse${index}`}
-                  className={`accordion-collapse collapse ${index === activeIndex ? "show" : ""}`}
-                  aria-labelledby={`heading${index}`}
-                  data-bs-parent="#accordionExample"
-                >
-                  <div className="accordion-body">
-                    {faq.content}
-                  </div>
-                </div>
-              )}
-            </a>
-            </div>
-          ))}
-        </div>
-        </div>
+          <div className="logo-container">
+              <img src={require('../../../assets/images/logo.png')} alt="Logo" className="logo" />
+          </div>
+              <h1 className="page-title">Frequently Asked Questions</h1>
+          <div className="container">
+            <Accordion defaultActiveKey="0">
+              {faqs.map(({title, content}, idx) => (
+
+                <Accordion.Item eventKey={idx}>
+                  <Accordion.Header>
+                    {title}
+                  </Accordion.Header>
+                  <Accordion.Body>
+                    {content}
+                  </Accordion.Body>
+                </Accordion.Item>
+              ))}
+              <Accordion.Item eventKey="1">
+                <Accordion.Header>Accordion Item #2</Accordion.Header>
+                <Accordion.Body>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+                  eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+                  minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+                  aliquip ex ea commodo consequat. Duis aute irure dolor in
+                  reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                  pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+                  culpa qui officia deserunt mollit anim id est laborum.
+                </Accordion.Body>
+              </Accordion.Item>
+            </Accordion>
+          </div>
         </div>
       );    
   };
   
-  export default Accordion;
+  export default AccordionComponent;

@@ -7,6 +7,7 @@ import {BrowserRouter} from 'react-router-dom';
 
 // User Imports
 import "./assets/css/index.css"
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 // PAGES
 import About from "./pages/About"
