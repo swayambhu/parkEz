@@ -1,7 +1,5 @@
 /* Accordion item */
 .accordion-item {
-    border: 1px solid #ccc;
-    background-color: #f9f9f9;
     border-radius: 10px;
     margin-bottom: 10px;
 }
@@ -9,8 +7,6 @@
 /* Accordion title */
 .accordion-button {
     padding: 10px;
-    color: #ffffff;
-    background-color: #0A0C8A;
     cursor: pointer;
     font-weight: bold;
 }
@@ -21,19 +17,19 @@
 }
   
 /* Accordion content */
-.accordion-body {
+/* .accordion-body {
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 10px;
-}
+} */
 
-.container {
+/* .container {
     width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
-}
+} */
 
 .page-title {
     font-weight: bold;

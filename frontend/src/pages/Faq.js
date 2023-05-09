@@ -1,9 +1,9 @@
-import Accordion from "../components/Pages/FAQ/Accordion.js"
+import AccordionComponent from "../components/Pages/FAQ/AccordionComponent.js"
 
 const FAQ = () => {
     return(
         <>
-            <Accordion />
+            <AccordionComponent />
         </>
   )
 }
