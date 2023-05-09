@@ -12,6 +12,14 @@ router = APIRouter(
 
 @router.post("/create-department", response_model=Services.Department)
 async def create_department(dept_name: Services.DepartmentCreate, db: Session = Depends(get_db)):
+    
+    exception = HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail="Department already exists"
+    )
+    
+    utils.user_exits(table=Department, column=Department.dept_name, check_value=dept_name.dept_name, exception=exception, db=db)
+    
     dept = Department(
         dept_name=dept_name.dept_name
     )
