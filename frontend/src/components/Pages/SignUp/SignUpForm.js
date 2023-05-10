@@ -3,11 +3,35 @@ import { Card, InputWrapper } from "../../Global.styled";
 import { useForm } from "react-hook-form";
 import ImageBlock from "../../Reusable components/ImageBlock";
 import {NavLink} from 'react-router-dom';
-
+import { toast } from "react-toastify";
+import axios from "axios"
 const SignUpForm = () => {
-    const { register, handleSubmit, watch, formState: { errors } } = useForm();
-    const onSubmit = data => console.log(data);
-    console.log(watch("example"));
+    const { register, handleSubmit,control, watch, formState: { errors } } = useForm();
+    const onSubmit = data => {
+        const {email, name, contact_no: phone_no, address, password, confirm_password} = data
+
+        const data_dict = {
+            email, 
+            name,
+            phone_no,
+            address,
+            password,
+            type: "BUSINESS"
+        }
+
+        if (password !== confirm_password){
+            toast.error('Password shall match confirm password')
+            return
+        }
+
+        axios.post('http://127.0.0.1:8000/business/create', data_dict)
+        .then(res => {
+            toast.success('Business registered Successfully!🚀')
+        })
+        .catch(err => toast.error(err.response.data.detail))
+        console.log(data)
+    };
+    
 
     const formInputs = [
         {
@@ -54,8 +78,8 @@ const SignUpForm = () => {
                 {formInputs.map(({label, type, placeholder, name}, idx) => (
                     <InputWrapper key={`${name}-${idx}`}>
                         <label htmlFor={name}>{label}</label>
-                        <input type={type} {...register("exampleRequired", { required: true })} placeholder={placeholder} id={name} name={name}/> 
-                        {errors.exampleRequired && <span>This field is required</span>}
+                        <input type={type} {...control} {...register(name, {required: `${name} is required`})} placeholder={placeholder} id={name} name={name}/> 
+                        {errors[name] && <span>{errors[name].message}</span>}
                     </InputWrapper>
                 ))}
 
