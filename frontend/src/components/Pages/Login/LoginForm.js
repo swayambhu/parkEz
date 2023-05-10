@@ -2,37 +2,77 @@ import styled from "styled-components";
 import {Card, InputWrapper} from '../../Global.styled'
 import ImageBlock from "../../Reusable components/ImageBlock";
 import { useForm } from "react-hook-form";
-import {NavLink} from 'react-router-dom';
-const LoginForm = () => {
-    const { register, handleSubmit, watch, formState: { errors } } = useForm();
-    const onSubmit = data => console.log(data);
-    console.log(watch("example"));
+import {NavLink, useNavigate} from 'react-router-dom';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import axios from "axios"
 
+const LoginForm = () => {
+    const { register, control, handleSubmit, formState: {errors} } = useForm();
+    const navigate = useNavigate()
+    const loginSubmit = data => {
+        const {Email: username, Password: password} = data
+        // data = {username, password}
+        // const formData = new FormData()
+        // for ( let key in data ) {
+        //     formData.append(key, data[key]);
+        // }
+        // formData.append("grant_type", "")
+        // formData.append("scope", "")
+        // formData.append("client_id", "")
+        // formData.append("client_secret", "")
+        // console.log(...formData.entries())
+        axios({
+            method: 'POST',
+            url: "http://127.0.0.1:8000/auth/login",
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                grant_type: 'password',
+                username: username,
+                password: password,
+                scope: '',
+                client_id: '',
+                client_secret: '',
+            }).toString(),
+        }).then((res) => {
+            console.log(res)
+        }).catch((err) => {
+            console.log(err)
+        })
+        // // console.log(data)
+        toast.success('Logged in successful')
+
+        // navigate("/", {replace: true})
+    }
     const formInputs = [
         {
             label: "Company Email ID:",
             type: "email",
-            name:"email",
+            name:"Email",
             placeholder: "Enter Company Email ID",
+
         },
         {
             label: "Password:",
             type: "password",
-            name:"password",
+            name:"Password",
             placeholder: "Enter Password",
         },
     ]
     return(
         <LoginFormCard className="flex-center">
+            
             <NavLink to="/">
                 <ImageBlock className="logo" src={require("../../../assets/images/logo.png")} w="150px"/>
             </NavLink>
-            <form onSubmit={handleSubmit(onSubmit)}>
-                {formInputs.map(({label, type, name, placeholder}, idx) => (
+            <form onSubmit={handleSubmit((data) =>loginSubmit(data))}>
+                {formInputs.map(({label, type, name, placeholder, pattern}, idx) => (
                     <InputWrapper key={`${name}-idx`}>
-                        <label htmlFor={name}>{label}</label>
-                        <input type={type} {...register("exampleRequired", { required: true })} placeholder={placeholder} id={name} name={name}/> 
-                        {errors.exampleRequired && <span>This field is required</span>}
+                        <label htmlFor={name}>{label}*</label>
+                        <input type={type} {...control} {...register(name, {required: `${name} is required`} )} placeholder={placeholder} />
+                        {errors[name] && <span>{errors[name].message}</span>}
                     </InputWrapper>
                 ))}
 
@@ -90,6 +130,10 @@ const LoginFormCard = styled(Card)`
 
     input[type="submit"]{
         margin-bottom: 7px;
+    }
+
+    span{
+        margin-bottom: -12px;
     }
 
     input[type="submit"] ~ div{
