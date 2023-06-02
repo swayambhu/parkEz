@@ -49,6 +49,7 @@ async def create_user(user: Users.UserCreate, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model= Users.User)
 async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: Session = Depends(get_db)):
+    print(form_data)
     user = authenticate_user(username=form_data.username, password=form_data.password, db=db)
     
     if not user:

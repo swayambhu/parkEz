@@ -85,7 +85,7 @@ def get_business_user(access_token: str = Depends(get_current_user), db: Session
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not authorized user"
         )
-        
+
     business.type = business.type.value
     business_dict = business.__dict__
     business = Business(**business_dict)

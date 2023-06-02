@@ -10,6 +10,8 @@ services:
       - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
       - POSTGRES_USER=${DATABASE_USERNAME}
       - POSTGRES_DB=${DATABASE_NAME}
+    networks:
+      - default
 
   pgadmin:
     container_name: pgadmin
@@ -20,9 +22,11 @@ services:
       - PGADMIN_LISTEN_PORT:80
     ports:
       - 5050:80
+    networks:
+      - default
     depends_on:
       - db
-
+    
   backend:
     build:
       context: ./backend
@@ -40,9 +44,12 @@ services:
       - 0.0.0.0
       - --port
       - "8000"
+    env_file:
+      - .env
+    networks:
+      - default
     links:
       - db
-      
 
   frontend:
     build: 
@@ -55,8 +62,15 @@ services:
       - /parkEz/frontend/node_modules
     stdin_open: true
     tty: true
+    networks:
+      - default
     links:
       - backend
+
+networks:
+  default:
+      
+   
   
   
     
