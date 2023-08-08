@@ -2,49 +2,31 @@ import styled from "styled-components";
 import {Card, InputWrapper} from '../../Global.styled'
 import ImageBlock from "../../Reusable components/ImageBlock";
 import { useForm } from "react-hook-form";
-import {NavLink, useNavigate} from 'react-router-dom';
+import {NavLink, useLocation} from 'react-router-dom';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import axios from "axios"
+import axios, { toFormData } from "axios"
+import { useEffect, useState } from "react";
 
 const LoginForm = () => {
+    const [currentUser, setCurrentUser] = useState("");
+
+    const location = useLocation()
+    useEffect(() => {
+        setCurrentUser(`/sign-up/${location.pathname.split("/")[2]}`)
+        
+    }, [currentUser]);
     const { register, control, handleSubmit, formState: {errors} } = useForm();
-    const navigate = useNavigate()
     const loginSubmit = data => {
         const {Email: username, Password: password} = data
-        // data = {username, password}
-        // const formData = new FormData()
-        // for ( let key in data ) {
-        //     formData.append(key, data[key]);
-        // }
-        // formData.append("grant_type", "")
-        // formData.append("scope", "")
-        // formData.append("client_id", "")
-        // formData.append("client_secret", "")
-        // console.log(...formData.entries())
-        axios({
-            method: 'POST',
-            url: "http://127.0.0.1:8000/auth/login",
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams({
-                grant_type: 'password',
-                username: username,
-                password: password,
-                scope: '',
-                client_id: '',
-                client_secret: '',
-            }).toString(),
-        }).then((res) => {
-            console.log(res)
+        data = {username, password}
+        
+        axios.post("http://127.0.0.1:8000/auth/login", toFormData(data)
+        ).then((res) => {
+            toast.success('Logged in successfully')
         }).catch((err) => {
-            console.log(err)
+            toast.error(err.response.data.detail)
         })
-        // // console.log(data)
-        toast.success('Logged in successful')
-
-        // navigate("/", {replace: true})
     }
     const formInputs = [
         {
@@ -88,7 +70,7 @@ const LoginForm = () => {
                     </div>
                 </div>
                 <p>
-                    Don't have an account? <NavLink to="/sign-up">Register Here</NavLink>
+                    Don't have an account? <NavLink to={currentUser}>Register Here</NavLink>
                 </p>
             </form>
         </LoginFormCard>
