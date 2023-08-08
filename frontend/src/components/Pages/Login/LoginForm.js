@@ -2,14 +2,21 @@ import styled from "styled-components";
 import {Card, InputWrapper} from '../../Global.styled'
 import ImageBlock from "../../Reusable components/ImageBlock";
 import { useForm } from "react-hook-form";
-import {NavLink, useNavigate} from 'react-router-dom';
+import {NavLink, useLocation} from 'react-router-dom';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios, { toFormData } from "axios"
+import { useEffect, useState } from "react";
 
 const LoginForm = () => {
+    const [currentUser, setCurrentUser] = useState("");
+
+    const location = useLocation()
+    useEffect(() => {
+        setCurrentUser(`/sign-up/${location.pathname.split("/")[2]}`)
+        
+    }, [currentUser]);
     const { register, control, handleSubmit, formState: {errors} } = useForm();
-    const navigate = useNavigate()
     const loginSubmit = data => {
         const {Email: username, Password: password} = data
         data = {username, password}
@@ -63,7 +70,7 @@ const LoginForm = () => {
                     </div>
                 </div>
                 <p>
-                    Don't have an account? <NavLink to="/sign-up">Register Here</NavLink>
+                    Don't have an account? <NavLink to={currentUser}>Register Here</NavLink>
                 </p>
             </form>
         </LoginFormCard>

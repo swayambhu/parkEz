@@ -44,7 +44,7 @@ const StyledNav = styled.nav`
         background-color: #e0dede73;
     }
 
-    ul a{
+    ul li > a{
         text-decoration: none;
         color: #000000;
         font-size: 16px;
@@ -53,27 +53,19 @@ const StyledNav = styled.nav`
         padding: 15px 10px;
     }
 
+    ul li div a > a{
+        text-decoration: none;
+        color: #000000;
+        font-size: 16px;
+        cursor: pointer;
+        display: block;
+        text-align: center;
+    }
+    
     li > .active{
         border-bottom: 2px solid #000000;
     }
 
-    ul li:last-child a{
-        color: #ffffff;
-        background-color: #0A0C8A;
-        font-weight: 700;
-        border-radius: 8px;
-        padding: 7px 15px;
-    }
-    ul li:last-child:hover{
-        background: none;
-    }
-
-    ul li:last-child a:hover{
-        opacity: 0.8;
-    }
-    ul li:last-child a.active{
-        border-bottom: none;
-    }
 
     .active{
         color: #030ab2;

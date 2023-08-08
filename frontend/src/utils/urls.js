@@ -22,14 +22,6 @@ const urls = [
     {
         path: "/pricing",
         text: "Pricing",
-    },
-    {
-        path: "/login",
-        text: "Login",
-    },
-    {
-        path: "/sign-up",
-        text: "Sign Up",
     }
 ]
 
