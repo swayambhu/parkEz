@@ -23,7 +23,8 @@ const LoginForm = () => {
         
         axios.post("http://127.0.0.1:8000/auth/login", toFormData(data)
         ).then((res) => {
-            toast.success('Logged in successfully')
+            console.log(res.data)
+            // toast.success('Logged in successfully')
         }).catch((err) => {
             toast.error(err.response.data.detail)
         })

@@ -17,22 +17,16 @@ const Navbar = () => {
                     </Dropdown.Toggle>
 
                     <Dropdown.Menu>
-                        <Dropdown.Item>
-                            <NavLink to="/login/employee" className={({isActive}) => isActive ? "active" : "" }>
-                                Employee
-                            </NavLink>
+                        <Dropdown.Item href="/login/employee" className={({isActive}) => isActive ? "active" : "" }>
+                            Employee
                         </Dropdown.Item>
 
-                        <Dropdown.Item>
-                            <NavLink to="/login/advertisers" className={({isActive}) => isActive ? "active" : "" }>
-                                Advertiser
-                            </NavLink>
+                        <Dropdown.Item href="/login/advertisers" className={({isActive}) => isActive ? "active" : "" }>
+                            Advertiser
                         </Dropdown.Item>
 
-                        <Dropdown.Item>
-                            <NavLink to="/login/business" className={({isActive}) => isActive ? "active" : "" }>
+                        <Dropdown.Item href="/login/business" className={({isActive}) => isActive ? "active" : "" }>
                                 Business
-                            </NavLink>
                         </Dropdown.Item>
                     </Dropdown.Menu>
                 </Dropdown>     

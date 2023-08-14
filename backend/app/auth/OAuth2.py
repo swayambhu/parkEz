@@ -11,6 +11,7 @@ from app.database.schemas.Business import Business
 from sqlalchemy.orm import Session
 from app.database.schemas import Token
 
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
@@ -25,10 +26,18 @@ def hash_password(plain_password):
 # Password Verification
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
-    
+
+# Verify User
+def authorize_user(username: str, user_type: str, db: Session) -> bool:
+    user = user_query.get_user_type(username= username, user_type=user_type, db=db)
+    if user:
+        if user == user_type:
+            return True
+        
+    raise HTTPException(status_code=401, detail='Unauthorized User') 
     
 # Authenticate User
-def authenticate_user(username: str, password: str, db: Session):
+def authenticate_user(username: str, password: str, user_type: str, db: Session):
     user = user_query.get_user(username= username, db=db)
     
     if not user:
@@ -36,6 +45,9 @@ def authenticate_user(username: str, password: str, db: Session):
     
     if not verify_password(password, user.password):
         return False
+    
+    authorize_user(username=username, user_type=user_type, db=db)
+    
     
     return user 
 
