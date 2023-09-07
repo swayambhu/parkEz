@@ -9,4 +9,4 @@ class UserType(str, Enum):
 class LoginForm(BaseModel):
     username: str
     password: str
-    user_type: UserType 
+    user_type: UserType | str

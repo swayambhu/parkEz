@@ -5,6 +5,9 @@ from app.routers.Authentication import authentication
 from app.routers.Business import business
 from app.routers import services
 from fastapi.middleware.cors import CORSMiddleware
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 Models.Base.metadata.create_all(bind= engine)
 app = FastAPI()

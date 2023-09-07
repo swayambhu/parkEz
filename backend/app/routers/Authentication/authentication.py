@@ -48,9 +48,9 @@ async def create_user(user: Users.UserCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model= Users.User)
-async def login(form_data: Annotated[Auth.LoginForm, Depends()], db: Session = Depends(get_db)):
-    
-    
+async def login(form_data: Auth.LoginForm, db: Session = Depends(get_db)):
+    print("form_data:", form_data)
+    print("db:", db)
     user = authenticate_user(username=form_data.username, password=form_data.password,user_type=form_data.user_type.value, db=db)
     
     if not user:
@@ -70,9 +70,7 @@ async def login(form_data: Annotated[Auth.LoginForm, Depends()], db: Session = D
     response = JSONResponse(content=user)
     
     
-    response.set_cookie(
-        key="access_token", value= access_token, httponly=True
-    )
+    response.set_cookie(key="access_token", value= access_token, httponly=True)
     return response
 
 @router.post("/logout")

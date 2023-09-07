@@ -5,26 +5,25 @@ import { useForm } from "react-hook-form";
 import {NavLink, useLocation} from 'react-router-dom';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import axios, { toFormData } from "axios"
-import { useEffect, useState } from "react";
+import axios from "axios"
 
 const LoginForm = () => {
-    const [currentUser, setCurrentUser] = useState("");
+    
 
     const location = useLocation()
-    useEffect(() => {
-        setCurrentUser(`/sign-up/${location.pathname.split("/")[2]}`)
-        
-    }, [currentUser]);
-    const { register, control, handleSubmit, formState: {errors} } = useForm();
+    
+    const currentUser = location.pathname.split("/").pop()
+    
+
+    const { register, handleSubmit, formState: {errors} } = useForm({defaultValues: {}});
     const loginSubmit = data => {
         const {Email: username, Password: password} = data
-        data = {username, password}
+        data = {username, password, user_type: currentUser.toUpperCase()}
+        console.log(data)
         
-        axios.post("http://127.0.0.1:8000/auth/login", toFormData(data)
+        axios.post("http://127.0.0.1:8000/auth/login", data
         ).then((res) => {
-            console.log(res.data)
-            // toast.success('Logged in successfully')
+            toast.success('Logged in successfully')
         }).catch((err) => {
             toast.error(err.response.data.detail)
         })
@@ -51,10 +50,10 @@ const LoginForm = () => {
                 <ImageBlock className="logo" src={require("../../../assets/images/logo.png")} w="150px"/>
             </NavLink>
             <form onSubmit={handleSubmit((data) =>loginSubmit(data))}>
-                {formInputs.map(({label, type, name, placeholder, pattern}, idx) => (
+                {formInputs.map(({label, type, name, placeholder}, idx) => (
                     <InputWrapper key={`${name}-idx`}>
                         <label htmlFor={name}>{label}*</label>
-                        <input type={type} {...control} {...register(name, {required: `${name} is required`} )} placeholder={placeholder} />
+                        <input type={type} {...register(name, {required: `${name} is required`} )} placeholder={placeholder} />
                         {errors[name] && <span>{errors[name].message}</span>}
                     </InputWrapper>
                 ))}
@@ -70,9 +69,12 @@ const LoginForm = () => {
                         </NavLink>
                     </div>
                 </div>
-                <p>
-                    Don't have an account? <NavLink to={currentUser}>Register Here</NavLink>
-                </p>
+                {
+                    currentUser !== "employee" && 
+                    <p>
+                        Don't have an account? <NavLink to={`/sign-up/${currentUser}/`}>Register Here</NavLink>
+                    </p>
+                }
             </form>
         </LoginFormCard>
     )
