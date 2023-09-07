@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Cookie
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-from app.database.schemas import Users, Token
+from app.database.schemas import Users, Token, Auth
 from app.auth.OAuth2 import hash_password, authenticate_user, create_access_token, validate_token, get_current_user
 from app.database.Queries import user_query
 from app.database.database import get_db
@@ -48,9 +48,10 @@ async def create_user(user: Users.UserCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model= Users.User)
-async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: Session = Depends(get_db)):
-    print(form_data)
-    user = authenticate_user(username=form_data.username, password=form_data.password, db=db)
+async def login(form_data: Auth.LoginForm, db: Session = Depends(get_db)):
+    print("form_data:", form_data)
+    print("db:", db)
+    user = authenticate_user(username=form_data.username, password=form_data.password,user_type=form_data.user_type.value, db=db)
     
     if not user:
         raise HTTPException(
@@ -69,9 +70,7 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: 
     response = JSONResponse(content=user)
     
     
-    response.set_cookie(
-        key="access_token", value= access_token, httponly=True
-    )
+    response.set_cookie(key="access_token", value= access_token, httponly=True)
     return response
 
 @router.post("/logout")

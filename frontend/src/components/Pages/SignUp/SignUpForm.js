@@ -2,11 +2,20 @@ import styled from "styled-components"
 import { Card, InputWrapper } from "../../Global.styled";
 import { useForm } from "react-hook-form";
 import ImageBlock from "../../Reusable components/ImageBlock";
-import {NavLink} from 'react-router-dom';
+import {NavLink, useLocation} from 'react-router-dom';
 import { toast } from "react-toastify";
 import axios from "axios"
+import { useState } from "react";
+import { useEffect } from "react";
 const SignUpForm = () => {
-    const { register, handleSubmit,control, watch, formState: { errors } } = useForm();
+
+    const [currentUser, setcurrentUser] = useState(null);
+    const { register, handleSubmit,control, formState: { errors } } = useForm();
+    const location = useLocation()
+    useEffect(() => {
+        setcurrentUser(location.pathname.split("/").pop())
+    }, [currentUser]);
+
     const onSubmit = data => {
         const {email, name, contact_no: phone_no, address, password, confirm_password} = data
 
@@ -16,7 +25,7 @@ const SignUpForm = () => {
             phone_no,
             address,
             password,
-            type: "BUSINESS"
+            type: currentUser
         }
 
         if (password !== confirm_password){

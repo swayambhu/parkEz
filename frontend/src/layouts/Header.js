@@ -53,7 +53,7 @@ const StyledNav = styled.nav`
         padding: 15px 10px;
     }
 
-    ul li div a > a{
+    ul li div a{
         text-decoration: none;
         color: #000000;
         font-size: 16px;
