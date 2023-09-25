@@ -2,10 +2,10 @@ import styled from "styled-components";
 import SignUpForm from "../components/Pages/SignUp/SignUpForm";
 import ImageBlock from "../components/Reusable components/ImageBlock";
 const SignUp = () => {
+    
     return(
         <Wrapper className="flex flex-between">
             <div>
-
                 <ImageBlock src={require("../assets/images/SignUp/vector.jpg")} w="100%" h="auto" alt="sign up" />
             </div>
             <div>

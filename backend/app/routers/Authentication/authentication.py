@@ -1,14 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Response, Cookie
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-from app.database.schemas import Users, Token, Auth
-from app.auth.OAuth2 import hash_password, authenticate_user, create_access_token, validate_token, get_current_user
+from app.database.schemas import Users, Auth
+from app.auth.OAuth2 import  authenticate_user, create_access_token, get_current_user
 from app.database.Queries import user_query
 from app.database.database import get_db
 from sqlalchemy.orm import Session
-from typing import Annotated
-from fastapi.security import OAuth2PasswordRequestForm
-from datetime import datetime, timedelta
+from datetime import timedelta
 from app import config, utils
 
 

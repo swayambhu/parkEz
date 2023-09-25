@@ -33,9 +33,7 @@ async def create_business(businessCreate: BusinessCreate, db: Session = Depends(
         raise HTTPErrors.business_type_not_valid
     
     
-    #? else create business user
-    
-    
+    #? else create business
     #! Create the business user
     user = UserCreate(username= businessCreate.email, password=businessCreate.password)
     user_dict = utils.create_user_auth(user=user, db=db)
@@ -46,6 +44,14 @@ async def create_business(businessCreate: BusinessCreate, db: Session = Depends(
     #! Return the business
     business.type = business.type.value
     return business
+
+
+
+
+
+
+
+
 
 @router.post("/create-users", response_model=ExternalUser)
 async def create_external_users(user_data: ExternalUserIn, business: str = Depends(get_business_user), db: Session = Depends(get_db)):

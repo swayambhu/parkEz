@@ -7,18 +7,21 @@ import { toast } from "react-toastify";
 import axios from "axios"
 import { useState } from "react";
 import { useEffect } from "react";
+import {getCurrentUserType} from "../../../utils/utils"
+
 const SignUpForm = () => {
 
     const [currentUser, setcurrentUser] = useState(null);
     const { register, handleSubmit,control, formState: { errors } } = useForm();
     const location = useLocation()
     useEffect(() => {
-        setcurrentUser(location.pathname.split("/").pop())
-    }, [currentUser]);
+        const userType = getCurrentUserType(location.pathname)
+        setcurrentUser(userType)
+    }, []);
 
     const onSubmit = data => {
         const {email, name, contact_no: phone_no, address, password, confirm_password} = data
-
+        console.log(currentUser)
         const data_dict = {
             email, 
             name,
@@ -35,10 +38,10 @@ const SignUpForm = () => {
 
         axios.post('http://127.0.0.1:8000/business/create', data_dict)
         .then(res => {
+            console.log(res)
             toast.success('Business registered Successfully!🚀')
         })
         .catch(err => toast.error(err.response.data.detail))
-        console.log(data)
     };
     
 
@@ -94,7 +97,7 @@ const SignUpForm = () => {
 
                 <input type="submit" value="Submit" />
                 <p>
-                    Already Registered? <NavLink to="/login">Login Here</NavLink>
+                    Already Registered? <NavLink to={`/login/${currentUser?.toLowerCase()}`}>Login Here</NavLink>
                 </p>
             </form>
         </SignUpCard>

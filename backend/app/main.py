@@ -4,6 +4,7 @@ from app.database.database import engine
 from app.routers.Authentication import authentication
 from app.routers.Business import business
 from app.routers import services
+from app.routers.Users import users
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 
@@ -23,6 +24,7 @@ app.add_middleware(
 app.include_router(authentication.router)
 app.include_router(business.router)
 app.include_router(services.router)
+app.include_router(users.router)
 
 @app.get("/")
 async def main():

@@ -1,4 +1,4 @@
-const urls = [
+export const urls = [
     {
         path: "/",
         text: "Home",
@@ -24,5 +24,3 @@ const urls = [
         text: "Pricing",
     }
 ]
-
-export default urls

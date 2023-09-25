@@ -1,5 +1,6 @@
 
-import urls from "../../../utils/urls";
+import { Link, NavLink } from "react-router-dom";
+import {urls} from "../../../utils/urls";
 import NavItem from "./NavItem";
 import Dropdown from 'react-bootstrap/Dropdown';
 
@@ -18,15 +19,15 @@ const Navbar = () => {
                     </Dropdown.Toggle>
 
                     <Dropdown.Menu>
-                        <Dropdown.Item href="/login/employee" className={({isActive}) => isActive ? "active" : "" }>
+                        <Dropdown.Item as={NavLink} to="/login/employee" className={({isActive}) => isActive ? "active" : "" }>
                             Employee
                         </Dropdown.Item>
 
-                        <Dropdown.Item href="/login/advertisers" className={({isActive}) => isActive ? "active" : "" }>
+                        <Dropdown.Item  as={NavLink} to="/login/advertisers" className={({isActive}) => isActive ? "active" : "" }>
                             Advertiser
                         </Dropdown.Item>
 
-                        <Dropdown.Item href="/login/business" className={({isActive}) => isActive ? "active" : "" }>
+                        <Dropdown.Item  as={NavLink} to="/login/business" className={({isActive}) => isActive ? "active" : "" }>
                                 Business
                         </Dropdown.Item>
                     </Dropdown.Menu>
