@@ -6,13 +6,13 @@ import {NavLink, useLocation} from 'react-router-dom';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from "axios"
-
+import {getCurrentUserType, DOMAIN} from  "../../../utils/utils"
 const LoginForm = () => {
     
 
     const location = useLocation()
     
-    const currentUser = location.pathname.split("/").pop()
+    const currentUser = getCurrentUserType(location.pathname)
     
 
     const { register, handleSubmit, formState: {errors} } = useForm({defaultValues: {}});
@@ -21,7 +21,7 @@ const LoginForm = () => {
         data = {username, password, user_type: currentUser.toUpperCase()}
         console.log(data)
         
-        axios.post("http://127.0.0.1:8000/auth/login", data
+        axios.post(`${DOMAIN}/auth/login`, data
         ).then((res) => {
             toast.success('Logged in successfully')
         }).catch((err) => {

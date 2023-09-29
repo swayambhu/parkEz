@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import axios from "axios"
 import { useState } from "react";
 import { useEffect } from "react";
-import {getCurrentUserType} from "../../../utils/utils"
+import {getCurrentUserType, DOMAIN} from "../../../utils/utils"
 
 const SignUpForm = () => {
 
@@ -21,7 +21,7 @@ const SignUpForm = () => {
 
     const onSubmit = data => {
         const {email, name, contact_no: phone_no, address, password, confirm_password} = data
-        console.log(currentUser)
+       
         const data_dict = {
             email, 
             name,
@@ -36,9 +36,8 @@ const SignUpForm = () => {
             return
         }
 
-        axios.post('http://127.0.0.1:8000/business/create', data_dict)
+        axios.post(`${DOMAIN}/business/create`, data_dict)
         .then(res => {
-            console.log(res)
             toast.success('Business registered Successfully!🚀')
         })
         .catch(err => toast.error(err.response.data.detail))

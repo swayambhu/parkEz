@@ -9,6 +9,7 @@ from app.database.database import get_db
 from sqlalchemy.orm import Session
 from datetime import timedelta
 from app import config, utils
+from app.database.Queries.user_query import summarize_account as summarize_account_query
 
 
 router = APIRouter(
@@ -16,11 +17,12 @@ router = APIRouter(
     tags=["Users Account"],
 )
 
-@router.get('/summarize-account', response_model=Users.UserBase)
-def summarize_account(access_token: str = Depends(get_current_user), db: Session = Depends(get_db)):
+@router.get('/summarize-account')
+async def summarize_account(user_type: str, access_token: str = Depends(get_current_user), db: Session = Depends(get_db)):
     user = User(**access_token.__dict__)
-    
-    
-    return user
+    if user:
+        user_details = summarize_account_query(user_type=user_type, email = user.username, db=db)
+        
+    return user_details
     
      

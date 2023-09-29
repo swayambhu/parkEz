@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from app.database.Models.Models import Business
 from app.database.schemas.Business import  BusinessBase
-
+from pydantic import EmailStr
  
 def get_business_by_email(email: str, db: Session):
     business = db.query(Business).filter(Business.email == email).first()
@@ -32,3 +32,6 @@ def create_business(business: BusinessBase, db: Session):
 
     
     return business_dict
+
+def get_business_details(email: EmailStr, db: Session):
+    return db.query(Business).filter(Business.email == email)

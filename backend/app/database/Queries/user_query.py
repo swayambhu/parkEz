@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from app.database.database import get_db
+from pydantic import EmailStr
 from fastapi import Depends, HTTPException, status
 from app.database.Models.Models import Users, Employees, Business, ExternalUsers
 from app.database.schemas import Services
@@ -51,3 +52,15 @@ def create_employee(employee: Services.EmployeeCreate, db: Session):
     db.commit()
     db.refresh(employee)
     return employee
+
+def summarize_account(user_type: str, email: EmailStr, db: Session):
+    
+    if user_type == "BUSINESS":
+        user = db.query(Business).filter(Business.email == email).first()
+
+        if not user:
+            user = db.query(ExternalUsers).filter(ExternalUsers.email).first()
+    elif user_type == "EMPLOYEE":
+        user = db.query(Employees).filter(Employees.email == email).first()
+    
+    return user
