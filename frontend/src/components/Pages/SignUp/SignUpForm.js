@@ -7,6 +7,8 @@ import { toast } from "react-toastify";
 import axios from "axios"
 import { useState } from "react";
 import { useEffect } from "react";
+const API_URL = process.env.REACT_APP_API_URL;
+
 const SignUpForm = () => {
 
     const [currentUser, setcurrentUser] = useState(null);
@@ -33,7 +35,7 @@ const SignUpForm = () => {
             return
         }
 
-        axios.post('http://127.0.0.1:8000/business/create', data_dict)
+        axios.post(API_URL + 'business/create', data_dict)
         .then(res => {
             toast.success('Business registered Successfully!🚀')
         })
