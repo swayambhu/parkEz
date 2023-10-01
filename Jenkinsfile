@@ -1,8 +1,8 @@
 pipeline {
-    agent any  // This will use any available agent
+    agent any 
 
     tools {
-        nodejs 'node'  // 'node' is the name you gave to the Node.js installation in Jenkins
+        nodejs 'node' 
     }
 
     stages {
@@ -14,7 +14,7 @@ pipeline {
 
         stage('Install and Build Frontend') {
             steps {
-                dir('frontend') {  // Change directory to 'frontend'
+                dir('frontend') {  
                     sh 'npm install'
                     sh '''
                         unset CI
@@ -26,13 +26,13 @@ pipeline {
 
         stage('Deploy Frontend') {
             steps {
-                sh 'cp -r frontend/build/* /home/tom/web/dev.gruevy.com/'
+                sh 'cp -r frontend/build/* /home/tom/web/qa.gruevy.com/'
             }
         }
 
         stage('Deploy Backend') {
             steps {
-                sh 'cp -r backend/* /home/tom/web/backend_dev/'
+                sh 'cp -r backend/* /home/tom/web/backend_qa/'
             }
         }
 
