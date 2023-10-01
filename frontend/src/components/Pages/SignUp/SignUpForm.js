@@ -2,23 +2,24 @@ import styled from "styled-components"
 import { Card, InputWrapper } from "../../Global.styled";
 import { useForm } from "react-hook-form";
 import ImageBlock from "../../Reusable components/ImageBlock";
-import {NavLink, useLocation} from 'react-router-dom';
+import {NavLink, useLocation, useNavigate} from 'react-router-dom';
 import { toast } from "react-toastify";
 import axios from "axios"
 import { useState } from "react";
 import { useEffect } from "react";
-const SignUpForm = () => {
+const API_URL = process.env.REACT_APP_API_URL;
 
+const SignUpForm = () => {
+    const navigate = useNavigate();
     const [currentUser, setcurrentUser] = useState(null);
     const { register, handleSubmit,control, formState: { errors } } = useForm();
     const location = useLocation()
     useEffect(() => {
-        setcurrentUser(location.pathname.split("/").pop())
+        setcurrentUser(location.pathname.split("/")[2].toUpperCase());
     }, [currentUser]);
 
     const onSubmit = data => {
         const {email, name, contact_no: phone_no, address, password, confirm_password} = data
-
         const data_dict = {
             email, 
             name,
@@ -32,13 +33,24 @@ const SignUpForm = () => {
             toast.error('Password shall match confirm password')
             return
         }
-
-        axios.post('http://127.0.0.1:8000/business/create', data_dict)
+        axios.post(API_URL + 'business/create', data_dict)
         .then(res => {
-            toast.success('Business registered Successfully!🚀')
+            let navigatePath;
+            let whatCreated  = '';
+            if (currentUser === 'ADVERTISERS') {
+                navigatePath = '/login/advertisers';
+                whatCreated = 'Advertisers account created';
+            } else if (currentUser === 'BUSINESS') {
+                navigatePath = '/login/business';
+                whatCreated = 'Lot monitoring account created';
+            } else {
+                navigatePath = '/login'; 
+            }
+            toast.success(whatCreated + '!🚀', {
+                onClose: () => navigate(navigatePath)
+            });
         })
         .catch(err => toast.error(err.response.data.detail))
-        console.log(data)
     };
     
 
@@ -139,8 +151,5 @@ const SignUpCard = styled(Card)`
     }
 
 `
-
-
-
 
 export default SignUpForm

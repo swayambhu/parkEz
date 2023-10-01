@@ -6,6 +6,7 @@ import {NavLink, useLocation} from 'react-router-dom';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from "axios"
+const API_URL = process.env.REACT_APP_API_URL;
 
 const LoginForm = () => {
     
@@ -21,7 +22,7 @@ const LoginForm = () => {
         data = {username, password, user_type: currentUser.toUpperCase()}
         console.log(data)
         
-        axios.post("http://127.0.0.1:8000/auth/login", data
+        axios.post(API_URL + "auth/login", data
         ).then((res) => {
             toast.success('Logged in successfully')
         }).catch((err) => {
