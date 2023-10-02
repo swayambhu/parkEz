@@ -29,12 +29,12 @@ const Navbar = () => {
     const handleLogout = () => {
         axios.post(API_URL + "auth/logout", {}, { withCredentials: true })
             .then((response) => {
-                // Delete the cookie from the frontend
-                document.cookie = "token=deleted; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-                setUserType(null);  // Reset user type after logout
+                // // Delete the cookie from the frontend
+                // document.cookie = "token=deleted; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+                // setUserType(null);  // Reset user type after logout
                 setTimeout(() => {
                     window.location.href = '/';  // Redirect to home/public page after a delay
-                }, 1000);  // Delay of 1 second
+                }, 200);  // Delay of 1 second
             })
             .catch((error) => {
                 console.error("Error logging out:", error);

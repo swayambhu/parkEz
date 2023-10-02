@@ -36,10 +36,10 @@ const LoginForm = () => {
         ).then((res) => {
             toast.success('Logged in successfully');
             navigate('/dashboard'); 
+            window.location = '/dashboard';
         }).catch((err) => {
             toast.error(err.response.data.detail);
         })
-        
     }
     const formInputs = [
         {
