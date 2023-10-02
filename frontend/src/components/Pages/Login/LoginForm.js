@@ -2,7 +2,7 @@ import styled from "styled-components";
 import {Card, InputWrapper} from '../../Global.styled'
 import ImageBlock from "../../Reusable components/ImageBlock";
 import { useForm } from "react-hook-form";
-import {NavLink, useLocation} from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from "axios"
@@ -12,8 +12,19 @@ const LoginForm = () => {
     
 
     const location = useLocation()
-    
+    const navigate = useNavigate();
     const currentUser = location.pathname.split("/").pop()
+
+    const handleForgotPassword = () => {
+        axios.get(API_URL + "auth/me", { withCredentials: true })
+        .then((res) => {
+            toast.success('Fetched user data successfully');
+            console.log(res.data);
+        })
+        .catch((err) => {
+            toast.error('Failed to fetch user data');
+        });
+    }
     
 
     const { register, handleSubmit, formState: {errors} } = useForm({defaultValues: {}});
@@ -21,13 +32,14 @@ const LoginForm = () => {
         const {Email: username, Password: password} = data
         data = {username, password, user_type: currentUser.toUpperCase()}
         console.log(data)
-        
-        axios.post(API_URL + "auth/login", data
+        axios.post(API_URL + "auth/login", data, { withCredentials: true }
         ).then((res) => {
-            toast.success('Logged in successfully')
+            toast.success('Logged in successfully');
+            navigate('/dashboard'); 
         }).catch((err) => {
-            toast.error(err.response.data.detail)
+            toast.error(err.response.data.detail);
         })
+        
     }
     const formInputs = [
         {
@@ -65,7 +77,7 @@ const LoginForm = () => {
                         <div className="flex-center">
                             <input type="checkbox" id="remember_me" name="remember_me"/> <label htmlFor="remember_me">Remember Me</label>
                         </div>
-                        <NavLink to="#">
+                        <NavLink to="#" onClick={handleForgotPassword}>
                             Forgot Password?
                         </NavLink>
                     </div>
@@ -77,6 +89,42 @@ const LoginForm = () => {
                     </p>
                 }
             </form>
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Email</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Advertiser</td>
+                        <td>advertiser@example.com</td>
+                    </tr>
+                    <tr>
+                        <td>Business (lot owner)</td>
+                        <td>business@example.com</td>
+                    </tr>
+                    <tr>
+                        <td>Customer Support</td>
+                        <td>customer_support@example.com</td>
+                    </tr>
+                    <tr>
+                        <td>Lot Specialist</td>
+                        <td>lot_specialist@example.com</td>
+                    </tr>
+                    <tr>
+                        <td>Advertising Specialist</td>
+                        <td>advertising_specialist@example.com</td>
+                    </tr>
+                    <tr>
+                        <td>Accountant</td>
+                        <td>accountant@example.com</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>Password is always 123</p>
+
         </LoginFormCard>
     )
 }

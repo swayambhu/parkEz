@@ -19,7 +19,7 @@ import Login from "./pages/Login"
 import Pricing from "./pages/Pricing"
 import SignUp from "./pages/SignUp"
 import BrowseParkingLot from './pages/BrowseParkingLots';
-
+import Dashboard from './pages/TempDashboard';
 const container = document.getElementById('root');
 const root = createRoot(container);
 
@@ -40,5 +40,6 @@ export const Pages = {
   Login,
   Pricing,
   SignUp,
-  BrowseParkingLot
+  BrowseParkingLot,
+  Dashboard
 }

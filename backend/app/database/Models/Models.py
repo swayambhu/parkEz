@@ -13,10 +13,19 @@ class Users(Base):
     created_at = Column(DateTime, default=datetime.utcnow())
     is_active = Column(Boolean, default=False)
     
-
+# This can be temporary, but it is necessary for
+# entitlement testing this week / next week
+class TypesOfEmployees(enum.Enum):
+    CUSTOMER_SUPPORT = "ADVERTISERS"
+    ADVERTISERS = "ADVERTISERS"
+    LOT_SPECIALIST = "LOT_SPECIALIST"
+    ADVERTISING_SPECIALIST = "ADVERTISING_SPECIALIST"
+    ACCOUNTANT = "ACCOUNTANT"
+    
 class Employees(Base):
     __tablename__ = "employees"
     id = Column(Integer, primary_key=True, index=True)
+    type = Column(Enum(TypesOfEmployees))
     full_name = Column(String)
     phone_no = Column(String)
     email = Column(String, ForeignKey("users.username"), unique=True)
@@ -42,7 +51,8 @@ class EmployeeDepartment(Base):
 class TypesOfBusiness(enum.Enum):
     ADVERTISERS = "ADVERTISERS"
     BUSINESS = "BUSINESS"
-        
+
+          
 class Business(Base):
     __tablename__ = "business"
     id = Column(Integer, primary_key=True, index=True)

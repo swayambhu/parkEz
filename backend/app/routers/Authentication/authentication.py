@@ -4,8 +4,11 @@ from fastapi.encoders import jsonable_encoder
 from app.database.schemas import Users, Token, Auth
 from app.auth.OAuth2 import hash_password, authenticate_user, create_access_token, validate_token, get_current_user
 from app.database.Queries import user_query
+from app.database.Models import Models
+
 from app.database.database import get_db
 from sqlalchemy.orm import Session
+from sqlalchemy.orm.exc import NoResultFound
 from typing import Annotated
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import datetime, timedelta
@@ -69,12 +72,55 @@ async def login(form_data: Auth.LoginForm, db: Session = Depends(get_db)):
     del user['password']
     response = JSONResponse(content=user)
     
-    
-    response.set_cookie(key="access_token", value= access_token, httponly=True)
+    response.set_cookie(
+        key="access_token", 
+        value=access_token, 
+        httponly=True,
+        samesite="None",  
+    )
     return response
+
+# @router.post("/logout")
+# async def logout():
+#     response = Response(content="Logged out")
+#     response.set_cookie(key="access_token", value="", expires=0, httponly=True, path="/login/employee")
+#     response.set_cookie(key="access_token", value="", expires=0, httponly=True, path="/login/advertisers")
+#     response.set_cookie(key="access_token", value="", expires=0, httponly=True, path="/login/business")
+
+#     return response
 
 @router.post("/logout")
 async def logout(access_token: str = Depends(get_current_user)):
     response = Response()
+    print(response)
     response.delete_cookie("access_token")
     return response
+
+# will ad response model later
+@router.get("/me")
+async def get_current_authenticated_user(current_user: Users.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    user_data = jsonable_encoder(current_user)
+
+    # Check if the user is associated with the Employees table
+    try:
+        employee = db.query(Models.Employees).filter(Models.Employees.email == user_data["username"]).one()
+        entitlement_category = employee.type  # From the Employees table
+    except NoResultFound:
+        entitlement_category = None
+
+    # If not found in Employees, check in the Business table
+    if not entitlement_category:
+        try:
+            business = db.query(Models.Business).filter(Models.Business.email == user_data["username"]).one()
+            entitlement_category = business.type  # From the Business table
+        except NoResultFound:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User not associated with any entitlement category"
+            )
+
+    # Add the entitlement category to the response
+    user_data["entitlement_category"] = entitlement_category.value  # Assuming you want the string value
+    user_data.pop("password", None)
+    return user_data
+
