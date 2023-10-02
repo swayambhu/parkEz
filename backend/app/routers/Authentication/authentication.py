@@ -76,18 +76,9 @@ async def login(form_data: Auth.LoginForm, db: Session = Depends(get_db)):
         key="access_token", 
         value=access_token, 
         httponly=True,
-        # samesite="None",  
+        # samesite="None",  # Only uncomment on localhost. Comment out before uploading or cookies won't load
     )
     return response
-
-# @router.post("/logout")
-# async def logout():
-#     response = Response(content="Logged out")
-#     response.set_cookie(key="access_token", value="", expires=0, httponly=True, path="/login/employee")
-#     response.set_cookie(key="access_token", value="", expires=0, httponly=True, path="/login/advertisers")
-#     response.set_cookie(key="access_token", value="", expires=0, httponly=True, path="/login/business")
-
-#     return response
 
 @router.post("/logout")
 async def logout(access_token: str = Depends(get_current_user)):

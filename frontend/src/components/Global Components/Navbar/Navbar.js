@@ -73,7 +73,7 @@ const Navbar = () => {
                 setUrls(AdvertiserUrls);
                 break;
             case 'BUSINESS':
-                setUrls(LotOperatorUrls); // Assuming businesses use LotOperatorUrls
+                setUrls(LotOperatorUrls);
                 break;
             default:
                 setUrls(PublicUrls);

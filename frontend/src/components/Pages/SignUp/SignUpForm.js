@@ -44,7 +44,7 @@ const SignUpForm = () => {
                 navigatePath = '/login/business';
                 whatCreated = 'Lot monitoring account created';
             } else {
-                navigatePath = '/login'; 
+                navigatePath = '/login';
             }
             toast.success(whatCreated + '!🚀', {
                 onClose: () => navigate(navigatePath)

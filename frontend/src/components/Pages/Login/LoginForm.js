@@ -4,7 +4,9 @@ import ImageBlock from "../../Reusable components/ImageBlock";
 import { useForm } from "react-hook-form";
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { useState } from 'react';
 import 'react-toastify/dist/ReactToastify.css';
+import React, { useRef } from 'react';  // Added useRef
 import axios from "axios"
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -14,7 +16,23 @@ const LoginForm = () => {
     const location = useLocation()
     const navigate = useNavigate();
     const currentUser = location.pathname.split("/").pop()
+    const emailRef = useRef(null);
+    const [email, setEmail] = useState('');
 
+    const passwordRef = useRef(null);
+
+
+    // I'm going to make it auto fill in demo logins for testing convenience 
+    // I haven't figured it out yet so leaving this attempt here to finish later
+    const handleEmailClick = (email) => {
+        console.log('email: '+ email);
+        if(emailRef.current && passwordRef.current) {
+            emailRef.current.value = email;
+            setEmail(email);
+            passwordRef.current.value = '123';
+        }
+    }
+    
     const handleForgotPassword = () => {
         axios.get(API_URL + "auth/me", { withCredentials: true })
         .then((res) => {
@@ -38,7 +56,7 @@ const LoginForm = () => {
             setTimeout(() => {
                 navigate('/dashboard'); 
                 window.location = '/dashboard';
-            }, 500);
+            }, 100);
         })
         .catch((err) => {
             toast.error(err.response.data.detail);
@@ -66,14 +84,18 @@ const LoginForm = () => {
             <NavLink to="/">
                 <ImageBlock className="logo" src={require("../../../assets/images/logo.png")} w="150px"/>
             </NavLink>
-            <form onSubmit={handleSubmit((data) =>loginSubmit(data))}>
-                {formInputs.map(({label, type, name, placeholder}, idx) => (
-                    <InputWrapper key={`${name}-idx`}>
-                        <label htmlFor={name}>{label}*</label>
-                        <input type={type} {...register(name, {required: `${name} is required`} )} placeholder={placeholder} />
-                        {errors[name] && <span>{errors[name].message}</span>}
-                    </InputWrapper>
-                ))}
+            <form onSubmit={handleSubmit((data) => loginSubmit(data))}>
+                <InputWrapper>
+                    <label htmlFor="Email">Company Email ID:*</label>
+                    <input type="email" ref={{email}} {...register("Email", { required: "Email is required" })} placeholder="Enter Company Email ID" />
+                    {errors.Email && <span>{errors.Email.message}</span>}
+                </InputWrapper>
+                <InputWrapper>
+                    <label htmlFor="Password">Password:*</label>
+                    <input type="password" ref={passwordRef} {...register("Password", { required: "Password is required" })} placeholder="Enter Password" />
+                    {errors.Password && <span>{errors.Password.message}</span>}
+                </InputWrapper>
+                
 
                 <div>
                     <input type="submit" value="Submit" />  
@@ -103,30 +125,31 @@ const LoginForm = () => {
                 <tbody>
                     <tr>
                         <td>Advertiser</td>
-                        <td>advertiser@example.com</td>
+                        <td onClick={() => handleEmailClick('advertiser@example.com')}>advertiser@example.com</td>
                     </tr>
                     <tr>
                         <td>Business (lot owner)</td>
-                        <td>business@example.com</td>
+                        <td onClick={() => handleEmailClick('business@example.com')}>business@example.com</td>
                     </tr>
                     <tr>
                         <td>Customer Support</td>
-                        <td>customer_support@example.com</td>
+                        <td onClick={() => handleEmailClick('customer_support@example.com')}>customer_support@example.com</td>
                     </tr>
                     <tr>
                         <td>Lot Specialist</td>
-                        <td>lot_specialist@example.com</td>
+                        <td onClick={() => handleEmailClick('lot_specialist@example.com')}>lot_specialist@example.com</td>
                     </tr>
                     <tr>
                         <td>Advertising Specialist</td>
-                        <td>advertising_specialist@example.com</td>
+                        <td onClick={() => handleEmailClick('advertising_specialist@example.com')}>advertising_specialist@example.com</td>
                     </tr>
                     <tr>
                         <td>Accountant</td>
-                        <td>accountant@example.com</td>
+                        <td onClick={() => handleEmailClick('accountant@example.com')}>accountant@example.com</td>
                     </tr>
                 </tbody>
             </table>
+
             <p>Password is always 123</p>
 
         </LoginFormCard>

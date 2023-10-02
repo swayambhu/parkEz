@@ -16,8 +16,7 @@ class Users(Base):
 # This can be temporary, but it is necessary for
 # entitlement testing this week / next week
 class TypesOfEmployees(enum.Enum):
-    CUSTOMER_SUPPORT = "ADVERTISERS"
-    ADVERTISERS = "ADVERTISERS"
+    CUSTOMER_SUPPORT = "CUSTOMER_SUPPORT"
     LOT_SPECIALIST = "LOT_SPECIALIST"
     ADVERTISING_SPECIALIST = "ADVERTISING_SPECIALIST"
     ACCOUNTANT = "ACCOUNTANT"
@@ -76,5 +75,3 @@ class ExternalUsers(Base):
     business_id = Column(Integer, ForeignKey("business.id"))
     business = relationship("Business", back_populates="user")
     user = relationship("Users", primaryjoin="Users.username == ExternalUsers.email")
-
-    
