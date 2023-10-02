@@ -8,14 +8,7 @@
   outline: none;
   border: none;
 }
-#root {
-  background-color: #ffffff;
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  grid-template-rows: auto 1fr;
-  min-height: 100vh;
-  overflow: hidden;
-}
+
 
 
 /* width */

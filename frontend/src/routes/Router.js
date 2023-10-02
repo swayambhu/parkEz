@@ -18,6 +18,7 @@ const Router = () => {
                 ))}
             </Route>
             <Route path="/pricing" element={<Pages.Pricing/>} />
+            <Route path="/summarize-account" element={<Pages.SummarizeAccount/>} />
             
             <Route path="/sign-up">  
                 {logins.map((login, idx) => (

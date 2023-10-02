@@ -54,7 +54,6 @@ def create_employee(employee: Services.EmployeeCreate, db: Session):
     return employee
 
 def summarize_account(user_type: str, email: EmailStr, db: Session):
-    
     if user_type == "BUSINESS":
         user = db.query(Business).filter(Business.email == email).first()
 
