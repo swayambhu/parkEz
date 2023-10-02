@@ -1,5 +1,4 @@
 import { NavLink } from "react-router-dom"
-
 const NavItem = ({path, text}) => {
     return(
         <li>

@@ -11,10 +11,14 @@ logging.basicConfig(level=logging.DEBUG)
 
 Models.Base.metadata.create_all(bind= engine)
 app = FastAPI()
-
+origins = [
+    "http://localhost:3000",  # Add more in future
+    "https://dev.gruevy.com",
+    "https://qa.gruevy.com"
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

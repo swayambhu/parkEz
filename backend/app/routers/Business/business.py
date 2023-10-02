@@ -25,16 +25,7 @@ async def create_business(businessCreate: BusinessCreate, db: Session = Depends(
     #? Check if business Name, Email, phone number already exists
     utils.user_exits(table= Models.Users, column= Models.Users.username, check_value= businessCreate.email, exception=HTTPErrors.business_already_exists, db=db) #check email exists
     utils.user_exits(table= Models.Business, column= Models.Business.name, check_value= businessCreate.name, exception=HTTPErrors.business_already_exists, db=db) #check name exists   
-    utils.user_exits(table=Models.Business, column= Models.Business.phone_no, check_value= businessCreate.phone_no, exception=HTTPErrors.business_already_exists, db=db) #Check phone_no exists
-
-    try:
-        businessCreate.type = BusinessType(businessCreate.type)
-    except ValueError:
-        raise HTTPErrors.business_type_not_valid
-    
-    
-    #? else create business user
-    
+    utils.user_exits(table=Models.Business, column= Models.Business.phone_no, check_value= businessCreate.phone_no, exception=HTTPErrors.business_already_exists, db=db) #Check phone_no exists    
     
     #! Create the business user
     user = UserCreate(username= businessCreate.email, password=businessCreate.password)
