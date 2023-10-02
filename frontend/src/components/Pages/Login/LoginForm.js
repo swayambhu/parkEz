@@ -29,18 +29,22 @@ const LoginForm = () => {
 
     const { register, handleSubmit, formState: {errors} } = useForm({defaultValues: {}});
     const loginSubmit = data => {
-        const {Email: username, Password: password} = data
-        data = {username, password, user_type: currentUser.toUpperCase()}
-        console.log(data)
-        axios.post(API_URL + "auth/login", data, { withCredentials: true }
-        ).then((res) => {
+        const {Email: username, Password: password} = data;
+        data = {username, password, user_type: currentUser.toUpperCase()};
+        console.log(data);
+        axios.post(API_URL + "auth/login", data, { withCredentials: true })
+        .then((res) => {
             toast.success('Logged in successfully');
-            navigate('/dashboard'); 
-            window.location = '/dashboard';
-        }).catch((err) => {
-            toast.error(err.response.data.detail);
+            setTimeout(() => {
+                navigate('/dashboard'); 
+                window.location = '/dashboard';
+            }, 500);
         })
+        .catch((err) => {
+            toast.error(err.response.data.detail);
+        });
     }
+    
     const formInputs = [
         {
             label: "Company Email ID:",
