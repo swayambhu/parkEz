@@ -15,9 +15,6 @@ router = APIRouter(
     tags=["business"],
 )
 
-
-
-
 # create business
 @router.post("/create", response_model= Business)
 async def create_business(businessCreate: BusinessCreate, db: Session = Depends(get_db)):

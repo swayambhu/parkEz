@@ -76,7 +76,7 @@ async def login(form_data: Auth.LoginForm, db: Session = Depends(get_db)):
         key="access_token", 
         value=access_token, 
         httponly=True,
-        # samesite="None",  # Only uncomment on localhost. Comment out before uploading or cookies won't load!!!!!!!
+        samesite="None",  # Only uncomment on localhost. Comment out before uploading or cookies won't load!!!!!!!
     )
     return response
 
