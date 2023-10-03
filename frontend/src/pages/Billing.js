@@ -4,6 +4,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import axios from 'axios';  
 
 const stripePromise = loadStripe('pk_test_51NwvsaDI89byjwRRr5t32OfvNlKh8ywXfqOYp4e6ofb52Xhjuft9jKRLWobLhGowrieHLHU5C9fL13Tq2KzW3yxa00ePSFj4RB');
+const API_URL = process.env.REACT_APP_API_URL;
 
 const Billing = () => {
 
@@ -18,8 +19,8 @@ const Billing = () => {
             event.preventDefault();
             if (!stripe || !elements) return;
 
-            const response = await axios.post('http://localhost:8000/billing/create-payment-intent/', {
-                amount: 1000, 
+            const response = await axios.post(API_URL + 'billing/create-payment-intent/', {
+                amount: 1500, 
                 currency: 'usd'
             });
 
