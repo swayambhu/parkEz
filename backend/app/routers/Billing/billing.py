@@ -15,6 +15,6 @@ async def create_payment_intent(data: PaymentIntent):
             amount=data.amount, 
             currency=data.currency, 
         )
-        return JSONResponse(content=payment_intent)
+        return {"client_secret": payment_intent.client_secret}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

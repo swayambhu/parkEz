@@ -14,18 +14,18 @@ const Billing = () => {
         const [errorMessage, setErrorMessage] = useState(null);
         const [name, setName] = useState('');
         const [email, setEmail] = useState('');
-
         const handleSubmit = async (event) => {
             event.preventDefault();
             if (!stripe || !elements) return;
-
+        
             const response = await axios.post(API_URL + 'billing/create-payment-intent/', {
                 amount: 1500, 
                 currency: 'usd'
             });
-
-            const clientSecret = response.data.id;
-
+        
+            // Extract the client_secret from the response
+            const clientSecret = response.data.client_secret;
+        
             const result = await stripe.confirmCardPayment(clientSecret, {
                 payment_method: {
                     card: elements.getElement(CardElement),
@@ -35,7 +35,6 @@ const Billing = () => {
                     }
                 }
             });
-
             if (result.error) {
                 setErrorMessage(result.error.message);
             } else {
