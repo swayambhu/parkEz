@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import axios from 'axios';  
@@ -11,6 +12,7 @@ const Billing = () => {
     const CheckoutForm = () => {
         const stripe = useStripe();
         const elements = useElements();
+        const navigate = useNavigate();
         const [errorMessage, setErrorMessage] = useState(null);
         const [name, setName] = useState('');
         const [email, setEmail] = useState('');
@@ -40,6 +42,7 @@ const Billing = () => {
             } else {
                 if (result.paymentIntent.status === 'succeeded') {
                     console.log('Payment succeeded!');
+                    navigate('/success'); 
                 }
             }
         };

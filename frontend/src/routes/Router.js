@@ -14,6 +14,7 @@ const Router = () => {
             <Route path="/contact" element={<Pages.Contact/>} />
             <Route path="/faq" element={<Pages.FAQ/>} />
             <Route path="/billing" element={<Pages.Billing/>} />
+            <Route path="/success" element={<Pages.Success/>} />
             <Route path="/login">
                 {logins.map((login, idx) => (
                     <Route path={login} key={`login-${idx}`} element={<Pages.Login/>} />

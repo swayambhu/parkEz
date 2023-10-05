@@ -23,7 +23,8 @@ def create_business(business: BusinessBase, db: Session):
         email= business.email,
         phone_no= business.phone_no,
         address= business.address,
-        type= business.type
+        type= business.type,
+        stripe_customer_id=business.stripe_customer_id
     )
     db.add(business_dict)
     db.commit()
