@@ -14,7 +14,6 @@ class UserInDB(UserCreate):
 
 class User(UserBase):
     username: str
-    stripe_customer_id: Optional[str]
     is_active: bool
     created_at: datetime
     class Config:
