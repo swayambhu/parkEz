@@ -7,10 +7,15 @@ from app.database.schemas.Business import BusinessCreate, Business, BusinessType
 from app.database.schemas.ExternalUsers import ExternalUserIn, ExternalUserCreate, ExternalUser
 from app.database.Queries import business_query, external_users_query
 from app.database.Models import Models
-from fastapi import Depends
+from fastapi import Depends, HTTPException, status
 from app.auth.OAuth2 import get_business_user
 from . import HTTPErrors, utils as business_utils
 from app import utils
+import traceback
+import logging
+
+logging.basicConfig(level=logging.INFO)
+
 router = APIRouter(
     prefix="/business",
     tags=["business"],
@@ -19,6 +24,8 @@ router = APIRouter(
 # create business
 @router.post("/create", response_model=Business)
 async def create_business(businessCreate: BusinessCreate, db: Session = Depends(get_db)):
+    logging.info(f"Received data: {businessCreate}")
+    print(businessCreate)
     #? Check if business Name, Email, phone number already exists
     utils.user_exits(table=Models.Users, column=Models.Users.username, check_value=businessCreate.email, exception=HTTPErrors.business_already_exists, db=db)  # check email exists
     utils.user_exits(table=Models.Business, column=Models.Business.name, check_value=businessCreate.name, exception=HTTPErrors.business_already_exists, db=db)  # check name exists   
@@ -28,23 +35,49 @@ async def create_business(businessCreate: BusinessCreate, db: Session = Depends(
     user = UserCreate(username=businessCreate.email, password=businessCreate.password)
     user_dict = utils.create_user_auth(user=user, db=db)
 
+    # Mapping for business types to price IDs
+    PRICE_IDS = {
+        "ADVERTISERS": "price_1NynvKDI89byjwRRIwPwtvTG",
+        "BUSINESS": "price_1NynsNDI89byjwRRSEHnmba5"
+    }
+
     # Create a Stripe customer
     try:
         stripe_customer = stripe.Customer.create(
             email=businessCreate.email,
-            name=businessCreate.name  # Add this line to set the name in Stripe
+            name=businessCreate.name
         )
-        # TODO: Store `stripe_customer.id` in your business model or related table to keep track of the Stripe customer ID for the business
-    except stripe.error.StripeError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Stripe error: {str(e)}")   
-     
-    # Set the Stripe customer ID in your business model (if you have a field for it)
-    businessCreate.stripe_customer_id = stripe_customer.id  # Assuming you have a stripe_customer_id field in BusinessCreate model
+    except Exception as e:
+        print(traceback.format_exc()) # This will print the full traceback
+        raise HTTPException(status_code=400, detail=str(e))    
 
-    #! Create the business with the stripe_customer_id
+    try:
+        payment_method = stripe.PaymentMethod.attach(
+            businessCreate.card_token,
+            customer=stripe_customer.id,
+        )
+    except stripe.error.StripeError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Stripe error: {str(e)}")
+
+
+    # Set this payment method as the default for the customer
+    try:
+        stripe.Customer.modify(
+            stripe_customer.id,
+            invoice_settings={
+                'default_payment_method': payment_method.id,
+            },
+        )
+    except stripe.error.StripeError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Stripe error: {str(e)}")
+
+    # Set the Stripe customer ID in your business model
+    businessCreate.stripe_customer_id = stripe_customer.id
+
+    # Create the business with the stripe_customer_id
     business = business_query.create_business(business=businessCreate, db=db)
-    
-    #! Return the business
+
+    # Return the business
     business.type = business.type.value
     return business
 
