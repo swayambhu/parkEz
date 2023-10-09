@@ -25,21 +25,18 @@ const CustomerSupportUrls = [
     { path: "/dashboard", text: "Support Dashboard" },
     { path: "/choose-lot-dashboard", text: "Lot Admin" },
     { path: "/choose-ad-dashboard", text: "Ad Admin" },
-    { path: "/billing", texaccountst: "Billing Admin" },
     { path: "/manage-", text: "Manage User Accounts" }
 ];
 
 const LotSpecialistUrls = [
     { path: "/dashboard", text: "Lot Support Dashboard" },
     { path: "/choose-lot-dashboard", text: "Lot Admin" },
-    { path: "/billing", text: "Lot Billing Admin" },
     { path: "/manage-accounts", text: "Manage Lot Accounts" }
 ];
 
 const AdvertisingSpecialistUrls = [
     { path: "/dashboard", text: "Ad Support Dashboard" },
     { path: "/choose-ad-dashboard", text: "Ad Admin" },
-    { path: "/billing", text: "Ad Billing Admin" },
     { path: "/manage-accounts", text: "Manage Ad Accounts" }
 ];
 
@@ -50,7 +47,6 @@ const AccountantUrls = [
     { path: "/choose-ad-dashboard", text: "Ad Admin" },
     { path: "/manage-accounts", text: "Manage Accounts" },
     { path: "/create-staff-account", text: "Create Employees" },
-    { path: "/billing", text: "Billing" }
 ];
 
 export { 
