@@ -54,10 +54,14 @@ pipeline {
                 '''
             }
         }
-
         stage('Start Service') { 
             steps {
                 sh 'sudo systemctl start devback.service'
+            }
+        }
+        stage('Wait for DB Initialization') {
+            steps {
+                sh 'sleep 30'
             }
         }
         stage('Populate Database Test Data') {
