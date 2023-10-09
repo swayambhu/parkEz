@@ -183,10 +183,6 @@ async def get_invoices(current_user: Users.User = Depends(get_current_user), db:
 
     return {"invoices": invoices_data}
 
-
-
-
-
 @router.post("/pay_invoice/{invoice_id}")
 async def pay_invoice(invoice_id: str, current_user: Users.User = Depends(get_current_user), db: Session = Depends(get_db)):
     try:

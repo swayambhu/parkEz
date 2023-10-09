@@ -6,6 +6,7 @@ const API_URL = process.env.REACT_APP_API_URL;
 
 const Billing = () => {
     const navigate = useNavigate();
+    const [paymentMethods, setPaymentMethods] = useState([]);
     const formatDate = (timestamp) => {
         const date = new Date(timestamp * 1000);
         const day = String(date.getDate()).padStart(2, '0');
@@ -26,9 +27,20 @@ const Billing = () => {
             console.error('Failed to fetch invoices:', error);
         }
     };
+    const fetchPaymentMethods = async () => {
+        try {
+            const response = await axios.get(API_URL + 'business/payment_methods', { withCredentials: true });
+            setPaymentMethods(response.data.payment_methods);
+        } catch (error) {
+            console.error('Failed to fetch payment methods:', error);
+        }
+    };
+    const defaultPaymentMethod = paymentMethods.find(pm => pm.is_default);
     useEffect(() => {
         fetchInvoices();
+        fetchPaymentMethods(); 
     }, []);
+    
 
     const handlePayInvoice = async (invoiceId) => {
         try {
@@ -38,23 +50,30 @@ const Billing = () => {
             console.error('Failed to pay invoice:', error);
         }
     };
-
     const buttonStyle = {
         backgroundColor: 'blue',
         color: 'white',
         padding: '10px 15px',
+        marginTop: '1em',
         border: 'none',
         borderRadius: '5px',
         cursor: 'pointer',
         margin: '5px',
         boxShadow: '2px 2px 8px rgba(0,0,0,0.2)'
     };
+    const centerContainerStyle = {
+        marginTop:'1em',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center', 
+        justifyContent: 'center', 
+    };
+    
 
 
     return (
-        <div style={{ minHeight: '50vh', margin: '3em' }}>
-            <h2>Manage Invoices</h2>
-            <p style={{fontSize: '0.8rem', marginBottom: '1em'}}>Pays with default payment method</p>
+        <div style={{ minHeight: '70vh', margin: '3em' }}>
+            <h3>Billing and Invoices</h3>            
             <table style={{ marginTop: '20px', width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                     <tr>
@@ -89,7 +108,19 @@ const Billing = () => {
                 ))}
                 </tbody>
             </table>
-            <button style={buttonStyle} onClick={handleManagePayments}>Manage Payments</button>
+            <div style={centerContainerStyle}>
+                {defaultPaymentMethod ? (
+                    <div>
+                        <strong><u>Current Payment Method: </u></strong>
+                        <strong>Brand:</strong> {defaultPaymentMethod.card.brand}, 
+                        <strong>Last 4 Digits:</strong> {defaultPaymentMethod.card.last4}, 
+                        <strong>Exp Date:</strong> {defaultPaymentMethod.card.exp_month}/{defaultPaymentMethod.card.exp_year}
+                    </div>) : (
+                    <div><strong>Current Payment Method</strong>: None</div>)
+                }
+
+                <button style={buttonStyle} onClick={handleManagePayments}>Manage Payment Method</button>
+            </div>
         </div>
     );
     
