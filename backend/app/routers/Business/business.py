@@ -162,3 +162,37 @@ async def update_default_payment_method(payment_method_id: str, current_user: Us
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Stripe error: {str(e)}")
 
     return {"detail": "Default payment method updated successfully"}
+
+@router.get("/invoices")
+async def get_invoices(current_user: Users.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    user_data = jsonable_encoder(current_user)
+    business = db.query(Models.Business).filter(Models.Business.email == user_data["username"]).one()
+
+    invoices = stripe.Invoice.list(customer=business.stripe_customer_id)
+
+    invoices_data = [{
+        "id": inv.id,
+        "description": inv.lines.data[0].description if inv.lines.data else "",
+        "status": inv.status,
+        "start_date": inv.lines.data[0].period.start if inv.lines.data else None,
+        "end_date": inv.lines.data[0].period.end if inv.lines.data else None,
+        "price_per_item": (inv.lines.data[0].amount / 100 / inv.lines.data[0].quantity) if inv.lines.data and inv.lines.data[0].quantity and inv.lines.data[0].quantity > 0 else None,  # Price for 1 of the top item
+        "quantity": inv.lines.data[0].quantity if inv.lines.data else None,
+        "total": (inv.total / 100) if hasattr(inv, 'total') else None  # Convert cents to dollars
+    } for inv in invoices.data]
+
+    return {"invoices": invoices_data}
+
+
+
+
+
+@router.post("/pay_invoice/{invoice_id}")
+async def pay_invoice(invoice_id: str, current_user: Users.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    try:
+        # Pay the invoice
+        stripe.Invoice.pay(invoice_id)
+    except stripe.error.StripeError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Stripe error: {str(e)}")
+
+    return {"detail": "Invoice paid successfully"}
