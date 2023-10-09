@@ -111,7 +111,16 @@ async def get_payment_methods(current_user: Users.User = Depends(get_current_use
         type="card",
     )
 
+    # Fetching the Stripe customer to get the default payment method.
+    customer = stripe.Customer.retrieve(business.stripe_customer_id)
+    default_payment_method = customer.invoice_settings.default_payment_method
+
+    # Augmenting each payment method with a "is_default" boolean.
+    for method in payment_methods["data"]:
+        method["is_default"] = method.id == default_payment_method
+
     return {"payment_methods": payment_methods["data"]}
+
 
 @router.post("/add_payment_method")
 async def add_payment_method(token_data: PaymentToken, current_user: Users.User = Depends(get_current_user), db: Session = Depends(get_db)):
