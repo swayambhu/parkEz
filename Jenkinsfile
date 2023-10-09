@@ -1,8 +1,8 @@
 pipeline {
-    agent any  // This will use any available agent
+    agent any 
 
     tools {
-        nodejs 'node'  // 'node' is the name you gave to the Node.js installation in Jenkins
+        nodejs 'node' 
     }
 
     stages {
@@ -14,7 +14,7 @@ pipeline {
 
         stage('Install and Build Frontend') {
             steps {
-                dir('frontend') {  // Change directory to 'frontend'
+                dir('frontend') { 
                     sh 'npm install'
                     sh '''
                         unset CI
@@ -36,9 +36,32 @@ pipeline {
             }
         }
 
-        stage('Restart Service') { 
+        stage('Stop Service') { 
             steps {
-                sh 'sudo systemctl restart devback.service'
+                sh 'sudo systemctl stop devback.service'
+            }
+        }
+
+        stage('Database Operations') {
+            steps {
+                sh '''
+                    export PGPASSWORD=Raccoon1
+                    psql -U jenkins -h localhost -d postgres -c "DROP DATABASE IF EXISTS dev;"
+                    psql -U jenkins -h localhost -d postgres -c "DROP USER IF EXISTS dev;"
+                    psql -U jenkins -h localhost -d postgres -c "CREATE DATABASE dev;"
+                    psql -U jenkins -h localhost -d postgres -c "CREATE USER dev WITH PASSWORD 'Raccoon1';"
+                    psql -U jenkins -h localhost -d postgres -c "GRANT ALL PRIVILEGES ON DATABASE dev TO dev;"
+                '''
+                sh '''
+                    export PGPASSWORD=Raccoon1
+                    psql -U jenkins -h localhost -d dev -f /home/tom/web/backend_dev/init.sql
+                '''
+            }
+        }
+
+        stage('Start Service') { 
+            steps {
+                sh 'sudo systemctl start devback.service'
             }
         }
     }
