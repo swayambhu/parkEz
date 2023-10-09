@@ -42,7 +42,7 @@ pipeline {
             }
         }
 
-        stage('Database Operations') {
+        stage('Remake Database') {
             steps {
                 sh '''
                     export PGPASSWORD=Raccoon1
@@ -52,10 +52,6 @@ pipeline {
                     psql -U jenkins -h localhost -d postgres -c "CREATE USER dev WITH PASSWORD 'Raccoon1';"
                     psql -U jenkins -h localhost -d postgres -c "GRANT ALL PRIVILEGES ON DATABASE dev TO dev;"
                 '''
-                sh '''
-                    export PGPASSWORD=Raccoon1
-                    psql -U jenkins -h localhost -d dev -f /home/tom/web/backend_dev/init.sql
-                '''
             }
         }
 
@@ -64,8 +60,15 @@ pipeline {
                 sh 'sudo systemctl start devback.service'
             }
         }
+        stage('Populate Database Test Data') {
+            steps {
+                sh '''
+                    export PGPASSWORD=Raccoon1
+                    psql -U jenkins -h localhost -d dev -f /home/tom/web/backend_dev/init.sql
+                '''
+            }
+        }
     }
-
     post {
         success {
             echo 'Build and deployment were successful!'
