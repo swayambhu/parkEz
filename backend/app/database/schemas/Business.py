@@ -33,3 +33,6 @@ class BusinessUsers(Business):
 
     class Config:
         orm_mode = True
+
+class PaymentToken(BaseModel):
+    token: str

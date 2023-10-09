@@ -1,10 +1,13 @@
 import stripe
 from fastapi.routing import APIRouter
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from app.database.database import get_db
+from app.database.schemas import Users
 from app.database.schemas.Users import UserCreate
-from app.database.schemas.Business import BusinessCreate, Business, BusinessType
+from app.database.schemas.Business import BusinessCreate, Business, BusinessType, PaymentToken
 from app.database.schemas.ExternalUsers import ExternalUserIn, ExternalUserCreate, ExternalUser
+from app.auth.OAuth2 import hash_password, authenticate_user, create_access_token, validate_token, get_current_user
 from app.database.Queries import business_query, external_users_query
 from app.database.Models import Models
 from fastapi import Depends, HTTPException, status
@@ -35,11 +38,6 @@ async def create_business(businessCreate: BusinessCreate, db: Session = Depends(
     user = UserCreate(username=businessCreate.email, password=businessCreate.password)
     user_dict = utils.create_user_auth(user=user, db=db)
 
-    # Mapping for business types to price IDs
-    PRICE_IDS = {
-        "ADVERTISERS": "price_1NynvKDI89byjwRRIwPwtvTG",
-        "BUSINESS": "price_1NynsNDI89byjwRRSEHnmba5"
-    }
 
     # Create a Stripe customer
     try:
@@ -100,5 +98,58 @@ async def create_external_users(user_data: ExternalUserIn, business: str = Depen
     user_data_in_db = ExternalUserCreate(**user_data.dict(), business_id=business.id, email=user_email)
     user = external_users_query.create_user(user=user_data_in_db, db=db) 
   
-    
     return user
+
+@router.get("/payment_methods")
+async def get_payment_methods(current_user: Users.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    user_data = jsonable_encoder(current_user)
+    
+    business = db.query(Models.Business).filter(Models.Business.email == user_data["username"]).one()
+
+    payment_methods = stripe.PaymentMethod.list(
+        customer=business.stripe_customer_id,
+        type="card",
+    )
+
+    return {"payment_methods": payment_methods["data"]}
+
+@router.post("/add_payment_method")
+async def add_payment_method(token_data: PaymentToken, current_user: Users.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    user_data = jsonable_encoder(current_user)
+    business = db.query(Models.Business).filter(Models.Business.email == user_data["username"]).one()
+
+    try:
+        payment_method = stripe.PaymentMethod.attach(
+            token_data.token,
+            customer=business.stripe_customer_id,
+        )
+    except stripe.error.StripeError as e:
+        raise HTTPException(status_code=400, detail=f"Stripe error: {str(e)}")
+
+    return {"payment_method": payment_method}
+
+@router.delete("/delete_payment_method/{payment_method_id}")
+async def delete_payment_method(payment_method_id: str, current_user: Users.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    try:
+        stripe.PaymentMethod.detach(payment_method_id)
+    except stripe.error.StripeError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Stripe error: {str(e)}")
+
+    return {"detail": "Payment method deleted successfully"}
+
+@router.put("/update_default_payment_method/{payment_method_id}")
+async def update_default_payment_method(payment_method_id: str, current_user: Users.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    user_data = jsonable_encoder(current_user)
+    business = db.query(Models.Business).filter(Models.Business.email == user_data["username"]).one()
+
+    try:
+        stripe.Customer.modify(
+            business.stripe_customer_id,
+            invoice_settings={
+                'default_payment_method': payment_method_id,
+            },
+        )
+    except stripe.error.StripeError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Stripe error: {str(e)}")
+
+    return {"detail": "Default payment method updated successfully"}
