@@ -1,8 +1,8 @@
 pipeline {
-    agent any 
+    agent any  // This will use any available agent
 
     tools {
-        nodejs 'node' 
+        nodejs 'node'  // 'node' is the name you gave to the Node.js installation in Jenkins
     }
 
     stages {
@@ -14,7 +14,7 @@ pipeline {
 
         stage('Install and Build Frontend') {
             steps {
-                dir('frontend') {  
+                dir('frontend') {  // Change directory to 'frontend'
                     sh 'npm install'
                     sh '''
                         unset CI
@@ -26,53 +26,23 @@ pipeline {
 
         stage('Deploy Frontend') {
             steps {
-                sh 'cp -r frontend/build/* /home/tom/web/qa.gruevy.com/'
+                sh 'cp -r frontend/build/* /home/tom/web/dev.gruevy.com/'
             }
         }
 
         stage('Deploy Backend') {
             steps {
-                sh 'cp -r backend/* /home/tom/web/backend_qa/'
+                sh 'cp -r backend/* /home/tom/web/backend_dev/'
             }
         }
 
-        stage('Stop Service') { 
+        stage('Restart Service') { 
             steps {
-                sh 'sudo systemctl stop devback.service'
-            }
-        }
-
-        stage('Remake Database') {
-            steps {
-                sh '''
-                    export PGPASSWORD=Raccoon1
-                    psql -U jenkins -h localhost -d postgres -c "DROP DATABASE IF EXISTS dev;"
-                    psql -U jenkins -h localhost -d postgres -c "DROP USER IF EXISTS dev;"
-                    psql -U jenkins -h localhost -d postgres -c "CREATE DATABASE dev;"
-                    psql -U jenkins -h localhost -d postgres -c "CREATE USER dev WITH PASSWORD 'Raccoon1';"
-                    psql -U jenkins -h localhost -d postgres -c "GRANT ALL PRIVILEGES ON DATABASE dev TO dev;"
-                '''
-            }
-        }
-        stage('Start Service') { 
-            steps {
-                sh 'sudo systemctl start devback.service'
-            }
-        }
-        stage('Wait for DB Initialization') {
-            steps {
-                sh 'sleep 30'
-            }
-        }
-        stage('Populate Database Test Data') {
-            steps {
-                sh '''
-                    export PGPASSWORD=Raccoon1
-                    psql -U jenkins -h localhost -d dev -f /home/tom/web/backend_dev/init.sql
-                '''
+                sh 'sudo systemctl restart devback.service'
             }
         }
     }
+
     post {
         success {
             echo 'Build and deployment were successful!'

@@ -1,7 +1,5 @@
-# ParkEz (QA branch)
-## Live Demo*: https://qa.gruevy.com/
-
-*I haven't setup backend uvicorn on this branch yet, but will before this is used for QA.
+# ParkEz (dev branch)
+## Live Demo: https://dev.gruevy.com/
 
 ParkEZ is a parking lot monitoring platform with different webpages for both the public and parking lot operators to monitor lot occupancy, provide security, stop overparking and recommend customers the best spots. Avertisers are also able to place ads on the public facing webpages. This repository is part of a 2-semester course progression, and it currently implements functional requirement module 1: Account Management, with all its subfeatures. The remaining modules will be implemented in the next semester's class.
 
