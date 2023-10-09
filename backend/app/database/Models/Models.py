@@ -10,7 +10,6 @@ class Users(Base):
     __tablename__ = "users"
     username = Column(String,primary_key=True, index=True)
     password = Column(String)
-    stripe_customer_id = Column(String, default="")
  
     created_at = Column(DateTime, default=datetime.utcnow())
     is_active = Column(Boolean, default=False)

@@ -1,102 +1,129 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
-import axios from 'axios';  
 
-const stripePromise = loadStripe('pk_test_51NwvsaDI89byjwRRr5t32OfvNlKh8ywXfqOYp4e6ofb52Xhjuft9jKRLWobLhGowrieHLHU5C9fL13Tq2KzW3yxa00ePSFj4RB');
 const API_URL = process.env.REACT_APP_API_URL;
 
 const Billing = () => {
-
-    const CheckoutForm = () => {
-        const stripe = useStripe();
-        const elements = useElements();
-        const navigate = useNavigate();
-        const [errorMessage, setErrorMessage] = useState(null);
-        const [name, setName] = useState('');
-        const [email, setEmail] = useState('');
-        const handleSubmit = async (event) => {
-            event.preventDefault();
-            if (!stripe || !elements) return;
-        
-            const response = await axios.post(API_URL + 'billing/create-payment-intent/', {
-                amount: 1500, 
-                currency: 'usd'
-            });
-        
-            // Extract the client_secret from the response
-            const clientSecret = response.data.client_secret;
-        
-            const result = await stripe.confirmCardPayment(clientSecret, {
-                payment_method: {
-                    card: elements.getElement(CardElement),
-                    billing_details: {
-                        name,
-                        email
-                    }
-                }
-            });
-            if (result.error) {
-                setErrorMessage(result.error.message);
-            } else {
-                if (result.paymentIntent.status === 'succeeded') {
-                    console.log('Payment succeeded!');
-                    navigate('/success'); 
-                }
-            }
-        };
-
-        return (
-            <div>
-                <h2>Payment</h2>
-                <p>Payment for Monthly Subscription Service</p>
-                <form onSubmit={handleSubmit}>
-                    <div className="inputWrapper">
-                        <label>Name:</label>
-                        <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
-                    </div>
-
-                    <div className="inputWrapper">
-                        <label>Email:</label>
-                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                    </div>
-
-                    <div className="inputWrapper">
-                        <label>Card Details:</label>
-                        <CardElement />
-                    </div>
-
-                    <button type="submit" disabled={!stripe}>Pay</button>
-                </form>
-                {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-            </div>
-        );
+    const navigate = useNavigate();
+    const [paymentMethods, setPaymentMethods] = useState([]);
+    const formatDate = (timestamp) => {
+        const date = new Date(timestamp * 1000);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${month}/${day}/${year}`;
     };
 
+    const handleManagePayments = () => {
+        navigate("/manage-payments");
+    }
+    const [invoices, setInvoices] = useState([]);
+    const fetchInvoices = async () => {
+        try {
+            const response = await axios.get(API_URL + 'business/invoices', { withCredentials: true });
+            setInvoices(response.data.invoices);
+        } catch (error) {
+            console.error('Failed to fetch invoices:', error);
+        }
+    };
+    const fetchPaymentMethods = async () => {
+        try {
+            const response = await axios.get(API_URL + 'business/payment_methods', { withCredentials: true });
+            setPaymentMethods(response.data.payment_methods);
+        } catch (error) {
+            console.error('Failed to fetch payment methods:', error);
+        }
+    };
+    const defaultPaymentMethod = paymentMethods.find(pm => pm.is_default);
+    useEffect(() => {
+        fetchInvoices();
+        fetchPaymentMethods(); 
+    }, []);
+    
+
+    const handlePayInvoice = async (invoiceId) => {
+        try {
+            await axios.post(API_URL + `business/pay_invoice/${invoiceId}`, {}, { withCredentials: true });
+            fetchInvoices();  // Refresh invoices list after payment
+        } catch (error) {
+            console.error('Failed to pay invoice:', error);
+        }
+    };
+    const buttonStyle = {
+        backgroundColor: 'blue',
+        color: 'white',
+        padding: '10px 15px',
+        marginTop: '1em',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer',
+        margin: '5px',
+        boxShadow: '2px 2px 8px rgba(0,0,0,0.2)'
+    };
+    const centerContainerStyle = {
+        marginTop:'1em',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center', 
+        justifyContent: 'center', 
+    };
+    
+
+
     return (
-        <div style={{ height: '80vh', padding: '5em' }}>
-            <Elements stripe={stripePromise}>
-                <CheckoutForm />
-            </Elements>
-            <style jsx>{`
-                .inputWrapper {
-                    margin-bottom: 15px;
-                    padding: 10px;
-                    border: 1px solid #ccc;
-                    border-radius: 5px;
+        <div style={{ minHeight: '70vh', margin: '3em' }}>
+            <h3>Billing and Invoices</h3>            
+            <table style={{ marginTop: '20px', width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                    <tr>
+                        <th>Invoice ID</th>
+                        <th>Description</th>
+                        <th>Start Date</th> 
+                        <th>End Date</th> 
+                        <th>Amount ($)</th>
+                        <th>Quantity</th> 
+                        <th>Total ($)</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {invoices.map(invoice => (
+                    <tr key={invoice.id}>
+                        <td>{invoice.id}</td>
+                        <td>{invoice.description}</td>
+                        <td>{invoice.start_date ? formatDate(invoice.start_date) : 'N/A'}</td>
+                        <td>{invoice.end_date ? formatDate(invoice.end_date) : 'N/A'}</td>
+                        <td>${invoice.price_per_item?.toFixed(2) || 'N/A'}</td>
+                        <td>{invoice.quantity || 'N/A'}</td>
+                        <td>${invoice.total?.toFixed(2) || 'N/A'}</td> 
+                        <td>{invoice.status}</td>
+                        <td>
+                            {invoice.status !== 'paid' && (
+                                <button style={buttonStyle} onClick={() => handlePayInvoice(invoice.id)}>Pay</button>
+                            )}
+                        </td>
+                    </tr>
+                ))}
+                </tbody>
+            </table>
+            <div style={centerContainerStyle}>
+                {defaultPaymentMethod ? (
+                    <div>
+                        <strong><u>Current Payment Method: </u></strong>
+                        <strong>Brand:</strong> {defaultPaymentMethod.card.brand}, 
+                        <strong>Last 4 Digits:</strong> {defaultPaymentMethod.card.last4}, 
+                        <strong>Exp Date:</strong> {defaultPaymentMethod.card.exp_month}/{defaultPaymentMethod.card.exp_year}
+                    </div>) : (
+                    <div><strong>Current Payment Method</strong>: None</div>)
                 }
 
-                input {
-                    margin-top: 5px;
-                    padding: 8px;
-                    width: 100%;
-                    border: 1px solid #ccc;
-                    border-radius: 4px;
-                }
-            `}</style>
+                <button style={buttonStyle} onClick={handleManagePayments}>Manage Payment Method</button>
+            </div>
         </div>
     );
+    
 };
 
 export default Billing;

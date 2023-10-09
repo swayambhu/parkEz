@@ -18,8 +18,7 @@ class BusinessBase(BaseModel):
 class BusinessCreate(BusinessBase):
     stripe_customer_id: Optional[str]
     password: str
-    
-
+    card_token: str
     
 class Business(BusinessBase):
     id: int
@@ -34,3 +33,6 @@ class BusinessUsers(Business):
 
     class Config:
         orm_mode = True
+
+class PaymentToken(BaseModel):
+    token: str
