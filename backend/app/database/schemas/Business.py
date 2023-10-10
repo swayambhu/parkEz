@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from enum import Enum
 from datetime import datetime
+from typing import Optional
 
 class BusinessType(str, Enum):
     ADVERTISERS = "ADVERTISERS"
@@ -11,12 +12,13 @@ class BusinessBase(BaseModel):
     name: str
     phone_no: str
     address: str
+    stripe_customer_id: Optional[str]
     type: BusinessType | str
     
 class BusinessCreate(BusinessBase):
+    stripe_customer_id: Optional[str]
     password: str
-    
-
+    card_token: str
     
 class Business(BusinessBase):
     id: int
@@ -31,3 +33,6 @@ class BusinessUsers(Business):
 
     class Config:
         orm_mode = True
+
+class PaymentToken(BaseModel):
+    token: str

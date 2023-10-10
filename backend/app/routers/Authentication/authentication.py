@@ -1,3 +1,4 @@
+import stripe
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Cookie
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
@@ -76,7 +77,7 @@ async def login(form_data: Auth.LoginForm, db: Session = Depends(get_db)):
         key="access_token", 
         value=access_token, 
         httponly=True,
-        # samesite="None",  # Only uncomment on localhost. Comment out before uploading or cookies won't load
+        # samesite="None",  # Only uncomment on localhost. Comment out before uploading or cookies won't load!!!!!!!
     )
     return response
 

@@ -17,7 +17,7 @@ INSERT INTO users (username, password, is_active) VALUES
 ('advertiser@example.com', '$2a$12$ueHwq6TvxZ89.KHevWdupesQpFAj8VRYSjGfOzL1p6QZQy8jbqS3m', TRUE),
 ('business@example.com', '$2a$12$ueHwq6TvxZ89.KHevWdupesQpFAj8VRYSjGfOzL1p6QZQy8jbqS3m', TRUE);
 
--- Inserting businesses
-INSERT INTO business (email, name, address, phone_no, type) VALUES
-('advertiser@example.com', 'Advertiser Business Inc.', '123 Advertiser St.', '666-666-6666', 'ADVERTISERS'),
-('business@example.com', 'General Business Corp.', '456 Business Ave.', '777-777-7777', 'BUSINESS');
+-- Inserting businesses with stripe_customer_id
+INSERT INTO business (email, name, address, phone_no, type, stripe_customer_id) VALUES
+('advertiser@example.com', 'Advertiser Business Inc.', '123 Advertiser St.', '666-666-6666', 'ADVERTISERS', 'cus_OmI33gnfCxqxG6'),
+('business@example.com', 'General Business Corp.', '456 Business Ave.', '777-777-7777', 'BUSINESS', 'cus_OmI4R9FT0VEl3c');

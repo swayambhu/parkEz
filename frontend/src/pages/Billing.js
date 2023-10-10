@@ -1,80 +1,129 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
+const API_URL = process.env.REACT_APP_API_URL;
+
 const Billing = () => {
-    return(
-        <div style={{height:'80vh', padding:'5em'}}>
-            <h1>The Mystical World of Billing</h1>
-            
-            <h2>The Legend of Invoice-ius</h2>
-            <p>
-                In the magical realm of Accounta, the hero Invoice-ius embarked on a quest to balance the ledger of fate. He faced the monstrous Receiptacle and delved into the Caverns of Commerce. Throughout his journey, Invoice-ius deciphered the ancient scrolls of Taxation and faced the trials of the Credit Card Tribes.
-            </p>
+    const navigate = useNavigate();
+    const [paymentMethods, setPaymentMethods] = useState([]);
+    const formatDate = (timestamp) => {
+        const date = new Date(timestamp * 1000);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${month}/${day}/${year}`;
+    };
 
-            <h2>Adventures in Billingland</h2>
-            <h3>The Subscriptions Forest</h3>
-            <p>
-                Here, trees bear fruits in the form of recurring charges. The brave souls who venture into this forest will find themselves caught in a web of monthly and annual cycles. Some adventurers may find the treasures of discounts, while others face the wrath of late fees.
-            </p>
+    const handleManagePayments = () => {
+        navigate("/manage-payments");
+    }
+    const [invoices, setInvoices] = useState([]);
+    const fetchInvoices = async () => {
+        try {
+            const response = await axios.get(API_URL + 'business/invoices', { withCredentials: true });
+            setInvoices(response.data.invoices);
+        } catch (error) {
+            console.error('Failed to fetch invoices:', error);
+        }
+    };
+    const fetchPaymentMethods = async () => {
+        try {
+            const response = await axios.get(API_URL + 'business/payment_methods', { withCredentials: true });
+            setPaymentMethods(response.data.payment_methods);
+        } catch (error) {
+            console.error('Failed to fetch payment methods:', error);
+        }
+    };
+    const defaultPaymentMethod = paymentMethods.find(pm => pm.is_default);
+    useEffect(() => {
+        fetchInvoices();
+        fetchPaymentMethods(); 
+    }, []);
+    
 
-            <h3>The Mountain of Debt</h3>
-            <p>
-                Towering above Billingland, this mountain's peak is often covered in the clouds of compound interest. Many have tried to climb it hoping to find the plateau of payoff, but only those with the right strategy and determination succeed.
-            </p>
+    const handlePayInvoice = async (invoiceId) => {
+        try {
+            await axios.post(API_URL + `business/pay_invoice/${invoiceId}`, {}, { withCredentials: true });
+            fetchInvoices();  // Refresh invoices list after payment
+        } catch (error) {
+            console.error('Failed to pay invoice:', error);
+        }
+    };
+    const buttonStyle = {
+        backgroundColor: 'blue',
+        color: 'white',
+        padding: '10px 15px',
+        marginTop: '1em',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer',
+        margin: '5px',
+        boxShadow: '2px 2px 8px rgba(0,0,0,0.2)'
+    };
+    const centerContainerStyle = {
+        marginTop:'1em',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center', 
+        justifyContent: 'center', 
+    };
+    
 
-            <h2>Myths and Fables</h2>
-            <ul>
-                <li>The Phantom Overcharge: A ghostly tale of an amount that appears and disappears from bills.</li>
-                <li>Refundia’s Labyrinth: A maze where those seeking refunds find themselves lost, only guided by the beacon of customer service.</li>
-                <li>The Eternal Warranty: Legends say it grants the holder an endless protection against wear and tear.</li>
-            </ul>
 
-            <h2>Encounters</h2>
-            <p>
-                On his travels, Invoice-ius met many a creature, like the loyal Discount Dragon who hoards promo codes and the mischievous Late Fee Elves that sprinkle additional charges when you least expect them.
-            </p>
-
-            <h2>The Prophecies</h2>
-            <p>
-                It is said that in the Age of Digital Currencies, a new champion will rise. This hero, known as PayPalladin, will usher in an era of seamless transactions, instant refunds, and unified global commerce. The realms of Billingland await this prophesied hero.
-            </p>
-
-            <h2>Historical Artifacts</h2>
-            <table border="1">
+    return (
+        <div style={{ minHeight: '70vh', margin: '3em' }}>
+            <h3>Billing and Invoices</h3>            
+            <table style={{ marginTop: '20px', width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                     <tr>
-                        <th>Artifact</th>
-                        <th>Origin</th>
-                        <th>Power</th>
+                        <th>Invoice ID</th>
+                        <th>Description</th>
+                        <th>Start Date</th> 
+                        <th>End Date</th> 
+                        <th>Amount ($)</th>
+                        <th>Quantity</th> 
+                        <th>Total ($)</th>
+                        <th>Status</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>The Golden Ledger</td>
-                        <td>Caverns of Commerce</td>
-                        <td>Ensures balanced accounts</td>
+                {invoices.map(invoice => (
+                    <tr key={invoice.id}>
+                        <td>{invoice.id}</td>
+                        <td>{invoice.description}</td>
+                        <td>{invoice.start_date ? formatDate(invoice.start_date) : 'N/A'}</td>
+                        <td>{invoice.end_date ? formatDate(invoice.end_date) : 'N/A'}</td>
+                        <td>${invoice.price_per_item?.toFixed(2) || 'N/A'}</td>
+                        <td>{invoice.quantity || 'N/A'}</td>
+                        <td>${invoice.total?.toFixed(2) || 'N/A'}</td> 
+                        <td>{invoice.status}</td>
+                        <td>
+                            {invoice.status !== 'paid' && (
+                                <button style={buttonStyle} onClick={() => handlePayInvoice(invoice.id)}>Pay</button>
+                            )}
+                        </td>
                     </tr>
-                    <tr>
-                        <td>Ruby Receipt</td>
-                        <td>Receiptacle's Lair</td>
-                        <td>Proof of any purchase</td>
-                    </tr>
-                    <tr>
-                        <td>Quill of Quotation</td>
-                        <td>Marketplace of Estimates</td>
-                        <td>Creates accurate price quotes</td>
-                    </tr>
+                ))}
                 </tbody>
             </table>
+            <div style={centerContainerStyle}>
+                {defaultPaymentMethod ? (
+                    <div>
+                        <strong><u>Current Payment Method: </u></strong>
+                        <strong>Brand:</strong> {defaultPaymentMethod.card.brand}, 
+                        <strong>Last 4 Digits:</strong> {defaultPaymentMethod.card.last4}, 
+                        <strong>Exp Date:</strong> {defaultPaymentMethod.card.exp_month}/{defaultPaymentMethod.card.exp_year}
+                    </div>) : (
+                    <div><strong>Current Payment Method</strong>: None</div>)
+                }
 
-            <h2>Tales from the Billing Bards</h2>
-            <p>
-                Songs and poems abound of these adventures. Bards sing of the Coupon Minstrel who can charm even the stingiest of vendors into granting a discount. They also recite tales of the Voucher Valkyrie who swoops down to save customers from overpaying.
-            </p>
-
-            <h2>A Final Word</h2>
-            <p>
-                As we close this chapter on Billingland, remember that every charge, every fee, and every transaction has a story behind it. So the next time you view your bill, think of Invoice-ius and his adventures, and perhaps your bill will seem a little less mundane.
-            </p>
+                <button style={buttonStyle} onClick={handleManagePayments}>Manage Payment Method</button>
+            </div>
         </div>
-    )
-}
+    );
+    
+};
 
 export default Billing;

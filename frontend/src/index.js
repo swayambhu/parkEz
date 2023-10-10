@@ -21,6 +21,8 @@ import SignUp from "./pages/SignUp";
 import BrowseParkingLot from './pages/BrowseParkingLots';
 import Dashboard from './pages/TempDashboard';
 import Billing from './pages/Billing';
+import Success from './pages/Success';
+import ManagePayments from './pages/ManagePayments';
 const container = document.getElementById('root');
 const root = createRoot(container);
 
@@ -43,5 +45,7 @@ export const Pages = {
   SignUp,
   BrowseParkingLot,
   Dashboard,
-  Billing
+  Billing,
+  Success,
+  ManagePayments
 }
