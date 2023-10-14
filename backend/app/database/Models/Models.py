@@ -51,8 +51,7 @@ class EmployeeDepartment(Base):
 class TypesOfBusiness(enum.Enum):
     ADVERTISERS = "ADVERTISERS"
     BUSINESS = "BUSINESS"
-
-          
+   
 class Business(Base):
     __tablename__ = "business"
     id = Column(Integer, primary_key=True, index=True)
@@ -66,6 +65,7 @@ class Business(Base):
     type = Column(Enum(TypesOfBusiness))
     business_user = relationship("Users", primaryjoin="Users.username == Business.email")
     user = relationship("ExternalUsers", back_populates="business")
+    lots = relationship("LotMetadata", back_populates="owner")
 
 
 class ExternalUsers(Base):
@@ -77,3 +77,54 @@ class ExternalUsers(Base):
     business_id = Column(Integer, ForeignKey("business.id"))
     business = relationship("Business", back_populates="user")
     user = relationship("Users", primaryjoin="Users.username == ExternalUsers.email")
+
+class CamImage(Base):
+    __tablename__ = "camimage"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    image = Column(String) 
+    timestamp = Column(DateTime, default=datetime.utcnow())
+    camera_name = Column(String)
+    human_labels = Column(String, nullable=True) 
+    model_labels = Column(String, nullable=True) 
+
+class LotMetadata(Base):
+    __tablename__ = "lotmetadata"
+    
+    id = Column(String, primary_key=True)
+    name = Column(String)
+    owner_id = Column(Integer, ForeignKey('business.id'), nullable=True)  
+    gps_coordinates = Column(String, nullable=True)
+    state = Column(String(2), nullable=True)
+    zip = Column(String(5), nullable=True)  
+    city = Column(String, nullable=True)
+    
+    owner = relationship("Business", back_populates="lots")
+    cameras = relationship("CamMetadata", back_populates="lot")
+    lprs = relationship("LPRMetadata", back_populates="lot")
+
+class CamMetadata(Base):
+    __tablename__ = "cammetadata" 
+    name = Column(String, primary_key=True)
+    lot_id = Column(String, ForeignKey('lotmetadata.id'))
+    lot = relationship("LotMetadata", back_populates="cameras") 
+    
+
+class LPRMetadata(Base):
+    __tablename__ = "lprmetadata"
+    
+    name = Column(String, primary_key=True)
+    lot_id = Column(String, ForeignKey('lotmetadata.id'))
+    passcode = Column(String)
+    lot = relationship("LotMetadata", back_populates="lprs")
+    readings = relationship("LicensePlateReading", back_populates="lpr")
+
+class LicensePlateReading(Base):
+    __tablename__ = "licenseplatereading"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    lpr_id = Column(String, ForeignKey('lprmetadata.name'))
+    timestamp = Column(DateTime, default=datetime.utcnow())
+    plate_number = Column(String(10)) 
+    lpr = relationship("LPRMetadata", back_populates="readings")
+    
