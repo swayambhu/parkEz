@@ -9,6 +9,7 @@ from app.routers.Authentication import authentication
 from app.routers.Business import business
 from app.routers import services
 from app.routers.Billing import billing
+from app.routers.Lots import lots
 
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
@@ -36,6 +37,7 @@ app.include_router(authentication.router)
 app.include_router(business.router)
 app.include_router(services.router)
 app.include_router(billing.router)
+app.include_router(lots.router)
 
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 @app.get("/")

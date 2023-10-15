@@ -93,6 +93,7 @@ class LotMetadata(Base):
     
     id = Column(String, primary_key=True)
     name = Column(String)
+    url_name = Column(String)
     owner_id = Column(Integer, ForeignKey('business.id'), nullable=True)  
     gps_coordinates = Column(String, nullable=True)
     state = Column(String(2), nullable=True)
@@ -101,30 +102,10 @@ class LotMetadata(Base):
     
     owner = relationship("Business", back_populates="lots")
     cameras = relationship("CamMetadata", back_populates="lot")
-    lprs = relationship("LPRMetadata", back_populates="lot")
 
 class CamMetadata(Base):
     __tablename__ = "cammetadata" 
     name = Column(String, primary_key=True)
     lot_id = Column(String, ForeignKey('lotmetadata.id'))
     lot = relationship("LotMetadata", back_populates="cameras") 
-    
-
-class LPRMetadata(Base):
-    __tablename__ = "lprmetadata"
-    
-    name = Column(String, primary_key=True)
-    lot_id = Column(String, ForeignKey('lotmetadata.id'))
-    passcode = Column(String)
-    lot = relationship("LotMetadata", back_populates="lprs")
-    readings = relationship("LicensePlateReading", back_populates="lpr")
-
-class LicensePlateReading(Base):
-    __tablename__ = "licenseplatereading"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    lpr_id = Column(String, ForeignKey('lprmetadata.name'))
-    timestamp = Column(DateTime, default=datetime.utcnow())
-    plate_number = Column(String(10)) 
-    lpr = relationship("LPRMetadata", back_populates="readings")
     

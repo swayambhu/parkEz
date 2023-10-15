@@ -1,36 +1,26 @@
 import styled, { css } from "styled-components";
 import { NavLink } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from 'axios';
 
 const BrowseParkingLot = () => {
-  const businesses = [
-    {
-      name: "The Beefy Beagle Barbecue",
-      address: "123 Wagging Tail Drive, Staten Island, NY 10314",
-    },
-    {
-      name: "Cereal Killer Café",
-      address: "789 Crunchy Bowl Boulevard, Queens, NY 11385",
-    },
-    {
-      name: "The Frisky Biscuit Bakery",
-      address: "864 Naughty Nibbles Lane, Queens, NY 11432",
-    },
-    {
-      name: "Guaca-holy Mole Mexican Grill",
-      address: "135 Sacred Salsa Street, Brooklyn, NY 11215",
-    },
-    {
-      name: "Jurassic Pork BBQ",
-      address: "987 Dino Rib Road, Long Island City, NY 11101",
-    },
-    {
-      name: "Latté Da Coffee House",
-      address: "321 Sassy Sip Street, Bronx, NY 10465",
-    },
-  ];
-
+  const [businesses, setBusinesses] = useState([]);
   const [selectedBusiness, setSelectedBusiness] = useState(null);
+
+  useEffect(() => {
+    const API_URL = process.env.REACT_APP_API_URL;
+    axios.get(API_URL + "lot/all")
+      .then((res) => {
+        const lots = res.data.map(lot => ({
+          name: lot.name,
+          address: `${lot.city}, ${lot.state}${lot.zip ? ' ' + lot.zip : ''}`
+        }));
+        setBusinesses(lots);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }, []);
 
   const handleClick = (business) => {
     setSelectedBusiness(business);
@@ -67,6 +57,7 @@ const BusinessListWrapper = styled.div`
   flex-direction: column;
   gap: 20px;
   max-width: 400px;
+  min-height: 80vh;
   margin: 0 auto;
 
   ul {

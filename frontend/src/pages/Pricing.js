@@ -91,6 +91,7 @@ const SectionHeader = styled.h2`
 
 const AboutWrapper = styled.div`
   padding: 50px 20px;
+  height: 80vh;
   display: flex;
   flex-direction: column;
   gap: 30px;

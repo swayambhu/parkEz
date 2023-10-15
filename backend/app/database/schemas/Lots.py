@@ -18,6 +18,7 @@ class CamImageInDB(CamImageBase):
 class LotMetadataBase(BaseModel):
     id: str
     name: str
+    url_name: str
     owner_id: Optional[int]
     gps_coordinates: Optional[str]
     state: Optional[str]
@@ -40,24 +41,3 @@ class CamMetadataCreate(CamMetadataBase):
 class CamMetadataInDB(CamMetadataBase):
     pass
 
-class LPRMetadataBase(BaseModel):
-    name: str
-    lot_id: str
-    passcode: str
-
-class LPRMetadataCreate(LPRMetadataBase):
-    pass
-
-class LPRMetadataInDB(LPRMetadataBase):
-    pass
-
-class LicensePlateReadingBase(BaseModel):
-    lpr_id: str
-    plate_number: str
-    timestamp: Optional[datetime]  
-
-class LicensePlateReadingCreate(LicensePlateReadingBase):
-    pass
-
-class LicensePlateReadingInDB(LicensePlateReadingBase):
-    id: int
