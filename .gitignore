@@ -3,3 +3,6 @@
 .DS_Store
 backend/.env
 MachineLearning/lot_image_uploader/venv
+MachineLearning/build_training_data/venv
+backend/app/routers/Authentication/authentication.py
+MachineLearning/build_training_data/training_images
