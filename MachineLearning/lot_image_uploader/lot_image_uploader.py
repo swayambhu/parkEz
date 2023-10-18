@@ -25,12 +25,8 @@ import time
 import sys
 import requests
 
-url = "https://devapi.gruevy.com/upload_image/"  # this endpoint hasn't been made yet
+url = "http://localhost:8000/lot/upload-image/"  # this endpoint hasn't been made yet
 cam_url = "https://www.youtube.com/watch?v=EPKWu223XEg"
-
-payload = {
-    "passcode": "tokensecurity"
-}
 
 def capture_frame(video_url):
     # get video and construct stream URL
@@ -47,7 +43,7 @@ def capture_frame(video_url):
         # save frame to image file
         now = datetime.datetime.now()
         filename = now.strftime("%Y%m%d%H%M.jpg")
-        filename = 'collingwoodon_' + filename
+        filename = 'colltown_' + filename
         cv2.imwrite(filename, frame)
         taken_time = now.strftime("%Y-%m-%d %H:%M")
         print('Screenshot taken ' + taken_time)
@@ -58,20 +54,18 @@ def capture_frame(video_url):
     cap.release()
     cv2.destroyAllWindows()
 
-    # This code cannot be implemented until API endpoint that receives live images is complete
-    # try:
-    #     files = {
-    #         "image": open(filename, "rb")
-    #     }
+    try:
+        files = {
+            "image": open(filename, "rb")
+        }
+        full_url = f"{url}?passcode=tokensecurity"
+        response = requests.post(full_url, files=files)
 
-    #     response = requests.post(url, data=payload, files=files)
+        print("Response status code:", response.status_code)
+        print("Response content:", response.json())
 
-    #     print("Response status code:", response.status_code)
-    #     print("Response content:", response.json())
-
-    # except IndexError:
-    #     print("Please provide the image filename as a command line argument.")
-
+    except IndexError:
+        print("Please provide the image filename as a command line argument.")
 
 capture_frame(cam_url)
 while True:
