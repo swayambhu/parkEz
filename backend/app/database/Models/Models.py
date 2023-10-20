@@ -1,5 +1,5 @@
-from sqlalchemy import Column, String, Integer, Boolean, DateTime, ForeignKey, Enum, Date, UniqueConstraint
-from sqlalchemy.orm import relationship
+from sqlalchemy import create_engine, Column, String, Integer, Boolean, DateTime, ForeignKey, Enum, Date, UniqueConstraint, Table
+from sqlalchemy.orm import relationship, declarative_base
 from datetime import datetime
 from app.database.database import Base
 import enum
@@ -14,8 +14,6 @@ class Users(Base):
     created_at = Column(DateTime, default=datetime.utcnow())
     is_active = Column(Boolean, default=False)
     
-# This can be temporary, but it is necessary for
-# entitlement testing this week / next week
 class TypesOfEmployees(enum.Enum):
     CUSTOMER_SUPPORT = "CUSTOMER_SUPPORT"
     LOT_SPECIALIST = "LOT_SPECIALIST"
@@ -51,7 +49,14 @@ class EmployeeDepartment(Base):
 class TypesOfBusiness(enum.Enum):
     ADVERTISERS = "ADVERTISERS"
     BUSINESS = "BUSINESS"
-   
+
+ad_lot_association = Table(
+    'ad_lot_association',
+    Base.metadata,
+    Column('ad_id', Integer, ForeignKey('ad.advert_id')),
+    Column('lot_id', String, ForeignKey('lotmetadata.id'))
+)
+
 class Business(Base):
     __tablename__ = "business"
     id = Column(Integer, primary_key=True, index=True)
@@ -66,6 +71,7 @@ class Business(Base):
     business_user = relationship("Users", primaryjoin="Users.username == Business.email")
     user = relationship("ExternalUsers", back_populates="business")
     lots = relationship("LotMetadata", back_populates="owner")
+    ads = relationship("Ad", back_populates="business")
 
 
 class ExternalUsers(Base):
@@ -102,10 +108,30 @@ class LotMetadata(Base):
     
     owner = relationship("Business", back_populates="lots")
     cameras = relationship("CamMetadata", back_populates="lot")
+    ads = relationship("Ad", secondary=ad_lot_association, back_populates="lots")
 
 class CamMetadata(Base):
     __tablename__ = "cammetadata" 
     name = Column(String, primary_key=True)
     lot_id = Column(String, ForeignKey('lotmetadata.id'))
     lot = relationship("LotMetadata", back_populates="cameras") 
+
+class Ad(Base):
+    __tablename__ = "ad"
+    
+    advert_id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False, comment='Ad Name')
+    start_date = Column(Date, nullable=True)
+    end_date = Column(Date, nullable=True)
+    business_id = Column(Integer, ForeignKey('business.id'), nullable=False)
+    business = relationship("Business", back_populates="ads")
+    url = Column(String(1024), nullable=False, comment='Target URL')
+    lots = relationship("LotMetadata", secondary=ad_lot_association, back_populates="ads")    
+    impressions = Column(Integer, default=0)
+    clicks = Column(Integer, default=0)
+    
+    top_banner_image1_path = Column(String, nullable=True)
+    top_banner_image2_path = Column(String, nullable=True)
+    
+    image_change_interval = Column(Integer, default=10, comment='Interval (in seconds) to switch between images')
     

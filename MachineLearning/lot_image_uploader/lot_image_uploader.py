@@ -25,7 +25,8 @@ import time
 import sys
 import requests
 
-url = "http://localhost:8000/lot/upload-image/"  # this endpoint hasn't been made yet
+# url = "http://localhost:8000/lot/upload-image/"  # this endpoint hasn't been made yet
+url = "https://devapi.gruevy.com/lot/upload-image/"  # this endpoint hasn't been made yet
 cam_url = "https://www.youtube.com/watch?v=EPKWu223XEg"
 
 def capture_frame(video_url):
