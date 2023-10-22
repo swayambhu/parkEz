@@ -1,5 +1,6 @@
 import os
 import base64
+from typing import List
 from fastapi.routing import APIRouter
 from fastapi import Form, File, UploadFile, Depends, HTTPException, Body, status
 from sqlalchemy.orm import Session
@@ -57,7 +58,9 @@ async def create_ad(
     top_banner_image2: UploadFile = File(None),
     top_banner_image3: UploadFile = File(None),
     current_user: Users.User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    lot_ids: List[int] = Form(...)
+
 ):
     # Check if ad name is already in use
     existing_ad = db.query(Models.Ad).filter(Models.Ad.name == name).first()
@@ -101,7 +104,11 @@ async def create_ad(
     db.commit()
     db.refresh(ad)
 
-    return {"message": "Ad created successfully", "ad": ad}
+    for lot_id in lot_ids:
+        print(lot_id)
+        association = Models.ad_lot_association.insert().values(ad_id=ad.advert_id, lot_id=lot_id)
+        db.execute(association)
+    db.commit()
 
 
 @ads_router.get("/current_user_ads")
@@ -123,6 +130,10 @@ async def get_current_user_ads(
     ads_list = []
     for ad in ads:
         ad_dict = ad.__dict__
+
+        # Add lot metadata for the ad
+        ad_dict["lots"] = [lot.__dict__ for lot in ad.lots]
+
         if ad.top_banner_image1_path:
             ad_dict['top_banner_image1_base64'] = image_to_base64(ad.top_banner_image1_path)
         if ad.top_banner_image2_path:
