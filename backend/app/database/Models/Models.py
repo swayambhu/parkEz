@@ -132,6 +132,6 @@ class Ad(Base):
     
     top_banner_image1_path = Column(String, nullable=True)
     top_banner_image2_path = Column(String, nullable=True)
-    
+    top_banner_image3_path = Column(String, nullable=True)
     image_change_interval = Column(Integer, default=10, comment='Interval (in seconds) to switch between images')
     

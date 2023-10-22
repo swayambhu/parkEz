@@ -12,7 +12,9 @@ class AdBase(BaseModel):
     clicks: int = 0
     top_banner_image1: Optional[str]
     top_banner_image2: Optional[str]
-    image_change_interval: int = 10
+    top_banner_image3: Optional[str]
+
+    image_change_interval: int = 3
 
 class AdCreate(AdBase):
     pass

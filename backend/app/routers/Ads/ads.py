@@ -1,11 +1,17 @@
 import os
 import uuid
 from fastapi.routing import APIRouter
-from fastapi import Form, File, UploadFile, Depends, HTTPException, Body
+from fastapi import Form, File, UploadFile, Depends, HTTPException, Body, status
 from sqlalchemy.orm import Session
+from sqlalchemy.orm.exc import NoResultFound
 from app.database.database import get_db
 from app.database.Models.Models import Ad
+from app.database.Models import Models
 from app.database.schemas.Ads import AdCreate
+from app.database.schemas import Users, Token, Auth
+from app.auth.OAuth2 import hash_password, authenticate_user, create_access_token, validate_token, get_current_user
+
+
 
 ads_router = APIRouter(
     prefix="/ads",
@@ -37,21 +43,34 @@ def save_upload_file(upload_file: UploadFile, dest_folder: str) -> str:
         print(f"Failed to save the file. Reason: {e}")
         return None
 
+
 @ads_router.post("/create")
 async def create_ad(
     name: str = Form(...),
     start_date: str = Form(...),
     end_date: str = Form(...),
-    business_id: int = Form(...),
     url: str = Form(...),
     image_change_interval: int = Form(...),
     top_banner_image1: UploadFile = File(None),
     top_banner_image2: UploadFile = File(None),
-    db: Session = Depends(get_db)  # Assuming you have a function `get_db` to get the database session
+    top_banner_image3: UploadFile = File(None),
+    current_user: Users.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
+    # Get business_id from the currently logged in user's email
+    try:
+        business = db.query(Models.Business).filter(Models.Business.email == current_user.username).one()
+        business_id = business.id
+    except NoResultFound:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No business associated with the current user"
+        )
+
     # Save files
     file_path1 = save_upload_file(top_banner_image1, ADS_DIR) if top_banner_image1 else None
-    file_path2 = save_upload_file(top_banner_image2, ADS_DIR) if top_banner_image2 else None
+    file_path2 = save_upload_file(top_banner_image2, ADS_DIR) if top_banner_image2 else None 
+    file_path3 = save_upload_file(top_banner_image3, ADS_DIR) if top_banner_image3 else None
 
     # Create Ad instance
     ad = Ad(
@@ -62,41 +81,11 @@ async def create_ad(
         url=url,
         image_change_interval=image_change_interval,
         top_banner_image1_path=file_path1,
-        top_banner_image2_path=file_path2
+        top_banner_image2_path=file_path2,
+        top_banner_image3_path=file_path3
     )
     db.add(ad)
     db.commit()
     db.refresh(ad)
 
     return {"message": "Ad created successfully", "ad": ad}
-
-
-# Old working but does nothing but print
-# @ads_router.post("/create")
-# async def create_ad(
-#     name: str = Form(...),
-#     start_date: str = Form(...),
-#     end_date: str = Form(...),
-#     business_id: int = Form(...),
-#     url: str = Form(...),
-#     image_change_interval: int = Form(...),
-#     top_banner_image1: UploadFile = File(None),
-#     top_banner_image2: UploadFile = File(None)
-# ):
-#     # Print the data received
-#     print("Received ad data:")
-#     print("Name:", name)
-#     print("Start Date:", start_date)
-#     print("End Date:", end_date)
-#     print("Business ID:", business_id)
-#     print("URL:", url)
-#     print("Image Change Interval:", image_change_interval)
-    
-#     if top_banner_image1:
-#         print(f"Received file {top_banner_image1.filename} for top_banner_image1")
-
-#     if top_banner_image2:
-#         print(f"Received file {top_banner_image2.filename} for top_banner_image2")
-
-#     # Since we're not doing anything, you can return a simple message for testing purposes
-#     return {"message": "Data received"}

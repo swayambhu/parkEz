@@ -22,7 +22,7 @@ logging.basicConfig(level=logging.DEBUG)
 Models.Base.metadata.create_all(bind= engine)
 app = FastAPI()
 origins = [
-    "http://localhost:3000",  # Add more in future
+    "http://localhost:3000",  
     "https://dev.gruevy.com",
     "https://qa.gruevy.com"
 ]
