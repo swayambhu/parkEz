@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import AdvertiserDashboard from '../components/Pages/AdvertiserDashboard';
 
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -128,15 +129,7 @@ const TempDashboard = () => {
             case 'ADVERTISERS':
                 return (
                     <div>
-                        <h2>Advertisers Dashboard</h2>
-                        <p>Welcome, dear advertiser. Let's boost our company's visibility together! Review analytics, start new campaigns, and more.</p>
-                        <h3>Analytics</h3>
-                        <ul>
-                            <li>Views last month: 50,000</li>
-                            <li>Clicks last month: 5,000</li>
-                        </ul>
-                        <h3>Suggestions</h3>
-                        <p>Consider reaching out to influencers in the tech space for our next campaign for a broader audience.</p>
+                        <AdvertiserDashboard />
                     </div>
                 );
             case 'BUSINESS':
@@ -159,7 +152,7 @@ const TempDashboard = () => {
         }
     
         return (
-            <div style={{height:'70vh', padding:'5em'}}>
+            <div style={{height:'95vh', padding:'5em'}}>
                 {renderContent()}
             </div>
         );
