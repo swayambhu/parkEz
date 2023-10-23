@@ -66,7 +66,7 @@ const EditAd = () => {
     top_banner_image2_path: null,
     top_banner_image3_path: null,
     image_change_interval: 3,
-    associatedLots: []
+    lots: []
   });
 
   const [businesses, setBusinesses] = useState([]);
@@ -82,15 +82,20 @@ const EditAd = () => {
 
       axios.get(API_URL + `ads/details/${id}`, { withCredentials: true })
       .then(res => {
-        console.log(res.data.ad);
-        setAdData(res.data.ad);
+        // Extract only the IDs of the lots and store them
+        const lotIDs = res.data.ad.lots.map(lot => parseInt(lot.id));
+        console.log(lotIDs);
+        setAdData({
+          ...res.data.ad,
+          lots: lotIDs
+        });
       })
       .catch(err => {
         console.error(err);
         toast.error('Error fetching ad details', {
           autoClose: 3000
         });
-      });
+      });    
   }, [id]);
 
 const handleChange = (e) => {
@@ -102,18 +107,20 @@ const handleChange = (e) => {
 };
 
 const handleLotCheckboxChange = (e) => {
-    const { value, checked } = e.target;
-    if (checked) {
-        setAdData((prevData) => ({
-            ...prevData,
-            associatedLots: [...prevData.associatedLots, value]
-        }));
-    } else {
-        setAdData((prevData) => ({
-            ...prevData,
-            associatedLots: prevData.associatedLots.filter(lot => lot !== value)
-        }));
-    }
+  const value = Number(e.target.value); 
+  const { checked } = e.target;
+
+  if (checked) {
+      setAdData((prevData) => ({
+          ...prevData,
+          lots: [...prevData.lots, value]
+      }));
+  } else {
+      setAdData((prevData) => ({
+          ...prevData,
+          lots: prevData.lots.filter(lot => lot !== value)
+      }));
+  }
 };
 
 const handleImageUpload = (e, fieldName) => {
@@ -128,14 +135,13 @@ const handleImageUpload = (e, fieldName) => {
 
     const formData = new FormData();
     Object.entries(adData).forEach(([key, value]) => {
-        if (key === "associatedLots") {
-            value.forEach(lotId => {
-                formData.append('lot_ids', lotId);
-            });
-        } else {
-            formData.append(key, value);
-        }
-    });
+      if (key === "lots") {
+          formData.append('lot_ids', value.join(","));
+      } else {
+          formData.append(key, value);
+      }
+  });
+  
     console.log(formData);
     try {
       const response = await axios.put(API_URL + `ads/update/${id}`, formData, {
@@ -208,18 +214,21 @@ const handleImageUpload = (e, fieldName) => {
                 </label>
                 <h2>Associate Ad with Lots:</h2>
                 <ul>
-                    {businesses.map((business, idx) => (
-                        <li key={`${business.name}-${idx}`}>
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    value={business.id} 
-                                    onChange={handleLotCheckboxChange}
-                                />
-                                <strong>&nbsp; {business.name}</strong> - <Address>{`${business.city}, ${business.state}${business.zip ? ' ' + business.zip : ''}`}</Address>
-                            </label>
-                        </li>
-                    ))}
+                  {businesses.map((business, idx) => (
+                    <li key={`${business.name}-${idx}`}>
+                      {console.log(business)}
+                        <label>
+                        <input
+                            type="checkbox"
+                            value={parseInt(business.id)}  // Convert string to integer
+                            checked={adData.lots.includes(parseInt(business.id))}  // Convert string to integer
+                            onChange={handleLotCheckboxChange}
+                        />
+
+                            <strong>&nbsp; {business.name}</strong> - <Address>{`${business.city}, ${business.state}${business.zip ? ' ' + business.zip : ''}`}</Address>
+                        </label>
+                    </li>
+                ))}
                 </ul>
 
 

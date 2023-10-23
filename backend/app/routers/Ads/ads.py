@@ -1,6 +1,6 @@
 import os
 import base64
-from typing import List
+from typing import List, Optional
 from fastapi.routing import APIRouter
 from fastapi import Form, File, UploadFile, Depends, HTTPException, Body, status
 from sqlalchemy.orm import Session, joinedload
@@ -155,9 +155,9 @@ async def update_ad(
     top_banner_image1: UploadFile = File(None),
     top_banner_image2: UploadFile = File(None),
     top_banner_image3: UploadFile = File(None),
-    current_user: Users.User = Depends(get_current_user),
+    current_user: Users.User = Depends(get_current_authenticated_user),
     db: Session = Depends(get_db),
-    lot_ids: List[int] = Form(None)
+    lot_ids: Optional[str] = Form(None)
 ):
     # Fetch the ad from the database
     ad = db.query(Models.Ad).filter(Models.Ad.advert_id == advert_id).first()
@@ -167,6 +167,38 @@ async def update_ad(
             detail="Ad not found"
         )
 
+    # Permissions check
+    entitlement_category = current_user["entitlement_category"]
+    allowed_employee_types = [
+        Models.TypesOfEmployees.CUSTOMER_SUPPORT.value, 
+        Models.TypesOfEmployees.ADVERTISING_SPECIALIST.value, 
+        Models.TypesOfEmployees.ACCOUNTANT.value
+    ]
+    if entitlement_category not in allowed_employee_types:
+        try:
+            business = db.query(Models.Business).filter(Models.Business.email == current_user["username"]).one()
+            business_id = business.id
+        except NoResultFound:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No business associated with the current user"
+            )
+        
+        if ad.business_id != business_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You don't have permission to update this ad"
+            )
+    if lot_ids:
+        print(f"Received lot_ids: {lot_ids}")  # Temporary debugging statement
+        # Ensure that every part of the lot_ids string is a valid integer
+        try:
+            lot_id_list = [int(id_str) for id_str in lot_ids.split(',')]
+        except ValueError as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid lot_ids value received: {e}"
+            )
     # Directory path based on business id
     business_dir = os.path.join(ADS_DIR, str(ad.business_id))
 
@@ -196,20 +228,23 @@ async def update_ad(
 
     # Delete existing associations
     db.query(Models.ad_lot_association).filter(Models.ad_lot_association.c.ad_id == advert_id).delete()
-    
+
     # Add new associations if lot_ids are provided
     if lot_ids:
-        for lot_id in lot_ids:
+        # Convert the comma-separated string to a list of integers
+        lot_id_list = [int(id_str) for id_str in lot_ids.split(',')]
+        for lot_id in lot_id_list:
             association = Models.ad_lot_association.insert().values(ad_id=advert_id, lot_id=lot_id)
             db.execute(association)
 
     db.commit()
+
     return {"message": "Ad updated successfully"}
 
 @ads_router.get("/details/{advert_id}")
 async def get_ad_details(
     advert_id: int,
-    current_user: Users.User = Depends(get_current_user),
+    current_user: Users.User = Depends(get_current_authenticated_user),
     db: Session = Depends(get_db)
 ):
     # Fetch the ad from the database
@@ -220,21 +255,29 @@ async def get_ad_details(
             detail="Ad not found"
         )
 
-    # Check if the ad belongs to the current user's business
-    try:
-        business = db.query(Models.Business).filter(Models.Business.email == current_user.username).one()
-        business_id = business.id
-    except NoResultFound:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No business associated with the current user"
-        )
-    
-    if ad.business_id != business_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You don't have permission to access this ad"
-        )
+    # If the current user is a permitted employee type
+    entitlement_category = current_user["entitlement_category"]
+    allowed_employee_types = [
+        Models.TypesOfEmployees.CUSTOMER_SUPPORT.value, 
+        Models.TypesOfEmployees.ADVERTISING_SPECIALIST.value, 
+        Models.TypesOfEmployees.ACCOUNTANT.value
+    ]
+    if entitlement_category not in allowed_employee_types:
+        # Check if the ad belongs to the current user's business
+        try:
+            business = db.query(Models.Business).filter(Models.Business.email == current_user["username"]).one() 
+            business_id = business.id
+        except NoResultFound:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No business associated with the current user"
+            )
+        
+        if ad.business_id != business_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You don't have permission to access this ad"
+            )
 
     ad_dict = ad.__dict__
 
@@ -250,6 +293,7 @@ async def get_ad_details(
         ad_dict['top_banner_image3_base64'] = image_to_base64(ad.top_banner_image3_path)
 
     return {"ad": ad_dict}
+
 
 @ads_router.get("/advertisers-ads-info")
 async def get_advertisers_ads_info(
