@@ -29,7 +29,8 @@ const Router = () => {
                 {logins.map((login, idx) => (
                     <Route path={login} key={`sign-up-${idx}`} element={<Pages.SignUp/>} />
                 ))}
-            </Route>  
+            </Route>
+            <Route path="/ad-admin" element={<Pages.AdAdmin />} />
         </Routes>
     )
 }

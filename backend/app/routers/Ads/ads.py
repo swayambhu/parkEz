@@ -3,7 +3,7 @@ import base64
 from typing import List
 from fastapi.routing import APIRouter
 from fastapi import Form, File, UploadFile, Depends, HTTPException, Body, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.orm.exc import NoResultFound
 from app.database.database import get_db
 from app.database.Models.Models import Ad
@@ -11,7 +11,7 @@ from app.database.Models import Models
 from app.database.schemas.Ads import AdCreate
 from app.database.schemas import Users, Token, Auth
 from app.auth.OAuth2 import hash_password, authenticate_user, create_access_token, validate_token, get_current_user
-
+from app.routers.Authentication.authentication import get_current_authenticated_user
 ads_router = APIRouter(
     prefix="/ads",
     tags=["ads"],
@@ -250,3 +250,54 @@ async def get_ad_details(
         ad_dict['top_banner_image3_base64'] = image_to_base64(ad.top_banner_image3_path)
 
     return {"ad": ad_dict}
+
+@ads_router.get("/advertisers-ads-info")
+async def get_advertisers_ads_info(
+    current_user: Users.User = Depends(get_current_authenticated_user),  # Reusing the function you provided
+    db: Session = Depends(get_db)
+):
+    # Check if user has the right role
+    entitlement_category = current_user["entitlement_category"]
+    if entitlement_category not in [Models.TypesOfEmployees.CUSTOMER_SUPPORT.value, 
+                                    Models.TypesOfEmployees.ADVERTISING_SPECIALIST.value, 
+                                    Models.TypesOfEmployees.ACCOUNTANT.value]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission to access this information"
+        )
+
+    # Get all advertiser type users
+    advertisers = db.query(Models.Business).filter(Models.Business.type == Models.TypesOfBusiness.ADVERTISERS.value).all()
+
+    # Extracting ads and required details for each advertiser
+    advertisers_info = []
+    for advertiser in advertisers:
+        ads_info = []
+        for ad in advertiser.ads:
+            ad_data = {
+                "advert_id": ad.advert_id,
+                "name": ad.name,
+                "start_date": ad.start_date,
+                "end_date": ad.end_date,
+                "url": ad.url,
+                "impressions": ad.impressions,
+                "clicks": ad.clicks,
+            }
+
+            # Convert image paths to base64 for sending in response
+            if ad.top_banner_image1_path:
+                ad_data['top_banner_image1_base64'] = image_to_base64(ad.top_banner_image1_path)
+            if ad.top_banner_image2_path:
+                ad_data['top_banner_image2_base64'] = image_to_base64(ad.top_banner_image2_path)
+            if ad.top_banner_image3_path:
+                ad_data['top_banner_image3_base64'] = image_to_base64(ad.top_banner_image3_path)
+
+            ads_info.append(ad_data)
+        
+        advertiser_data = {
+            "email": advertiser.email,
+            "ads": ads_info
+        }
+        advertisers_info.append(advertiser_data)
+
+    return {"advertisers_info": advertisers_info}

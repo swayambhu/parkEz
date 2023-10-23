@@ -33,6 +33,12 @@ const Address = styled.span`
   color: grey;
 `;
 
+const ImagePreview = styled.img`
+    border: 1px solid grey;
+    max-width: 100%;
+    margin-bottom: 1em;
+`;
+
 const Button = styled.button`
     padding: 10px 20px;
     margin-bottom: 3em;
@@ -76,7 +82,8 @@ const EditAd = () => {
 
       axios.get(API_URL + `ads/details/${id}`, { withCredentials: true })
       .then(res => {
-        setAdData(res.data);
+        console.log(res.data.ad);
+        setAdData(res.data.ad);
       })
       .catch(err => {
         console.error(err);
@@ -155,33 +162,45 @@ const handleImageUpload = (e, fieldName) => {
     <Container>
       <h1>Edit Ad</h1>
       <Form onSubmit={handleSubmit}>
-                <label>
-                    Name:
-                    <Input name="name" placeholder="Name" value={adData.name} onChange={handleChange} />
+              <label>
+                    Current Name: <span><strong>{adData.name}</strong></span><em>(enter new name to update)</em><br/>
+                    <Input name="name" placeholder="Put new name here to update" value={adData.name} onChange={handleChange} />
                 </label>
+
                 <label>
-                    Start Date:
+                    Current Start Date : <span><strong>{adData.start_date}</strong></span><em>(enter new date to update)</em><br/>
                     <Input name="start_date" type="date" value={adData.start_date} onChange={handleChange} />
+                    <br />
                 </label>
+
                 <label>
-                    End Date:
+                    Current End Date: <span><strong>{adData.end_date}</strong></span> <em>(enter new date to update)</em><br/>
                     <Input name="end_date" type="date" value={adData.end_date} onChange={handleChange} />
                 </label>
+
                 <label>
-                    URL:
-                    <Input name="url" placeholder="URL" value={adData.url} onChange={handleChange} />
+                    Current URL: <span><strong>{adData.url}</strong></span> <em>(enter new date to update)</em><br/>
+                    <Input name="url" placeholder="Put new URL here to update" value={adData.url} onChange={handleChange} />
+                </label> 
+                <label>
+                    Current Banner Image: <br />
+                    {adData.top_banner_image1_base64 && 
+                        <ImagePreview src={`data:image/jpeg;base64,${adData.top_banner_image1_base64}`} alt="Banner Image 1" />}
+                     <br />Select new image to update: <Input type="file" onChange={(e) => handleImageUpload(e, 'top_banner_image1')} />
                 </label>
+
                 <label>
-                    Top Banner Image 1:
-                    <Input type="file" onChange={(e) => handleImageUpload(e, 'top_banner_image1')} />
+                  Current Banner Image 2: <br />
+                    {adData.top_banner_image2_base64 && 
+                        <ImagePreview src={`data:image/jpeg;base64,${adData.top_banner_image2_base64}`} alt="Banner Image 2" />}
+                     <br />Select new image to update: <Input type="file" onChange={(e) => handleImageUpload(e, 'top_banner_image2')} />
                 </label>
+
                 <label>
-                    Top Banner Image 2:
-                    <Input type="file" onChange={(e) => handleImageUpload(e, 'top_banner_image2')} />
-                </label>
-                <label>
-                    Top Banner Image 3:
-                    <Input type="file" onChange={(e) => handleImageUpload(e, 'top_banner_image3')} />
+                  Current Banner Image 3: <br />
+                    {adData.top_banner_image3_base64 && 
+                        <ImagePreview src={`data:image/jpeg;base64,${adData.top_banner_image3_base64}`} alt="Banner Image 3" />}
+                    <br />Select new image to update: <Input type="file" onChange={(e) => handleImageUpload(e, 'top_banner_image3')} />
                 </label>
                 <label>
                     Image Change Interval (seconds):
