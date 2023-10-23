@@ -22,6 +22,7 @@ const Router = () => {
                 ))}
             </Route>
             <Route path="/create-ad" element={<Pages.CreateAd />} />
+            <Route path="/edit-ad/:id" element={<Pages.EditAd />} />
             <Route path="/pricing" element={<Pages.Pricing />} />
             
             <Route path="/sign-up">  

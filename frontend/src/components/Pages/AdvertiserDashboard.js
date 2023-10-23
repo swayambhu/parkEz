@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -24,7 +25,9 @@ const AdvertiserDashboard = () => {
 
         {ads.map((ad, index) => (
             <div key={ad.advert_id} style={{ marginBottom: "30px" }}>
-                <h2>{index + 1}. {ad.name}</h2>
+                <h2>
+                  {index + 1}. {ad.name} <span><Link to={`/edit-ad/${ad.advert_id}`}>(Edit)</Link></span>
+                </h2>
                 <p><strong>Name:</strong> {ad.name}</p>
                 <p><strong>Start Date:</strong> {ad.start_date}</p>
                 <p><strong>End Date:</strong> {ad.end_date}</p>

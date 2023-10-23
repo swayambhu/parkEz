@@ -2,6 +2,7 @@ import styled, { css } from "styled-components";
 import { NavLink } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axios from 'axios';
+import Footer from "../layouts/Footer"
 
 const BrowseParkingLot = () => {
   const [businesses, setBusinesses] = useState([]);
@@ -48,6 +49,7 @@ const BrowseParkingLot = () => {
         </ul>
       </BusinessListWrapper>
       <br /><br />
+      <Footer />
     </>
   );
 };

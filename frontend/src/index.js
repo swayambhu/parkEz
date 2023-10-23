@@ -24,6 +24,7 @@ import Billing from './pages/Billing';
 import Success from './pages/Success';
 import CreateAd from './pages/CreateAd';
 import ManagePayments from './pages/ManagePayments';
+import EditAd from './pages/EditAd';
 const container = document.getElementById('root');
 const root = createRoot(container);
 
@@ -49,5 +50,6 @@ export const Pages = {
   Billing,
   Success,
   ManagePayments,
-  CreateAd
+  CreateAd,
+  EditAd
 }

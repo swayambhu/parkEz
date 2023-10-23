@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Footer from "../layouts/Footer"
 
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -72,7 +73,7 @@ const Billing = () => {
 
 
     return (
-        <div style={{ minHeight: '70vh', margin: '3em' }}>
+        <div style={{ minHeight: '95vh', margin: '3em' }}>
             <h3>Billing and Invoices</h3>            
             <table style={{ marginTop: '20px', width: '100%', borderCollapse: 'collapse' }}>
                 <thead>

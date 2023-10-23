@@ -143,3 +143,110 @@ async def get_current_user_ads(
         ads_list.append(ad_dict)
 
     return {"ads": ads_list}
+
+@ads_router.put("/update/{advert_id}")
+async def update_ad(
+    advert_id: int,
+    name: str = Form(None),
+    start_date: str = Form(None),
+    end_date: str = Form(None),
+    url: str = Form(None),
+    image_change_interval: int = Form(None),
+    top_banner_image1: UploadFile = File(None),
+    top_banner_image2: UploadFile = File(None),
+    top_banner_image3: UploadFile = File(None),
+    current_user: Users.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    lot_ids: List[int] = Form(None)
+):
+    # Fetch the ad from the database
+    ad = db.query(Models.Ad).filter(Models.Ad.advert_id == advert_id).first()
+    if not ad:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Ad not found"
+        )
+
+    # Directory path based on business id
+    business_dir = os.path.join(ADS_DIR, str(ad.business_id))
+
+    # Update ad details if provided
+    if name:
+        ad.name = name
+    if start_date:
+        ad.start_date = start_date
+    if end_date:
+        ad.end_date = end_date
+    if url:
+        ad.url = url
+    if image_change_interval:
+        ad.image_change_interval = image_change_interval
+    if top_banner_image1:
+        file_path1 = save_upload_file(top_banner_image1, business_dir, name, 1)
+        if file_path1:
+            ad.top_banner_image1_path = file_path1
+    if top_banner_image2:
+        file_path2 = save_upload_file(top_banner_image2, business_dir, name, 2)
+        if file_path2:
+            ad.top_banner_image2_path = file_path2
+    if top_banner_image3:
+        file_path3 = save_upload_file(top_banner_image3, business_dir, name, 3)
+        if file_path3:
+            ad.top_banner_image3_path = file_path3
+
+    # Delete existing associations
+    db.query(Models.ad_lot_association).filter(Models.ad_lot_association.c.ad_id == advert_id).delete()
+    
+    # Add new associations if lot_ids are provided
+    if lot_ids:
+        for lot_id in lot_ids:
+            association = Models.ad_lot_association.insert().values(ad_id=advert_id, lot_id=lot_id)
+            db.execute(association)
+
+    db.commit()
+    return {"message": "Ad updated successfully"}
+
+@ads_router.get("/details/{advert_id}")
+async def get_ad_details(
+    advert_id: int,
+    current_user: Users.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    # Fetch the ad from the database
+    ad = db.query(Models.Ad).filter(Models.Ad.advert_id == advert_id).first()
+    if not ad:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Ad not found"
+        )
+
+    # Check if the ad belongs to the current user's business
+    try:
+        business = db.query(Models.Business).filter(Models.Business.email == current_user.username).one()
+        business_id = business.id
+    except NoResultFound:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No business associated with the current user"
+        )
+    
+    if ad.business_id != business_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission to access this ad"
+        )
+
+    ad_dict = ad.__dict__
+
+    # Add lot metadata for the ad
+    ad_dict["lots"] = [lot.__dict__ for lot in ad.lots]
+
+    # Convert image paths to base64 for sending in response
+    if ad.top_banner_image1_path:
+        ad_dict['top_banner_image1_base64'] = image_to_base64(ad.top_banner_image1_path)
+    if ad.top_banner_image2_path:
+        ad_dict['top_banner_image2_base64'] = image_to_base64(ad.top_banner_image2_path)
+    if ad.top_banner_image3_path:
+        ad_dict['top_banner_image3_base64'] = image_to_base64(ad.top_banner_image3_path)
+
+    return {"ad": ad_dict}
