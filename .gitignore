@@ -11,3 +11,4 @@ MachineLearning/build_training_data/training_images
 MachineLearning/venv
 MachineLearning/models
 MachineLearning/.ipynb_checkpoints
+.env
