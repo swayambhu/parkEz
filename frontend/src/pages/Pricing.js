@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import Footer from "../layouts/Footer";
 
 const pricingData = [
   {
@@ -49,6 +50,7 @@ const Pricing = () => {
           </React.Fragment>
         ))}
       </AboutWrapper>
+      <Footer />
     </>
   );
 };
@@ -91,6 +93,7 @@ const SectionHeader = styled.h2`
 
 const AboutWrapper = styled.div`
   padding: 50px 20px;
+  height: 80vh;
   display: flex;
   flex-direction: column;
   gap: 30px;

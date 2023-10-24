@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import ContactUs from "../components/Pages/Contact/ContactUs"
+import Footer from "../layouts/Footer"
 
 const Contact = () => {
     return(
@@ -7,7 +8,7 @@ const Contact = () => {
         <Wrapper className="flex-center"> 
             <ContactUs />
         </Wrapper> 
-            
+        <Footer />
         </>
     )
 }

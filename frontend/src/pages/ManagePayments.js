@@ -8,6 +8,7 @@ const ManagePayments = () => {
     const [paymentMethods, setPaymentMethods] = useState([]);
     const stripe = useStripe();
     const elements = useElements();
+    const [resetKey, setResetKey] = useState(0);
 
     const fetchPaymentMethods = async () => {
         try {
@@ -26,13 +27,13 @@ const ManagePayments = () => {
         if (!stripe || !elements) {
             return;
         }
-
+    
         const card = elements.getElement(CardElement);
         const result = await stripe.createPaymentMethod({
             type: 'card',
             card: card,
         });
-
+    
         if (result.error) {
             console.error(result.error.message);
         } else {
@@ -40,11 +41,13 @@ const ManagePayments = () => {
                 await axios.post(API_URL + 'business/add_payment_method', { token: result.paymentMethod.id }, { withCredentials: true });
                 // Refresh payment methods list after adding
                 fetchPaymentMethods();
+                // Reset the CardElement
+                setResetKey(prevKey => prevKey + 1);
             } catch (error) {
                 console.error('Failed to add payment method:', error);
             }
         }
-    };
+    };    
 
     const handleDeletePaymentMethod = async (paymentMethodId) => {
         try {
@@ -106,7 +109,7 @@ const ManagePayments = () => {
             </table>
             <h3 style={{marginTop:'2em'}}>Add new Payment Method</h3>
             <div>
-                <CardElement />
+                <CardElement key={resetKey} />
                 <button style={buttonStyle} onClick={handleAddPaymentMethod}>Add Payment Method</button>
             </div>
         </div>
