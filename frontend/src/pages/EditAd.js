@@ -70,6 +70,7 @@ const EditAd = () => {
   });
 
   const [businesses, setBusinesses] = useState([]);
+  const [userType, setUserType] = useState(null);
 
   useEffect(() => {
     axios.get(API_URL + "lot/all")
@@ -82,7 +83,6 @@ const EditAd = () => {
 
       axios.get(API_URL + `ads/details/${id}`, { withCredentials: true })
       .then(res => {
-        // Extract only the IDs of the lots and store them
         const lotIDs = res.data.ad.lots.map(lot => parseInt(lot.id));
         console.log(lotIDs);
         setAdData({
@@ -97,7 +97,14 @@ const EditAd = () => {
         });
       });    
   }, [id]);
-
+  useEffect(() => {
+    axios.get(API_URL + "auth/me", { withCredentials: true })
+    .then((res) => {
+        setUserType(res.data.entitlement_category);
+    })
+    .catch((err) => {
+    });
+}, []);  
 const handleChange = (e) => {
     const { name, value } = e.target;
     setAdData((prevData) => ({
@@ -150,11 +157,14 @@ const handleImageUpload = (e, fieldName) => {
         },
         withCredentials: true
       });
-
+      let success_url = '/ad-admin';
+      if (userType == 'ADVERTISERS'){
+        success_url = '/dashboard';
+      }
       toast.success('Ad updated successfully', {
         autoClose: 3000,
         onClose: () => {
-          window.location.href = "/dashboard";
+          window.location.href = success_url;
         }
       });
     } catch (err) {

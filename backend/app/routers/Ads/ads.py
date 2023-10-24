@@ -405,3 +405,108 @@ async def delete_ad(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Failed to delete ad. Ensure all references are removed first."
         )
+
+@ads_router.post("/staff_ad_create/{business_id}")
+async def staff_create_ad(
+    business_id: int,
+    name: str = Form(...),
+    start_date: str = Form(...),
+    end_date: str = Form(...),
+    url: str = Form(...),
+    image_change_interval: int = Form(...),
+    top_banner_image1: UploadFile = File(None),
+    top_banner_image2: UploadFile = File(None),
+    top_banner_image3: UploadFile = File(None),
+    current_user: Users.User = Depends(get_current_authenticated_user),
+    db: Session = Depends(get_db),
+    lot_ids: List[int] = Form(...)
+):
+    # Check if the current user is an allowed employee type
+    entitlement_category = current_user["entitlement_category"]
+    allowed_employee_types = [
+        Models.TypesOfEmployees.CUSTOMER_SUPPORT.value, 
+        Models.TypesOfEmployees.ADVERTISING_SPECIALIST.value, 
+        Models.TypesOfEmployees.ACCOUNTANT.value
+    ]
+
+    if entitlement_category not in allowed_employee_types:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission to create ads on behalf of businesses"
+        )
+
+    # Check if ad name is already in use
+    existing_ad = db.query(Models.Ad).filter(Models.Ad.name == name).first()
+    if existing_ad:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Ad name already in use"
+        )
+
+    # Directory path based on business id
+    business_dir = os.path.join(ADS_DIR, str(business_id))
+
+    # Save files
+    file_path1 = save_upload_file(top_banner_image1, business_dir, name, 1) if top_banner_image1 else None
+    file_path2 = save_upload_file(top_banner_image2, business_dir, name, 2) if top_banner_image2 else None 
+    file_path3 = save_upload_file(top_banner_image3, business_dir, name, 3) if top_banner_image3 else None
+
+    # Create Ad instance
+    ad = Ad(
+        name=name,
+        start_date=start_date,
+        end_date=end_date,
+        business_id=business_id,
+        url=url,
+        image_change_interval=image_change_interval,
+        top_banner_image1_path=file_path1,
+        top_banner_image2_path=file_path2,
+        top_banner_image3_path=file_path3
+    )
+    db.add(ad)
+    db.commit()
+    db.refresh(ad)
+
+    for lot_id in lot_ids:
+        association = Models.ad_lot_association.insert().values(ad_id=ad.advert_id, lot_id=lot_id)
+        db.execute(association)
+    db.commit()
+
+    return {"message": "Ad created successfully"}
+
+@ads_router.get("/get_advertisers")
+async def get_advertiser_businesses(
+    current_user: Users.User = Depends(get_current_authenticated_user),
+    db: Session = Depends(get_db)
+):
+    # Check if the current user is allowed to access this endpoint
+    entitlement_category = current_user["entitlement_category"]
+    allowed_employee_types = [
+        Models.TypesOfEmployees.CUSTOMER_SUPPORT.value, 
+        Models.TypesOfEmployees.ADVERTISING_SPECIALIST.value, 
+        Models.TypesOfEmployees.ACCOUNTANT.value
+    ]
+    if entitlement_category not in allowed_employee_types:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission to access this endpoint"
+        )
+
+    # Fetch all advertiser businesses
+    try:
+        advertiser_businesses = db.query(Models.Business).filter(
+            Models.Business.type == Models.TypesOfBusiness.ADVERTISERS.value
+        ).all()
+
+        # Convert ORM objects to dictionary
+        businesses_list = []
+        for business in advertiser_businesses:
+            businesses_list.append(business.__dict__)
+
+        return {"businesses": businesses_list}
+
+    except NoResultFound:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No advertiser businesses found"
+        )

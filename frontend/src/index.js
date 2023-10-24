@@ -26,6 +26,7 @@ import CreateAd from './pages/CreateAd';
 import ManagePayments from './pages/ManagePayments';
 import EditAd from './pages/EditAd';
 import AdAdmin from './pages/AdAdmin';
+import AdminCreateAd from './pages/AdminCreateAd';
 const container = document.getElementById('root');
 const root = createRoot(container);
 
@@ -53,5 +54,6 @@ export const Pages = {
   ManagePayments,
   CreateAd,
   EditAd,
-  AdAdmin
+  AdAdmin,
+  AdminCreateAd
 }

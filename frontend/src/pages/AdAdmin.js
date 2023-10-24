@@ -7,6 +7,25 @@ const API_URL = process.env.REACT_APP_API_URL;
 const AdAdmin = () => {
     const [advertisersInfo, setAdvertisersInfo] = useState([]);
 
+    const deleteAd = (advert_id) => {
+        axios
+            .delete(API_URL + `ads/delete/${advert_id}`, { withCredentials: true })
+            .then((res) => {
+                console.log(res.data.message);
+                // Re-fetch the list of advertisers and their ads after deleting an ad
+                axios.get(API_URL + "ads/advertisers-ads-info", { withCredentials: true })
+                    .then((res) => {
+                        setAdvertisersInfo(res.data.advertisers_info);
+                    })
+                    .catch((err) => {
+                        console.error(err);
+                    });
+            })
+            .catch((err) => {
+                console.error(err);
+            });
+    };
+    
     useEffect(() => {
         axios.get(API_URL + "ads/advertisers-ads-info", { withCredentials: true })
              .then((res) => {
@@ -26,8 +45,20 @@ const AdAdmin = () => {
                     {advertiser.ads.map((ad, index) => (
                         <div key={ad.advert_id} style={{ marginBottom: "30px", marginLeft: "20px" }}>
                             <h3>
-                                Advertisement {index + 1}: {ad.name} <span><Link to={`/edit-ad/${ad.advert_id}`}>(Edit)</Link></span>
+                                Advertisement {index + 1}: {ad.name}
+                                <span><Link to={`/edit-ad/${ad.advert_id}`}>(Edit)</Link></span>
+                                <a 
+                                    href="#"
+                                    onClick={(event) => {
+                                        event.preventDefault();
+                                        deleteAd(ad.advert_id);
+                                    }}
+                                    style={{ marginLeft: '10px',  textDecoration: 'underline', cursor: 'pointer' }}
+                                >
+                                    (Delete)
+                                </a> 
                             </h3>
+
                             <p><strong>Name:</strong> {ad.name}</p>
                             <p><strong>Start Date:</strong> {ad.start_date}</p>
                             <p><strong>End Date:</strong> {ad.end_date}</p>
