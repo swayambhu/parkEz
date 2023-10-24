@@ -57,7 +57,3 @@ ParkEZ has various usage scenarios for external customers and internal users. Ex
 ParkEZ generates revenue through the following streams:
 1. Monthly Subscription: Parking lot operators and advertisers pay a monthly fee to use ParkEZ's features.
 2. Advertisement Fees: Local businesses pay to advertise on ParkEZ's parking lot webpages.
-
-## Screenshots
-### Homepage
-![home](./Documents/screenshots/home.png)
