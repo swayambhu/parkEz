@@ -4,6 +4,7 @@ from typing import List, Optional
 from fastapi.routing import APIRouter
 from fastapi import Form, File, UploadFile, Depends, HTTPException, Body, status
 from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 from app.database.database import get_db
 from app.database.Models.Models import Ad
@@ -12,6 +13,7 @@ from app.database.schemas.Ads import AdCreate
 from app.database.schemas import Users, Token, Auth
 from app.auth.OAuth2 import hash_password, authenticate_user, create_access_token, validate_token, get_current_user
 from app.routers.Authentication.authentication import get_current_authenticated_user
+
 ads_router = APIRouter(
     prefix="/ads",
     tags=["ads"],
@@ -297,7 +299,7 @@ async def get_ad_details(
 
 @ads_router.get("/advertisers-ads-info")
 async def get_advertisers_ads_info(
-    current_user: Users.User = Depends(get_current_authenticated_user),  # Reusing the function you provided
+    current_user: Users.User = Depends(get_current_authenticated_user),
     db: Session = Depends(get_db)
 ):
     # Check if user has the right role
@@ -336,6 +338,9 @@ async def get_advertisers_ads_info(
             if ad.top_banner_image3_path:
                 ad_data['top_banner_image3_base64'] = image_to_base64(ad.top_banner_image3_path)
 
+            # Add lot metadata for the ad
+            ad_data["lots"] = [lot.__dict__ for lot in ad.lots]
+
             ads_info.append(ad_data)
         
         advertiser_data = {
@@ -345,3 +350,58 @@ async def get_advertisers_ads_info(
         advertisers_info.append(advertiser_data)
 
     return {"advertisers_info": advertisers_info}
+
+
+@ads_router.delete("/delete/{advert_id}")
+async def delete_ad(
+    advert_id: int,
+    current_user: Users.User = Depends(get_current_authenticated_user),
+    db: Session = Depends(get_db)
+):
+    # Fetch the ad from the database
+    ad = db.query(Models.Ad).filter(Models.Ad.advert_id == advert_id).first()
+    if not ad:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Ad not found"
+        )
+
+    # Permissions check
+    entitlement_category = current_user["entitlement_category"]
+    allowed_employee_types = [
+        Models.TypesOfEmployees.CUSTOMER_SUPPORT.value, 
+        Models.TypesOfEmployees.ADVERTISING_SPECIALIST.value, 
+        Models.TypesOfEmployees.ACCOUNTANT.value
+    ]
+
+    if entitlement_category not in allowed_employee_types:
+        # Check if the ad belongs to the current user's business
+        try:
+            business = db.query(Models.Business).filter(Models.Business.email == current_user["username"]).one()
+            business_id = business.id
+        except NoResultFound:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No business associated with the current user"
+            )
+        
+        if ad.business_id != business_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You don't have permission to delete this ad"
+            )
+
+    # Delete associations
+    db.query(Models.ad_lot_association).filter(Models.ad_lot_association.c.ad_id == advert_id).delete()
+    
+    # Try deleting the ad itself
+    try:
+        db.delete(ad)
+        db.commit()
+        return {"message": "Ad deleted successfully"}
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to delete ad. Ensure all references are removed first."
+        )

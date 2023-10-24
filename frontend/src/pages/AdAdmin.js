@@ -34,7 +34,7 @@ const AdAdmin = () => {
                             <p><strong>Target URL:</strong> {ad.url}</p>
                             <p><strong>Impressions:</strong> {ad.impressions}</p>
                             <p><strong>Clicks:</strong> {ad.clicks}</p>
-                            
+
                             {ad.top_banner_image1_base64 && (
                                 <>
                                     <strong>Image 1:</strong><br />
@@ -45,7 +45,7 @@ const AdAdmin = () => {
                                     /><br />
                                 </>
                             )}
-                            
+
                             {ad.top_banner_image2_base64 && (
                                 <>
                                     <strong>Image 2:</strong><br />
@@ -66,6 +66,33 @@ const AdAdmin = () => {
                                         alt="Image 3"  
                                     />
                                 </>
+                            )}
+                            <h3>Lots Associated:</h3>
+                            {ad.lots.length === 0 ? (
+                                <h4>None</h4>
+                            ) : (
+                                <table border="1">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>City</th>
+                                            <th>GPS Coordinates</th>
+                                            <th>State</th>
+                                            <th>ZIP</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {ad.lots.map((lot) => (
+                                            <tr key={lot.id}>
+                                                <td>{lot.name}</td>
+                                                <td>{lot.city}</td>
+                                                <td>{lot.gps_coordinates}</td>
+                                                <td>{lot.state}</td>
+                                                <td>{lot.zip ? lot.zip : 'N/A'}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
                             )}
                         </div>
                     ))}

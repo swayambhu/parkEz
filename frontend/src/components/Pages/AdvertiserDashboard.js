@@ -6,17 +6,31 @@ const API_URL = process.env.REACT_APP_API_URL;
 
 const AdvertiserDashboard = () => {
   const [ads, setAds] = useState([]);
+  const deleteAd = (advert_id) => {
+    axios
+        .delete(API_URL + `ads/delete/${advert_id}`, { withCredentials: true })
+        .then((res) => {
+            console.log(res.data.message);
+            fetchAds();
+        })
+        .catch((err) => {
+            console.error(err);
+        });
+};
+
+  const fetchAds = () => {
+    axios
+        .get(API_URL + "ads/current_user_ads", { withCredentials: true })
+        .then((res) => {
+            setAds(res.data.ads);
+        })
+        .catch((err) => {
+            console.error(err);
+        });
+  };
 
   useEffect(() => {
-    axios
-      .get(API_URL + "ads/current_user_ads", { withCredentials: true })
-      .then((res) => {
-        console.log(res.data.ads);
-        setAds(res.data.ads);
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+    fetchAds();
   }, []);
 
   return (
@@ -26,8 +40,20 @@ const AdvertiserDashboard = () => {
         {ads.map((ad, index) => (
             <div key={ad.advert_id} style={{ marginBottom: "30px" }}>
                 <h2>
-                  Advertisement {index + 1}: {ad.name} <span><Link to={`/edit-ad/${ad.advert_id}`}>(Edit)</Link></span>
+                  Advertisement {index + 1}: {ad.name} 
+                  <Link style={{ marginLeft: '10px'}} to={`/edit-ad/${ad.advert_id}`}>(Edit)</Link>
+                  <a 
+                      href="#"
+                      onClick={(event) => {
+                          event.preventDefault();
+                          deleteAd(ad.advert_id);
+                      }}
+                      style={{ marginLeft: '10px',  textDecoration: 'underline', cursor: 'pointer' }}
+                  >
+                      (Delete)
+                  </a> 
                 </h2>
+
                 <p><strong>Name:</strong> {ad.name}</p>
                 <p><strong>Start Date:</strong> {ad.start_date}</p>
                 <p><strong>End Date:</strong> {ad.end_date}</p>
@@ -55,7 +81,6 @@ const AdvertiserDashboard = () => {
                       alt="Image 3"  
                   />
               </div>
-                {/* Lot information */}
                 <h3>Lots Associated:</h3>
                 {ad.lots.length === 0 ? (
                     <h3>None</h3>
