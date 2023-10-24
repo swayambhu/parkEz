@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import myimg from '../assets/images/about.jpg';
+import Footer from "../layouts/Footer"
 
 const About = () => {
   return (
@@ -52,6 +53,7 @@ const About = () => {
         </Paragraph>
       </RoundedRectangle>
     </AboutWrapper>
+    <Footer />
     </>
   );
 };

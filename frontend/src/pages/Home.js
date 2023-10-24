@@ -3,6 +3,7 @@ import HeroSection from "../components/Pages/Home Page/HeroSection"
 import KeyProperties from "../components/Pages/Home Page/KeyProperties"
 import Services from "../components/Pages/Home Page/Services"
 import Reviews from "../components/Pages/Home Page/Reviews"
+import Footer from "../layouts/Footer"
 
 
 const Home = () => {
@@ -13,6 +14,7 @@ const Home = () => {
             <KeyProperties />
             <Brands/>
             <Reviews />
+            <Footer />
         </>
     )
 }

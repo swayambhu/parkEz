@@ -21,13 +21,16 @@ const Router = () => {
                     <Route path={login} key={`login-${idx}`} element={<Pages.Login/>} />
                 ))}
             </Route>
-            <Route path="/pricing" element={<Pages.Pricing/>} />
-            
+            <Route path="/create-ad" element={<Pages.CreateAd />} />
+            <Route path="/edit-ad/:id" element={<Pages.EditAd />} />
+            <Route path="/pricing" element={<Pages.Pricing />} />     
             <Route path="/sign-up">  
                 {logins.map((login, idx) => (
                     <Route path={login} key={`sign-up-${idx}`} element={<Pages.SignUp/>} />
                 ))}
-            </Route>  
+            </Route>
+            <Route path="/ad-admin" element={<Pages.AdAdmin />} />
+            <Route path="/admin-create-ad" element={<Pages.AdminCreateAd />} />
         </Routes>
     )
 }

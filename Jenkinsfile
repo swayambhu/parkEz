@@ -26,13 +26,13 @@ pipeline {
 
         stage('Deploy Frontend') {
             steps {
-                sh 'cp -r frontend/build/* /home/tom/web/qa.gruevy.com/'
+                sh 'cp -r frontend/build/* /home/tom/web/dev.gruevy.com/'
             }
         }
 
         stage('Deploy Backend') {
             steps {
-                sh 'cp -r backend/* /home/tom/web/backend_qa/'
+                sh 'cp -r backend/* /home/tom/web/backend_dev/'
             }
         }
 

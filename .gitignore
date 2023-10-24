@@ -1,4 +1,14 @@
 /backend/venv/
 **/__pycache__/
 .DS_Store
+backend/.env
+backend/app/ads/
+MachineLearning/lot_image_uploader/venv
+MachineLearning/build_training_data/venv
+backend/app/routers/Authentication/authentication.py
+backend/app/lots/colltown
+MachineLearning/build_training_data/training_images
+MachineLearning/venv
+MachineLearning/models
+MachineLearning/.ipynb_checkpoints
 .env

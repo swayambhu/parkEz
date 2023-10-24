@@ -1,12 +1,17 @@
 import styled from "styled-components";
 import LoginForm from "../components/Pages/Login/LoginForm";
+import Footer from "../layouts/Footer"
 
 
 const Login = () => {
     return(
+    <>
         <Wrapper className="flex-center">
             <LoginForm />
         </Wrapper>
+    <Footer />
+    </>
+
     )
 }
 
