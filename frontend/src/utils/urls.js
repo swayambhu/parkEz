@@ -46,8 +46,6 @@ const AccountantUrls = [
     { path: "/dashboard", text: "Accountant Dashboard" },
     { path: "/add-invoice", text: "New Invoice" },
     { path: "/choose-lot-dashboard", text: "Lot Admin" },
-    { path: "/ad-admin", text: "Ad Admin" },
-    { path: "/admin-create-ad", text: "Create Ad" },
     { path: "/manage-accounts", text: "Manage Accounts" },
     { path: "/create-staff-account", text: "Create Employees" },
 ];
