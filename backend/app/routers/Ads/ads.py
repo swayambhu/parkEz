@@ -173,8 +173,7 @@ async def update_ad(
     entitlement_category = current_user["entitlement_category"]
     allowed_employee_types = [
         Models.TypesOfEmployees.CUSTOMER_SUPPORT.value, 
-        Models.TypesOfEmployees.ADVERTISING_SPECIALIST.value, 
-        Models.TypesOfEmployees.ACCOUNTANT.value
+        Models.TypesOfEmployees.ADVERTISING_SPECIALIST.value
     ]
     if entitlement_category not in allowed_employee_types:
         try:
@@ -261,8 +260,7 @@ async def get_ad_details(
     entitlement_category = current_user["entitlement_category"]
     allowed_employee_types = [
         Models.TypesOfEmployees.CUSTOMER_SUPPORT.value, 
-        Models.TypesOfEmployees.ADVERTISING_SPECIALIST.value, 
-        Models.TypesOfEmployees.ACCOUNTANT.value
+        Models.TypesOfEmployees.ADVERTISING_SPECIALIST.value
     ]
     if entitlement_category not in allowed_employee_types:
         # Check if the ad belongs to the current user's business
@@ -305,8 +303,7 @@ async def get_advertisers_ads_info(
     # Check if user has the right role
     entitlement_category = current_user["entitlement_category"]
     if entitlement_category not in [Models.TypesOfEmployees.CUSTOMER_SUPPORT.value, 
-                                    Models.TypesOfEmployees.ADVERTISING_SPECIALIST.value, 
-                                    Models.TypesOfEmployees.ACCOUNTANT.value]:
+                                    Models.TypesOfEmployees.ADVERTISING_SPECIALIST.value]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have permission to access this information"
@@ -370,8 +367,7 @@ async def delete_ad(
     entitlement_category = current_user["entitlement_category"]
     allowed_employee_types = [
         Models.TypesOfEmployees.CUSTOMER_SUPPORT.value, 
-        Models.TypesOfEmployees.ADVERTISING_SPECIALIST.value, 
-        Models.TypesOfEmployees.ACCOUNTANT.value
+        Models.TypesOfEmployees.ADVERTISING_SPECIALIST.value
     ]
 
     if entitlement_category not in allowed_employee_types:
@@ -425,8 +421,7 @@ async def staff_create_ad(
     entitlement_category = current_user["entitlement_category"]
     allowed_employee_types = [
         Models.TypesOfEmployees.CUSTOMER_SUPPORT.value, 
-        Models.TypesOfEmployees.ADVERTISING_SPECIALIST.value, 
-        Models.TypesOfEmployees.ACCOUNTANT.value
+        Models.TypesOfEmployees.ADVERTISING_SPECIALIST.value
     ]
 
     if entitlement_category not in allowed_employee_types:
@@ -483,8 +478,7 @@ async def get_advertiser_businesses(
     entitlement_category = current_user["entitlement_category"]
     allowed_employee_types = [
         Models.TypesOfEmployees.CUSTOMER_SUPPORT.value, 
-        Models.TypesOfEmployees.ADVERTISING_SPECIALIST.value, 
-        Models.TypesOfEmployees.ACCOUNTANT.value
+        Models.TypesOfEmployees.ADVERTISING_SPECIALIST.value
     ]
     if entitlement_category not in allowed_employee_types:
         raise HTTPException(
