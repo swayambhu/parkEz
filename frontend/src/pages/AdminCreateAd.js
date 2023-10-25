@@ -54,6 +54,13 @@ const Button = styled.button`
     }
 `;
 
+const ErrorText = styled.span`
+    color: red;
+    font-size: 0.8em;
+    margin-top: 0.2em;
+    display: block;
+`;
+
 const AdminCreateAd = () => {
     const [adData, setAdData] = useState({
         name: '',
@@ -79,6 +86,51 @@ const AdminCreateAd = () => {
                 console.error(err);
             });
     }, []);
+
+    const [errors, setErrors] = useState({associatedLots: undefined}); 
+
+    const validateForm = () => {
+        let tempErrors = {};
+
+        // Checking for empty fields
+        const requiredFields = ['name', 'start_date', 'end_date', 'url', 'top_banner_image1', 'top_banner_image2', 'top_banner_image3', 'image_change_interval'];
+        requiredFields.forEach(field => {
+            if (!adData[field]) {
+                tempErrors[field] = 'This field is required.';
+            }
+        });
+
+        // Name validation
+        const namePattern = /^[A-Za-z0-9]{1,10}$/;
+        if (adData.name && !namePattern.test(adData.name)) {
+            tempErrors.name = 'Name must be 1-10 characters long and contain only uppercase, lowercase letters, and numbers.';
+        }
+
+        // Start date must be before end date
+        if (adData.start_date && adData.end_date && new Date(adData.start_date) >= new Date(adData.end_date)) {
+            tempErrors.end_date = 'End date must be after start date.';
+        }
+
+        // Image change interval validation
+        const interval = parseInt(adData.image_change_interval, 10);
+        if (isNaN(interval) || interval <= 1 || interval >= 20) {
+            tempErrors.image_change_interval = 'Interval must be a whole number between 2 and 19.';
+        }
+
+        // URL validation
+        const urlPattern = /^http(s)?:\/\/[^\s]*$/;
+        if (adData.url && !urlPattern.test(adData.url)) {
+            tempErrors.url = 'Invalid URL. Must start with http or https.';
+        }
+
+        if (adData.associatedLots.length === 0) {
+            tempErrors.associatedLots = 'At least one lot should be selected.';
+        }
+
+        setErrors(tempErrors);
+        return Object.keys(tempErrors).length === 0;  // Return true if no errors
+    };
+
     useEffect(() => {
         axios.get(API_URL + "lot/all")
             .then((res) => {
@@ -111,11 +163,17 @@ const AdminCreateAd = () => {
         }
     };
 
-    const handleImageUpload = (e, fieldName) => {
-        setAdData((prevData) => ({
-            ...prevData,
-            [fieldName]: e.target.files[0]
-        }));
+    const handleImageUpload = async (e, fieldName) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        try {
+            await validateImage(file, fieldName);
+            setAdData(prevData => ({ ...prevData, [fieldName]: file }));
+            setErrors(errors => ({ ...errors, [fieldName]: undefined }));
+        } catch (error) {
+            setErrors(errors => ({ ...errors, [fieldName]: error }));
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -127,6 +185,9 @@ const AdminCreateAd = () => {
             });
             return;
         }
+        if (!validateForm()) {
+            return;  
+        }    
 
         const formData = new FormData();
         Object.entries(adData).forEach(([key, value]) => {
@@ -159,6 +220,36 @@ const AdminCreateAd = () => {
         }
     };
 
+    const validateImage = (file, fieldName) => {
+        return new Promise((resolve, reject) => {
+            // Validate file size
+            if (file.size > 500 * 1024) { // 500KB
+                reject(`${fieldName} must be less than 500KB.`);
+                return;
+            }
+
+            // Validate file extension
+            if (file.name.split('.').pop().toLowerCase() !== 'jpg') {
+                reject(`${fieldName} must have a .jpg extension.`);
+                return;
+            }
+
+            // Validate image dimensions
+            const img = new Image();
+            img.src = URL.createObjectURL(file);
+            img.onload = () => {
+                if (img.width > 1000 || img.height > 200) {
+                    reject(`${fieldName} must have a width of no more than 1000px and a height of no more than 200px.`);
+                    return;
+                }
+                resolve();
+            };
+            img.onerror = () => {
+                reject(`${fieldName} loading failed.`);
+            };
+        });
+    };
+
     return (
         <Container>
             <h1>Create Ad for Advertiser</h1>
@@ -177,34 +268,42 @@ const AdminCreateAd = () => {
                 <label>
                     Name:
                     <Input name="name" placeholder="Name" value={adData.name} onChange={handleChange} />
+                    {errors.name && <ErrorText>{errors.name}</ErrorText>}
                 </label>
                 <label>
                     Start Date:
                     <Input name="start_date" type="date" value={adData.start_date} onChange={handleChange} />
+                    {errors.start_date && <ErrorText>{errors.start_date}</ErrorText>}
                 </label>
                 <label>
                     End Date:
                     <Input name="end_date" type="date" value={adData.end_date} onChange={handleChange} />
+                    {errors.end_date && <ErrorText>{errors.end_date}</ErrorText>}
                 </label>
                 <label>
                     URL:
                     <Input name="url" placeholder="URL" value={adData.url} onChange={handleChange} />
+                    {errors.url && <ErrorText>{errors.url}</ErrorText>}
                 </label>
                 <label>
                     Top Banner Image 1:
                     <Input type="file" onChange={(e) => handleImageUpload(e, 'top_banner_image1')} />
+                    {errors.top_banner_image1 && <ErrorText>{errors.top_banner_image1}</ErrorText>}
                 </label>
                 <label>
                     Top Banner Image 2:
                     <Input type="file" onChange={(e) => handleImageUpload(e, 'top_banner_image2')} />
+                    {errors.top_banner_image2 && <ErrorText>{errors.top_banner_image2}</ErrorText>}
                 </label>
                 <label>
                     Top Banner Image 3:
                     <Input type="file" onChange={(e) => handleImageUpload(e, 'top_banner_image3')} />
+                    {errors.top_banner_image3 && <ErrorText>{errors.top_banner_image3}</ErrorText>}
                 </label>
                 <label>
                     Image Change Interval (seconds):
                     <Input name="image_change_interval" type="number" placeholder="Image Change Interval" value={adData.image_change_interval} onChange={handleChange} />
+                    {errors.image_change_interval && <ErrorText>{errors.image_change_interval}</ErrorText>}
                 </label>
                 <h2>Associate Ad with Lots:</h2>
                 <ul>
@@ -221,6 +320,7 @@ const AdminCreateAd = () => {
                         </li>
                     ))}
                 </ul>
+                {errors.associatedLots && <ErrorText>{errors.associatedLots}</ErrorText>}
                 <Button type="submit">Submit</Button>
             </Form>
         </Container>
