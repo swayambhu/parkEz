@@ -31,3 +31,6 @@ INSERT INTO lotmetadata (id, name, url_name, gps_coordinates, city, state, zip, 
 (3, '(fake lot) Cereal Killer Café', 'cerealot', '40.7001,-73.8983', 'Queens', 'NY', '11385', NULL),
 (4, '(fake lot) Jurassic Pork BBQ', 'porklot', '40.7506,-73.9353', 'Long Island City', 'NY', '11101', NULL),
 (5, '(fake lot) Latté Da Coffee House', 'lattlot', '40.8198,-73.8221', 'Bronx', 'NY', '10465', NULL);
+
+-- Associates cameras with lots
+INSERT INTO cammetadata (name, lot_id) VALUES ('colltown', '1');

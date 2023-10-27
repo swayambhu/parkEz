@@ -2,19 +2,23 @@ import styled, { css } from "styled-components";
 import { NavLink } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axios from 'axios';
+import { useNavigate } from "react-router-dom";
 import Footer from "../layouts/Footer"
 
 const BrowseParkingLot = () => {
   const [businesses, setBusinesses] = useState([]);
   const [selectedBusiness, setSelectedBusiness] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const API_URL = process.env.REACT_APP_API_URL;
     axios.get(API_URL + "lot/all")
       .then((res) => {
+        console.log(res);
         const lots = res.data.map(lot => ({
           name: lot.name,
-          address: `${lot.city}, ${lot.state}${lot.zip ? ' ' + lot.zip : ''}`
+          address: `${lot.city}, ${lot.state}${lot.zip ? ' ' + lot.zip : ''}`,
+          url: lot.url_name
         }));
         setBusinesses(lots);
       })
@@ -23,9 +27,8 @@ const BrowseParkingLot = () => {
       });
   }, []);
 
-  const handleClick = (business) => {
-    setSelectedBusiness(business);
-    setTimeout(() => setSelectedBusiness(null), 300);
+  const handleClick = (url) => {
+    navigate(`/lot/${url}`);
   };
 
   return (
@@ -37,7 +40,7 @@ const BrowseParkingLot = () => {
             <li key={`${business.name}-${idx}`}>
               <BusinessLink
                 as="button"
-                onClick={() => handleClick(business.name)}
+                onClick={() => handleClick(business.url)}
                 selected={selectedBusiness === business.name}
               >
                 {business.name}

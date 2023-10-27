@@ -6,9 +6,10 @@ from torch import nn, optim
 import torchvision.transforms as transforms
 from fastapi import APIRouter, HTTPException, UploadFile, File, Depends
 from app.database.database import get_db
-from app.database.Models.Models import LotMetadata, CamImage
+from app.database.Models.Models import LotMetadata, CamImage, CamMetadata
 from app.database.schemas.Lots import CamImageCreate, CamImageInDB, LotMetadataInDB
-from typing import List
+from typing import List, Dict
+
 
 router = APIRouter(
     prefix="/lot",
@@ -72,8 +73,8 @@ async def upload_image(
         model_path = os.path.join('app', 'lots', camera_name, 'models', spot + '.pth')
 
         # Depending on the environment you're running this code in, choose the appropriate loading method
-        # model_state_dict = torch.load(model_path, map_location=torch.device('cpu'))
-        model.load_state_dict(torch.load(model_path)) 
+        model_state_dict = torch.load(model_path, map_location=torch.device('cpu'))
+        # model.load_state_dict(torch.load(model_path)) 
         model.eval()  # Set the model to evaluation mode
 
         with torch.no_grad():
@@ -193,3 +194,53 @@ transform = transforms.Compose([
     transforms.ToTensor(),  # Convert to PyTorch tensor
     transforms.Normalize((0.5,0.5,0.5,), (0.5,0.5,0.5,))  # Normalize pixel values in the range [-1, 1]
 ])
+
+@router.get("/lot_latest/")
+def get_latest_image(url_name: str, db: Session = Depends(get_db)) -> Dict:
+    if not url_name:
+        raise HTTPException(status_code=400, detail="Lot URL name not specified.")
+
+    # Fetching lot and cameras data
+    lot_instance = db.query(LotMetadata).filter(LotMetadata.url_name == url_name).first()
+    if not lot_instance:
+        raise HTTPException(status_code=404, detail="No such lot found based on the given URL name.")
+
+    cameras = db.query(CamMetadata).filter(CamMetadata.lot_id == lot_instance.id).all()
+    camera_names = [camera.name for camera in cameras]
+
+    # Fetching latest image for the camera
+    lot_image = db.query(CamImage).filter(CamImage.camera_name == camera_names[0]).order_by(CamImage.timestamp.desc()).first()
+    if not lot_image:
+        raise HTTPException(status_code=404, detail="No images found for this camera.")
+
+    # Assuming the image is stored in some storage system, replace 'path_to_storage' with appropriate method
+    image_url = os.path.join('lots', camera_names[0], 'photos', lot_image.image)
+
+    # Fetching previous image
+    previous_image = db.query(CamImage).filter(CamImage.camera_name == camera_names[0], CamImage.timestamp < lot_image.timestamp).order_by(CamImage.timestamp.desc()).first()
+    if previous_image:
+        previous_image_name_part = previous_image.image.split('_')[-1].replace('.jpg', '')
+    else:
+        previous_image_name_part = lot_image.image.split('_')[-1].replace('.jpg', '')
+
+    # Assuming the spots and bestspots JSON files are located in a folder named 'models'
+    spots_path = os.path.join('app', 'lots', camera_names[0], 'spots.json')
+    bestspots_path = os.path.join('app','lots', camera_names[0], 'bestspots.json')
+
+    with open(spots_path, 'r') as spots_file:
+        spots_data = json.load(spots_file)
+    with open(bestspots_path, 'r') as bestspots_file:
+        bestspots_data = json.load(bestspots_file)
+
+    human_labels = json.loads(lot_image.human_labels)
+    model_labels = json.loads(lot_image.model_labels)
+
+    return {
+        'image_url': image_url,
+        'timestamp': lot_image.timestamp,
+        'human_labels': human_labels,
+        'model_labels': model_labels,
+        'previous_image_name_part': previous_image_name_part,
+        'spots': spots_data,
+        'bestspots': bestspots_data
+    }
