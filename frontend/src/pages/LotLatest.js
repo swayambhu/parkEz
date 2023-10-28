@@ -1,42 +1,137 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
+import { PStyle, LotCanvas, TimeH2, ImageDiv, Button, ButtonsDiv, LabelsDiv, AdImage, AdBanner } from '../shared/visuals';
+import { formatDate, formatDateNoTime, formatAmount } from '../shared/tools';
 
 const API_URL = process.env.REACT_APP_API_URL;
 
 const LotLatest = () => {
+    const canvasRef = useRef(null);
     const { lot } = useParams();
-    const [lotData, setLotData] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const navigate = useNavigate();
+    const [humanLabels, setHumanLabels] = useState('');
+    const [bestSpot, setBestSpot] = useState('');
+    const [humanTime, setHumanTime] = useState('');
+    const [ad, setAd] = useState(null);
+    const [previousImageName, setPreviousImageName] = useState('');
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await axios.get(`${API_URL}lot/lot_latest/`, {
-                    params: { url_name: lot }
-                });
-                setLotData(response.data);
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
+        const canvas = canvasRef.current;
+        const context = canvas.getContext('2d');
 
-        fetchData();
+        // Fetch data using axios instead of fetch
+        axios.get(`${API_URL}lot/lot_latest/`, { params: { url_name: lot } })
+            .then(response => {
+                const data = response.data;
+                console.log(response.data);
+                const trueLabels = Object.entries(data.human_labels)
+                    .filter(([key, value]) => value === true)
+                    .map(([key]) => key)
+                    .join(", ");
+
+                let bestSpotString = 'None available';
+                let BestSpotSoFarKey = 99999;
+                for (let spot in Object.keys(data.bestspots)) {
+                    if (!data.human_labels[data.bestspots[spot]] & Number(spot) < BestSpotSoFarKey) {
+                        bestSpotString = data.bestspots[spot];
+                        BestSpotSoFarKey = Number(spot);
+                    }
+                }
+                setBestSpot(bestSpotString);
+                setHumanLabels(trueLabels);
+                setHumanTime(data.timestamp);
+                setPreviousImageName(data.previous_image_name_part);
+
+                const image = new Image();
+                image.src = API_URL + data.image_url;
+                image.onload = () => {
+                    canvas.width = image.width;
+                    canvas.height = image.height;
+                    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+                    const entries = Object.entries(data.spots);
+                    entries.reverse().forEach(([key, value]) => {
+                        const [x1, x2, y1, y2] = value;
+                        const width = x2 - x1;
+                        const height = y2 - y1;
+
+                        if (key === bestSpotString) {
+                            context.strokeStyle = 'green';
+                            context.fillStyle = 'green';
+                        } else if (data.human_labels[key]) {
+                            context.strokeStyle = 'red';
+                            context.fillStyle = 'red';
+                        } else {
+                            context.strokeStyle = 'blue';
+                            context.fillStyle = 'blue';
+                        }
+                        context.lineWidth = 7;
+                        context.strokeRect(x1, y1, width, height);
+                        context.strokeStyle = 'black';   // Black for the text outline
+                        context.fillStyle = 'white';     // White for the text fill
+                        context.font = "40px Arial";     
+                        context.strokeText(key, x1, y1 - 5);   // Draw the text outline
+                        context.fillText(key, x1, y1 - 5);     // Draw the filled text on top
+                    
+                    });
+                }
+
+                return axios.post(`${API_URL}ads/serve-ad/`, { lot_id: lot || 'coldwater' });
+            })
+            .then(response => {
+                setAd(response.data);
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+
     }, [lot]);
 
-    if (loading) return <p>Loading...</p>;
-    if (error) return <p>Error: {error}</p>;
+    const handlePrevious = () => {
+        navigate(`/image/${lot || 'coldwater'}/${previousImageName}`);
+    };
+
+    const handleAdClick = () => {
+        if (ad && ad.advert_id) {
+            axios.post(`${API_URL}ads/increment_clicks/`, { advert_id: ad.advert_id })
+                .then(response => {
+                    console.log('Click incremented successfully:', response.data);
+                })
+                .catch(error => {
+                    console.error('Error incrementing click:', error);
+                });
+        }
+    };
 
     return (
-        <>
-            <h1>Lot is {lot}</h1>
-            <img style={{maxHeight: '60vh'}} src={API_URL + lotData.image_url} alt="Latest Image" />
-            <p>Timestamp: {lotData.timestamp}</p>
-            {console.log(lotData)}
-        </>
+        <div style={{ minHeight: '95vh' }}>
+            {ad && (
+                <AdBanner style={{ marginTop: '60px' }}>
+                    <a href={ad.url} target="_blank" rel="noopener noreferrer" onClick={handleAdClick}>
+                        <AdImage style={{ width: '100%', height: 'auto' }} src={ad.top_banner_image} />
+                    </a>
+                </AdBanner>
+            )}
+            <TimeH2>{formatDate(humanTime)}</TimeH2>
+            <ImageDiv>
+                <LotCanvas ref={canvasRef} />
+                {ad && (
+                    <AdBanner style={{ marginLeft: '50px' }}>
+                        <a href={ad.url} target="_blank" rel="noopener noreferrer" onClick={handleAdClick}>
+                            <AdImage style={{ width: '100%', height: 'auto' }} src={ad.side_banner_image} />
+                        </a>
+                    </AdBanner>
+                )}
+            </ImageDiv>
+            <ButtonsDiv>
+                <Button onClick={handlePrevious}>Previous</Button>
+            </ButtonsDiv>
+            <LabelsDiv>
+                <PStyle>Best Open Spot: {bestSpot}</PStyle>
+                <PStyle>Spots occupied: {humanLabels}</PStyle>
+            </LabelsDiv>
+        </div>
     );
 };
 

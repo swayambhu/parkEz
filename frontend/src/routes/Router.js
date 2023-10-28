@@ -32,6 +32,7 @@ const Router = () => {
             </Route>
             <Route path="/ad-admin" element={<Pages.AdAdmin />} />
             <Route path="/admin-create-ad" element={<Pages.AdminCreateAd />} />
+            <Route path="/image/:lot/:imageName" element={<Pages.SpecificImage />} />
         </Routes>
     )
 }

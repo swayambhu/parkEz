@@ -5,6 +5,7 @@ backend/.env
 backend/app/ads/
 backend/app/__pycache__/
 MachineLearning/lot_image_uploader/venv
+MachineLearning/lot_image_uploader/to_upload
 MachineLearning/build_training_data/venv
 backend/app/routers/Authentication/authentication.py
 backend/app/lots/colltown

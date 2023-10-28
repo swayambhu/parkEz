@@ -1,14 +1,15 @@
 import os, json, torch, shutil
+from datetime import datetime
 from PIL import Image
 from sqlalchemy.orm import Session
 from fastapi.templating import Jinja2Templates
 from torch import nn, optim
 import torchvision.transforms as transforms
-from fastapi import APIRouter, HTTPException, UploadFile, File, Depends
+from fastapi import APIRouter, HTTPException, UploadFile, File, Depends, Query
 from app.database.database import get_db
 from app.database.Models.Models import LotMetadata, CamImage, CamMetadata
 from app.database.schemas.Lots import CamImageCreate, CamImageInDB, LotMetadataInDB
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 
 router = APIRouter(
@@ -39,6 +40,12 @@ async def upload_image(
     filename = image.filename
     camera_name, date_code = os.path.splitext(filename)[0].split("_")
 
+    # Extract the datetime from the filename
+    dt_str = date_code[8:]
+    date_str = date_code[:8]
+    date_time_str = date_str + ' ' + dt_str[:2] + ':' + dt_str[2:]
+    date_time_obj = datetime.strptime(date_time_str, '%Y%m%d %H:%M')
+
     # Save the uploaded image first
     image_save_path = os.path.join('app', 'lots', camera_name, 'photos', image.filename)
     with open(image_save_path, 'wb') as buffer:
@@ -51,8 +58,9 @@ async def upload_image(
     lot_image = db.query(CamImage).filter(CamImage.image.ilike(f"%{filename}%")).first()
     if lot_image:
         lot_image.image = filename
+        lot_image.timestamp = date_time_obj
     else:
-        lot_image = CamImage(image=filename, camera_name=camera_name)
+        lot_image = CamImage(image=filename, camera_name=camera_name, timestamp=date_time_obj)
 
     # Load data from spots.json
     spots_file_path = os.path.join('app', 'lots', camera_name, 'spots.json')
@@ -195,6 +203,64 @@ transform = transforms.Compose([
     transforms.Normalize((0.5,0.5,0.5,), (0.5,0.5,0.5,))  # Normalize pixel values in the range [-1, 1]
 ])
 
+@router.get("/lot_specific/")
+def get_specific_image(
+    lot: str = Query(...),
+    image: str = Query(...),
+    db: Session = Depends(get_db)
+) -> Dict:
+    
+    if not lot or not image:
+        raise HTTPException(status_code=400, detail="Lot or image name part not specified.")
+
+    # Fetching lot and cameras data
+    lot_instance = db.query(LotMetadata).filter(LotMetadata.url_name == lot).first()
+    if not lot_instance:
+        raise HTTPException(status_code=404, detail="No such lot found based on the given URL name.")
+
+    cameras = db.query(CamMetadata).filter(CamMetadata.lot_id == lot_instance.id).all()
+    camera_names = [camera.name for camera in cameras]
+    print(camera_names[0])
+    image_name_location = os.path.join('lots', camera_names[0], 'photos', camera_names[0]  + '_' + image + '.jpg')
+    image_name = camera_names[0]  + '_' + image + '.jpg'
+
+    lot_image = db.query(CamImage).filter(CamImage.image.ilike(f"%{image_name}%")).first()
+    if not lot_image:
+        raise HTTPException(status_code=404, detail="No images found for this camera.")
+
+    # Assuming the image is stored in some storage system, replace 'path_to_storage' with appropriate method
+    image_url = os.path.join('app','lots', camera_names[0], 'photos', lot_image.image)
+    image_url = image_name_location
+    # Fetching previous and next images by timestamp
+    previous_image = db.query(CamImage).filter(CamImage.camera_name == camera_names[0], CamImage.timestamp < lot_image.timestamp).order_by(CamImage.timestamp.desc()).first()
+    next_image = db.query(CamImage).filter(CamImage.camera_name == camera_names[0], CamImage.timestamp > lot_image.timestamp).order_by(CamImage.timestamp).first()
+
+    previous_image_name_part = previous_image.image.split('_')[-1].split('.')[0] if previous_image else image_name
+    next_image_name_part = next_image.image.split('_')[-1].split('.')[0] if next_image else image_name
+
+    # Assuming the spots and bestspots JSON files are located in a folder named 'models'
+    spots_path = os.path.join('app', 'lots', camera_names[0], 'spots.json')
+    bestspots_path = os.path.join('app','lots', camera_names[0], 'bestspots.json')
+
+    with open(spots_path, 'r') as spots_file:
+        spots_data = json.load(spots_file)
+    with open(bestspots_path, 'r') as bestspots_file:
+        bestspots_data = json.load(bestspots_file)
+
+    human_labels = json.loads(lot_image.human_labels)
+    model_labels = json.loads(lot_image.model_labels)
+
+    return {
+        'image_url': image_url,
+        'timestamp': lot_image.timestamp,
+        'human_labels': human_labels,
+        'model_labels': model_labels,
+        'previous_image_name_part': previous_image_name_part,
+        'next_image_name_part': next_image_name_part,
+        'spots': spots_data,
+        'bestspots': bestspots_data
+    }
+
 @router.get("/lot_latest/")
 def get_latest_image(url_name: str, db: Session = Depends(get_db)) -> Dict:
     if not url_name:
@@ -244,3 +310,5 @@ def get_latest_image(url_name: str, db: Session = Depends(get_db)) -> Dict:
         'spots': spots_data,
         'bestspots': bestspots_data
     }
+
+    
