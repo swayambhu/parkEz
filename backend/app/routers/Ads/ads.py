@@ -1,9 +1,12 @@
 import os
 import base64
+from datetime import date
+from random import choice
 from typing import List, Optional
 from fastapi.routing import APIRouter
-from fastapi import Form, File, UploadFile, Depends, HTTPException, Body, status
+from fastapi import Form, File, UploadFile, Depends, HTTPException, Body, status, Request
 from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import or_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 from app.database.database import get_db
@@ -504,3 +507,89 @@ async def get_advertiser_businesses(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="No advertiser businesses found"
         )
+
+@ads_router.post("/serve_ad/")
+async def serve_ad_view(request: Request, db: Session = Depends(get_db)):
+    
+    # Get the lot id from request data
+    data = await request.json()
+    url_name = data.get('lot_id', None)
+    if not url_name:
+        raise HTTPException(status_code=400, detail="Lot ID not provided.")
+    
+    # Fetch the corresponding lot using the url_name
+    lot = db.query(Models.LotMetadata).filter_by(url_name=url_name).first()
+    if not lot:
+        raise HTTPException(status_code=404, detail="Lot not found.")
+    lot_id = lot.id
+
+    # Current date
+    current_date = date.today()
+
+    # Get all the ads pointing to the provided lot id
+    # eligible_ads = db.query(Ad).filter(Ad.lots.any(id=lot_id))
+    all_ads = db.query(Ad).all()
+    print('lot id: ' + lot_id)
+    print('all ads: ')
+    print(all_ads)
+    
+    eligible_ads = db.query(Ad).join(Models.ad_lot_association).filter(Models.ad_lot_association.c.lot_id == lot_id).all()
+    print('lot id: ' + lot_id)
+    print('eligible ads: ')
+    print(eligible_ads)
+
+    # Filter the ads further to only include ads where the current date is between the start date and the end date
+    eligible_active_ads = db.query(Ad).join(Models.ad_lot_association).filter(
+        Models.ad_lot_association.c.lot_id == lot_id,
+        Ad.start_date <= current_date,
+        Ad.end_date >= current_date
+    ).all()
+    print('lot id: ' + lot_id)
+    print('eligible active ads: ')
+    print(eligible_active_ads)
+
+
+    # Randomly select one valid ad and increment its impressions
+    selected_ad = choice(eligible_active_ads)
+    selected_ad.impressions += 1
+    db.commit()  # Commit changes to database. Assuming your db session supports it.
+
+    # Convert image paths to Base64 encoded data
+    image_keys = ['top_banner_image1_path', 'top_banner_image2_path', 'top_banner_image3_path']
+    serialized_data = {
+        "advert_id": selected_ad.advert_id,
+        "name": selected_ad.name,
+        "url": selected_ad.url,
+        "impressions": selected_ad.impressions,
+        "clicks": selected_ad.clicks,
+        "seconds": selected_ad.image_change_interval
+    }
+
+    for key in image_keys:
+        image_path = getattr(selected_ad, key)
+        if image_path:  # Check if image_path exists for the ad
+            with open(image_path, "rb") as image_file:
+                base64_encoded = base64.b64encode(image_file.read()).decode('utf-8')
+            serialized_data[key] = f"data:image/jpeg;base64,{base64_encoded}"
+        else:
+            serialized_data[key] = None
+
+    return serialized_data
+
+@ads_router.post("/increment_clicks/")
+async def increment_clicks(request: Request, db: Session = Depends(get_db)):
+    data = await request.json()
+    advert_id = data.get('advert_id', None)
+    # Fetch the ad from the database using advert_id
+    ad = db.query(Ad).filter(Ad.advert_id == advert_id).first()
+    if not ad:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Ad not found"
+        )
+
+    # Increment clicks
+    ad.clicks += 1
+    db.commit()
+
+    return {"message": "Click incremented successfully", "new_clicks": ad.clicks}

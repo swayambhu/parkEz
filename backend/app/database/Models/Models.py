@@ -118,7 +118,9 @@ class CamMetadata(Base):
 
 class Ad(Base):
     __tablename__ = "ad"
-    
+    def __repr__(self):
+        return f"<Ad(advert_id={self.advert_id}, name={self.name}, start_date={self.start_date}, end_date={self.end_date}, url={self.url})>"
+
     advert_id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False, comment='Ad Name')
     start_date = Column(Date, nullable=True)

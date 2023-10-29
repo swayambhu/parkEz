@@ -23,6 +23,7 @@ const Router = () => {
             </Route>
             <Route path="/create-ad" element={<Pages.CreateAd />} />
             <Route path="/edit-ad/:id" element={<Pages.EditAd />} />
+            <Route path="/lot/:lot" element={<Pages.LotLatest />} />
             <Route path="/pricing" element={<Pages.Pricing />} />     
             <Route path="/sign-up">  
                 {logins.map((login, idx) => (
@@ -31,6 +32,9 @@ const Router = () => {
             </Route>
             <Route path="/ad-admin" element={<Pages.AdAdmin />} />
             <Route path="/admin-create-ad" element={<Pages.AdminCreateAd />} />
+            <Route path="/image/:lot/:imageName" element={<Pages.SpecificImage />} />
+            <Route path="/fakelot/:lot" element={<Pages.FakeLot />} />
+
         </Routes>
     )
 }

@@ -4,6 +4,7 @@ import ImageBlock from "../components/Reusable components/ImageBlock";
 import Footer from "../layouts/Footer"
 const SignUp = () => {
     return(
+        <>
         <Wrapper className="flex flex-between">
             <div>
 
@@ -13,8 +14,9 @@ const SignUp = () => {
 
                 <SignUpForm />
             </div>
-            <Footer />
         </Wrapper>
+        <Footer />
+        </>
     )
 }
 
