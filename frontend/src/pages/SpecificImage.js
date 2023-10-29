@@ -13,7 +13,6 @@ const SpecificImage = () => {
     const [bestSpot, setBestSpot] = useState('');
     const [ad, setAd] = useState(null);
     const [currentTopImageIndex, setCurrentTopImageIndex] = useState(1);
-    const [currentSideImageIndex, setCurrentSideImageIndex] = useState(1);
     const [previousImageName, setPreviousImageName] = useState('');
     const [nextImageName, setNextImageName] = useState('');
     const { lot, imageName } = useParams();
@@ -86,8 +85,7 @@ const SpecificImage = () => {
         .catch(error => {
             console.error('Error fetching data:', error);
         });
-
-        axios.post(`${API_URL}ads/serve-ad/`, { lot_id: lot })
+        axios.post(`${API_URL}ads/serve_ad/`, { lot_id: lot || 'colltown' })
         .then(response => {
             setAd(response.data);
         })
@@ -106,15 +104,16 @@ const SpecificImage = () => {
     };
 
     useEffect(() => {
-        if (ad) {
+        if (ad && ad.seconds) {
             const interval = setInterval(() => {
-                setCurrentTopImageIndex(prev => (prev % 3) + 1);
-                setCurrentSideImageIndex(prev => (prev % 3) + 1);
-            }, ad.image_change_interval * 1000);
-
+                setCurrentTopImageIndex(prevIndex =>
+                    (prevIndex + 1) % 3
+                );
+            }, ad.seconds * 1000); 
             return () => clearInterval(interval);
         }
     }, [ad]);
+    
 
     const handleAdClick = () => {
         if (ad && ad.advert_id) {
@@ -133,20 +132,13 @@ const SpecificImage = () => {
             {ad && (
                 <AdBanner style={{marginTop:'60px'}}>
                     <a href={ad.url} target="_blank" rel="noopener noreferrer" onClick={handleAdClick}>
-                        <AdImage style={{width: '100%', height: 'auto'}} src={ad[`top_banner_image${currentTopImageIndex}`]} />
+                        <AdImage style={{width: '100%', height: 'auto'}} src={[ad.top_banner_image1_path,ad.top_banner_image2_path,ad.top_banner_image3_path][currentTopImageIndex]} />
                     </a>
                 </AdBanner>
             )}
             <TimeH2>{humanTime}</TimeH2>
             <ImageDiv>
                 <LotCanvas ref={canvasRef} />
-                {ad && (
-                    <AdBanner style={{marginLeft:'50px'}}>
-                        <a href={ad.url} target="_blank" rel="noopener noreferrer" onClick={handleAdClick}>
-                            <AdImage style={{width: '100%', height: 'auto'}} src={ad[`side_banner_image${currentSideImageIndex}`]} />
-                        </a>
-                    </AdBanner>
-                )}
             </ImageDiv>
             <ButtonsDiv>
                 <Button onClick={handlePrevious}>Previous</Button>

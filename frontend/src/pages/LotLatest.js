@@ -14,6 +14,7 @@ const LotLatest = () => {
     const [bestSpot, setBestSpot] = useState('');
     const [humanTime, setHumanTime] = useState('');
     const [ad, setAd] = useState(null);
+    const [currentTopImageIndex, setCurrentTopImageIndex] = useState(1);
     const [previousImageName, setPreviousImageName] = useState('');
 
     useEffect(() => {
@@ -68,18 +69,19 @@ const LotLatest = () => {
                         }
                         context.lineWidth = 7;
                         context.strokeRect(x1, y1, width, height);
-                        context.strokeStyle = 'black';   // Black for the text outline
-                        context.fillStyle = 'white';     // White for the text fill
+                        context.strokeStyle = 'black'; 
+                        context.fillStyle = 'white';
                         context.font = "40px Arial";     
-                        context.strokeText(key, x1, y1 - 5);   // Draw the text outline
-                        context.fillText(key, x1, y1 - 5);     // Draw the filled text on top
+                        context.strokeText(key, x1, y1 - 5);
+                        context.fillText(key, x1, y1 - 5);  
                     
                     });
                 }
 
-                return axios.post(`${API_URL}ads/serve-ad/`, { lot_id: lot || 'coldwater' });
+                return axios.post(`${API_URL}ads/serve_ad/`, { lot_id: lot || 'colltown' });
             })
             .then(response => {
+                console.log(response.data);
                 setAd(response.data);
             })
             .catch(error => {
@@ -92,37 +94,44 @@ const LotLatest = () => {
         navigate(`/image/${lot || 'coldwater'}/${previousImageName}`);
     };
 
+    useEffect(() => {
+        if (ad && ad.seconds) {
+            // Set the interval for changing images
+            const interval = setInterval(() => {
+                setCurrentTopImageIndex(prevIndex =>
+                    (prevIndex + 1) % 3
+                );
+            }, ad.seconds * 1000); // Convert seconds to milliseconds
+
+            // Clear the interval when the component unmounts or ad changes
+            return () => clearInterval(interval);
+        }
+    }, [ad]);
+
     const handleAdClick = () => {
         if (ad && ad.advert_id) {
             axios.post(`${API_URL}ads/increment_clicks/`, { advert_id: ad.advert_id })
-                .then(response => {
-                    console.log('Click incremented successfully:', response.data);
-                })
-                .catch(error => {
-                    console.error('Error incrementing click:', error);
-                });
+            .then(response => {
+                console.log('Click incremented successfully:', response.data);
+            })
+            .catch(error => {
+                console.error('Error incrementing click:', error);
+            });
         }
     };
 
     return (
         <div style={{ minHeight: '95vh' }}>
             {ad && (
-                <AdBanner style={{ marginTop: '60px' }}>
+                <AdBanner style={{marginTop:'60px'}}>
                     <a href={ad.url} target="_blank" rel="noopener noreferrer" onClick={handleAdClick}>
-                        <AdImage style={{ width: '100%', height: 'auto' }} src={ad.top_banner_image} />
+                        <AdImage style={{width: '100%', height: 'auto'}} src={[ad.top_banner_image1_path,ad.top_banner_image2_path,ad.top_banner_image3_path][currentTopImageIndex]} />
                     </a>
                 </AdBanner>
             )}
             <TimeH2>{formatDate(humanTime)}</TimeH2>
             <ImageDiv>
-                <LotCanvas ref={canvasRef} />
-                {ad && (
-                    <AdBanner style={{ marginLeft: '50px' }}>
-                        <a href={ad.url} target="_blank" rel="noopener noreferrer" onClick={handleAdClick}>
-                            <AdImage style={{ width: '100%', height: 'auto' }} src={ad.side_banner_image} />
-                        </a>
-                    </AdBanner>
-                )}
+            <LotCanvas ref={canvasRef} />
             </ImageDiv>
             <ButtonsDiv>
                 <Button onClick={handlePrevious}>Previous</Button>
