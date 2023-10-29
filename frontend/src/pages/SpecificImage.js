@@ -23,7 +23,7 @@ const SpecificImage = () => {
         const canvas = canvasRef.current;
         const context = canvas.getContext('2d');
 
-        axios.get(`${API_URL}lot/lot_specific`, { 
+        axios.get(`${API_URL}lot/lot_specific/`, { 
             params: { 
                 lot: lot, 
                 image: imageName 
