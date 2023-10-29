@@ -27,8 +27,14 @@ const BrowseParkingLot = () => {
       });
   }, []);
 
-  const handleClick = (url) => {
-    navigate(`/lot/${url}`);
+  const handleClick = (urlName) => {
+    let url = urlName[0];
+    let name = urlName[1];
+    if(name.includes("(fake lot)")){
+      navigate(`/fakelot/${url}`);
+    }else {
+      navigate(`/lot/${url}`);
+    }
   };
 
   return (
@@ -40,7 +46,7 @@ const BrowseParkingLot = () => {
             <li key={`${business.name}-${idx}`}>
               <BusinessLink
                 as="button"
-                onClick={() => handleClick(business.url)}
+                onClick={() => handleClick([business.url, business.name])}
                 selected={selectedBusiness === business.name}
               >
                 {business.name}

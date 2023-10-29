@@ -91,7 +91,7 @@ const LotLatest = () => {
     }, [lot]);
 
     const handlePrevious = () => {
-        navigate(`/image/${lot || 'coldwater'}/${previousImageName}`);
+        navigate(`/image/${lot || 'colltown'}/${previousImageName}`);
     };
 
     useEffect(() => {
