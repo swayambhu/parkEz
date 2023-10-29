@@ -27,6 +27,10 @@ import ManagePayments from './pages/ManagePayments';
 import EditAd from './pages/EditAd';
 import AdAdmin from './pages/AdAdmin';
 import AdminCreateAd from './pages/AdminCreateAd';
+import LotLatest from './pages/LotLatest';
+import SpecificImage from './pages/SpecificImage';
+import FakeLot from './pages/FakeLot';
+
 const container = document.getElementById('root');
 const root = createRoot(container);
 
@@ -55,5 +59,8 @@ export const Pages = {
   CreateAd,
   EditAd,
   AdAdmin,
-  AdminCreateAd
+  AdminCreateAd,
+  LotLatest,
+  SpecificImage,
+  FakeLot
 }
