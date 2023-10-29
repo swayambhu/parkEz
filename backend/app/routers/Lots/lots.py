@@ -221,7 +221,6 @@ def get_specific_image(
     cameras = db.query(CamMetadata).filter(CamMetadata.lot_id == lot_instance.id).all()
     camera_names = [camera.name for camera in cameras]
     print(camera_names[0])
-    image_name_location = os.path.join('lots', camera_names[0], 'photos', camera_names[0]  + '_' + image + '.jpg')
     image_name = camera_names[0]  + '_' + image + '.jpg'
 
     lot_image = db.query(CamImage).filter(CamImage.image.ilike(f"%{image_name}%")).first()
@@ -229,8 +228,7 @@ def get_specific_image(
         raise HTTPException(status_code=404, detail="No images found for this camera.")
 
     # Assuming the image is stored in some storage system, replace 'path_to_storage' with appropriate method
-    image_url = os.path.join('app','lots', camera_names[0], 'photos', lot_image.image)
-    image_url = image_name_location
+    image_url = os.path.join('lots', camera_names[0], 'photos', lot_image.image)
     # Fetching previous and next images by timestamp
     previous_image = db.query(CamImage).filter(CamImage.camera_name == camera_names[0], CamImage.timestamp < lot_image.timestamp).order_by(CamImage.timestamp.desc()).first()
     next_image = db.query(CamImage).filter(CamImage.camera_name == camera_names[0], CamImage.timestamp > lot_image.timestamp).order_by(CamImage.timestamp).first()
