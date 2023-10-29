@@ -26,6 +26,7 @@ app.mount("/lots", StaticFiles(directory="app/lots/"), name="lots")  # <-- Added
 
 origins = [
     "http://localhost:3000",
+    "http://dev.gruevy.com",
     "https://dev.gruevy.com",
     "https://qa.gruevy.com"
 ]
