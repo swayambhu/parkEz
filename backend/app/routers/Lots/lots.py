@@ -47,7 +47,7 @@ async def upload_image(
     date_time_obj = datetime.strptime(date_time_str, '%Y%m%d %H:%M')
 
     # Save the uploaded image first
-    image_save_path = os.path.join('app', 'lots', camera_name, 'photos', 'temp_' + image.filename)
+    image_save_path = os.path.join('app', 'lots', camera_name, 'photos', image.filename)
     with open(image_save_path, 'wb') as buffer:
         shutil.copyfileobj(image.file, buffer)
 
