@@ -11,6 +11,7 @@ const SpecificImage = () => {
     const [humanTime, setHumanTime] = useState('');
     const [humanLabels, setHumanLabels] = useState('');
     const [bestSpot, setBestSpot] = useState('');
+    const [lotName, setLotName] = useState('');
     const [ad, setAd] = useState(null);
     const [currentTopImageIndex, setCurrentTopImageIndex] = useState(1);
     const [previousImageName, setPreviousImageName] = useState('');
@@ -43,7 +44,7 @@ const SpecificImage = () => {
                     BestSpotSoFarKey = Number(spot);
                 }
             }
-
+            setLotName(data.name);
             setBestSpot(bestSpotString);            
             setHumanLabels(trueLabels);
             setHumanTime(formatDate(data.timestamp));
@@ -135,7 +136,7 @@ const SpecificImage = () => {
                     </a>
                 </AdBanner>
             )}
-            <TimeH2>{humanTime}</TimeH2>
+            <TimeH2>{lotName} - {humanTime}</TimeH2>
             <ImageDiv>
                 <LotCanvas ref={canvasRef} />
             </ImageDiv>
