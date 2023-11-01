@@ -25,7 +25,6 @@ const LotLatest = () => {
         axios.get(`${API_URL}lot/lot_latest/`, { params: { url_name: lot } })
             .then(response => {
                 const data = response.data;
-                console.log(response.data);
                 const trueLabels = Object.entries(data.human_labels)
                     .filter(([key, value]) => value === true)
                     .map(([key]) => key)
@@ -81,7 +80,6 @@ const LotLatest = () => {
                 return axios.post(`${API_URL}ads/serve_ad/`, { lot_id: lot || 'colltown' });
             })
             .then(response => {
-                console.log(response.data);
                 setAd(response.data);
             })
             .catch(error => {

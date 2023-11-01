@@ -47,7 +47,7 @@ async def upload_image(
     date_time_obj = datetime.strptime(date_time_str, '%Y%m%d %H:%M')
 
     # Save the uploaded image first
-    image_save_path = os.path.join('app', 'lots', camera_name, 'photos', image.filename)
+    image_save_path = os.path.join('app', 'lots', camera_name, 'photos', 'temp_' + image.filename)
     with open(image_save_path, 'wb') as buffer:
         shutil.copyfileobj(image.file, buffer)
 
@@ -80,10 +80,10 @@ async def upload_image(
         model = CNN()  # Instantiate your model
         model_path = os.path.join('app', 'lots', camera_name, 'models', spot + '.pth')
 
-        # Depending on the environment you're running this code in, choose the appropriate loading method
-        model_state_dict = torch.load(model_path, map_location=torch.device('cpu'))
-        # model.load_state_dict(torch.load(model_path)) 
-        model.eval()  # Set the model to evaluation mode
+        # Load the saved model state into the model
+        # model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
+        model.load_state_dict(torch.load(model_path)) 
+        model.eval()  
 
         with torch.no_grad():
             output = model(input_tensor)
@@ -93,6 +93,7 @@ async def upload_image(
         prediction = predicted.item()
         if prediction == 0: 
             labels[spot] = True
+
 
     lot_image.human_labels = json.dumps(labels)
     lot_image.model_labels = json.dumps(labels)
