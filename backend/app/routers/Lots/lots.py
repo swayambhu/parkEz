@@ -251,6 +251,7 @@ def get_specific_image(
 
     return {
         'image_url': image_url,
+        'name' : lot_instance.name,
         'timestamp': lot_image.timestamp,
         'human_labels': human_labels,
         'model_labels': model_labels,
@@ -302,6 +303,7 @@ def get_latest_image(url_name: str, db: Session = Depends(get_db)) -> Dict:
 
     return {
         'image_url': image_url,
+        'name' : lot_instance.name,
         'timestamp': lot_image.timestamp,
         'human_labels': human_labels,
         'model_labels': model_labels,
