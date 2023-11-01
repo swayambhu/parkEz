@@ -38,7 +38,7 @@ pipeline {
 
         stage('Stop Service') { 
             steps {
-                sh 'sudo systemctl stop qaback.service'
+                sh 'sudo systemctl stop devback.service'
             }
         }
 
@@ -46,17 +46,17 @@ pipeline {
             steps {
                 sh '''
                     export PGPASSWORD=Raccoon1
-                    psql -U jenkins -h localhost -d postgres -c "DROP DATABASE IF EXISTS qa;"
-                    psql -U jenkins -h localhost -d postgres -c "DROP USER IF EXISTS qa;"
-                    psql -U jenkins -h localhost -d postgres -c "CREATE DATABASE qa;"
-                    psql -U jenkins -h localhost -d postgres -c "CREATE USER qa WITH PASSWORD 'Raccoon1';"
-                    psql -U jenkins -h localhost -d postgres -c "GRANT ALL PRIVILEGES ON DATABASE qa TO qa;"
+                    psql -U jenkins -h localhost -d postgres -c "DROP DATABASE IF EXISTS dev;"
+                    psql -U jenkins -h localhost -d postgres -c "DROP USER IF EXISTS dev;"
+                    psql -U jenkins -h localhost -d postgres -c "CREATE DATABASE dev;"
+                    psql -U jenkins -h localhost -d postgres -c "CREATE USER dev WITH PASSWORD 'Raccoon1';"
+                    psql -U jenkins -h localhost -d postgres -c "GRANT ALL PRIVILEGES ON DATABASE dev TO dev;"
                 '''
             }
         }
         stage('Start Service') { 
             steps {
-                sh 'sudo systemctl start qaback.service'
+                sh 'sudo systemctl start devback.service'
             }
         }
         stage('Wait for DB Initialization') {
@@ -68,7 +68,7 @@ pipeline {
             steps {
                 sh '''
                     export PGPASSWORD=Raccoon1
-                    psql -U jenkins -h localhost -d qa -f /home/tom/web/backend_qa/init.sql
+                    psql -U jenkins -h localhost -d dev -f /home/tom/web/backend_dev/init.sql
                 '''
             }
         }

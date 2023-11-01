@@ -30,7 +30,6 @@ const SpecificImage = () => {
         })
         .then(response => {
             const data = response.data;
-            console.log(data);
             const trueLabels = Object.entries(data.human_labels)
                 .filter(([key, value]) => value === true)
                 .map(([key]) => key)
