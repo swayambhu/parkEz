@@ -81,7 +81,7 @@ const ManagePayments = () => {
     };
 
     return (
-        <div style={{minHeight:'50vh', margin:'3em'}}>
+        <div style={{minHeight:'95vh', margin:'3em'}}>
             <h2>Manage Payment Methods</h2>
             <table style={{marginTop: '20px', width: '100%', borderCollapse: 'collapse'}}>
                 <thead>
