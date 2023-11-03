@@ -12,6 +12,7 @@ const LotLatest = () => {
     const navigate = useNavigate();
     const [humanLabels, setHumanLabels] = useState('');
     const [bestSpot, setBestSpot] = useState('');
+    const [lotName, setLotName] = useState('');
     const [humanTime, setHumanTime] = useState('');
     const [ad, setAd] = useState(null);
     const [currentTopImageIndex, setCurrentTopImageIndex] = useState(1);
@@ -25,7 +26,6 @@ const LotLatest = () => {
         axios.get(`${API_URL}lot/lot_latest/`, { params: { url_name: lot } })
             .then(response => {
                 const data = response.data;
-                console.log(response.data);
                 const trueLabels = Object.entries(data.human_labels)
                     .filter(([key, value]) => value === true)
                     .map(([key]) => key)
@@ -39,6 +39,7 @@ const LotLatest = () => {
                         BestSpotSoFarKey = Number(spot);
                     }
                 }
+                setLotName(data.name);
                 setBestSpot(bestSpotString);
                 setHumanLabels(trueLabels);
                 setHumanTime(data.timestamp);
@@ -81,7 +82,6 @@ const LotLatest = () => {
                 return axios.post(`${API_URL}ads/serve_ad/`, { lot_id: lot || 'colltown' });
             })
             .then(response => {
-                console.log(response.data);
                 setAd(response.data);
             })
             .catch(error => {
@@ -123,13 +123,13 @@ const LotLatest = () => {
     return (
         <div style={{ minHeight: '95vh' }}>
             {ad && (
-                <AdBanner style={{marginTop:'60px'}}>
+                <AdBanner>
                     <a href={ad.url} target="_blank" rel="noopener noreferrer" onClick={handleAdClick}>
                         <AdImage style={{width: '100%', height: 'auto'}} src={[ad.top_banner_image1_path,ad.top_banner_image2_path,ad.top_banner_image3_path][currentTopImageIndex]} />
                     </a>
                 </AdBanner>
             )}
-            <TimeH2>{formatDate(humanTime)}</TimeH2>
+            <TimeH2>{lotName} - {formatDate(humanTime)}</TimeH2>
             <ImageDiv>
             <LotCanvas ref={canvasRef} />
             </ImageDiv>

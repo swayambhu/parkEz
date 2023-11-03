@@ -80,10 +80,10 @@ async def upload_image(
         model = CNN()  # Instantiate your model
         model_path = os.path.join('app', 'lots', camera_name, 'models', spot + '.pth')
 
-        # Depending on the environment you're running this code in, choose the appropriate loading method
-        model_state_dict = torch.load(model_path, map_location=torch.device('cpu'))
-        # model.load_state_dict(torch.load(model_path)) 
-        model.eval()  # Set the model to evaluation mode
+        # Load the saved model state into the model
+        # model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
+        model.load_state_dict(torch.load(model_path)) 
+        model.eval()  
 
         with torch.no_grad():
             output = model(input_tensor)
@@ -93,6 +93,7 @@ async def upload_image(
         prediction = predicted.item()
         if prediction == 0: 
             labels[spot] = True
+
 
     lot_image.human_labels = json.dumps(labels)
     lot_image.model_labels = json.dumps(labels)
@@ -250,6 +251,7 @@ def get_specific_image(
 
     return {
         'image_url': image_url,
+        'name' : lot_instance.name,
         'timestamp': lot_image.timestamp,
         'human_labels': human_labels,
         'model_labels': model_labels,
@@ -301,6 +303,7 @@ def get_latest_image(url_name: str, db: Session = Depends(get_db)) -> Dict:
 
     return {
         'image_url': image_url,
+        'name' : lot_instance.name,
         'timestamp': lot_image.timestamp,
         'human_labels': human_labels,
         'model_labels': model_labels,

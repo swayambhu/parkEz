@@ -115,7 +115,7 @@ const LoginForm = () => {
                     </p>
                 }
             </form>
-            <table border="1">
+            {/* <table border="1">
                 <thead>
                     <tr>
                         <th>Type</th>
@@ -150,7 +150,7 @@ const LoginForm = () => {
                 </tbody>
             </table>
 
-            <p>Password is always 123</p>
+            <p>Password is always 123</p> */}
 
         </LoginFormCard>
     )
