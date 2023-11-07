@@ -9,20 +9,23 @@ import Footer from "../layouts/Footer"
 const BrowseParkingLot = () => {
   const [businesses, setBusinesses] = useState([]);
   const [search, setSearch] = useState('');
+  const [sortedByDistance, setSortedByDistance] = useState(false);
   const navigate = useNavigate();
+
 
   useEffect(() => {
     const API_URL = process.env.REACT_APP_API_URL;
     axios.get(API_URL + 'lot/all')
-      .then((res) => {
-        console.log(res);
-        const lots = res.data.map((lot) => ({
-          name: lot.name,
-          address: `${lot.city}, ${lot.state}${lot.zip ? ' ' + lot.zip : ''}`,
-          url: lot.url_name,
-        }));
-        setBusinesses(lots);
-      })
+    .then((res) => {
+      console.log(res);
+      const lots = res.data.map((lot) => ({
+        name: lot.name,
+        address: `${lot.city}, ${lot.state}${lot.zip ? ' ' + lot.zip : ''}`,
+        url: lot.url_name,
+        gps_coordinates: lot.gps_coordinates,
+      }));
+      setBusinesses(lots);
+    })
       .catch((err) => {
         console.error(err);
       });
@@ -31,11 +34,48 @@ const BrowseParkingLot = () => {
   const handleSearchChange = (event) => {
     setSearch(event.target.value);
   };
+  // Function to calculate distance in miles
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const p = Math.PI / 180;
+    const c = Math.cos;
+    const a = 0.5 - c((lat2 - lat1) * p) / 2 + 
+              c(lat1 * p) * c(lat2 * p) * 
+              (1 - c((lon2 - lon1) * p)) / 2;
 
+    return 12742 * Math.asin(Math.sqrt(a)) * 0.621371; // convert to miles
+  };
+
+  // Function to sort businesses by distance
+  const sortBusinessesByDistance = (userLat, userLon) => {
+    setBusinesses((currentBusinesses) =>
+      [...currentBusinesses].map((business) => ({
+        ...business,
+        distance: calculateDistance(
+          userLat,
+          userLon,
+          parseFloat(business.gps_coordinates.split(',')[0]),
+          parseFloat(business.gps_coordinates.split(',')[1])
+        ),
+      })).sort((a, b) => a.distance - b.distance)
+    );
+  };
+
+  // Function to get user's location and sort businesses
+  const handleSortByDistanceClick = () => {
+    navigator.geolocation.getCurrentPosition((position) => {
+      sortBusinessesByDistance(position.coords.latitude, position.coords.longitude);
+      setSortedByDistance(true);
+    }, (error) => {
+      console.error('Error obtaining location', error);
+    });
+  };
+
+  // Adjusted to include distance and check if sorted
   const filteredBusinesses = businesses.filter((business) =>
     business.name.toLowerCase().includes(search.toLowerCase()) ||
     business.address.toLowerCase().includes(search.toLowerCase())
   );
+
 
   const handleClick = (urlName) => {
     let url = urlName[0];
@@ -56,8 +96,9 @@ const BrowseParkingLot = () => {
           value={search}
           onChange={handleSearchChange}
           placeholder="Search"
-          style={{background:'#EEE', padding:'0.2em'}}
+          style={{ background: '#EEE', padding: '0.2em' }}
         />
+        <button onClick={handleSortByDistanceClick}>Sort by Distance</button>
         <ul>
           {filteredBusinesses.map((business, idx) => (
             <li key={`${business.name}-${idx}`}>
@@ -70,9 +111,12 @@ const BrowseParkingLot = () => {
                 <br />
                 <Address>{business.address}</Address>
               </BusinessLink>
-            </li>
-          ))}
-        </ul>
+              {sortedByDistance && business.distance && (
+          <div>Distance: {business.distance.toFixed(2) + ' miles'}</div>
+        )}
+      </li>
+    ))}
+  </ul>
       </BusinessListWrapper>
       <br /><br />
       <Footer />
