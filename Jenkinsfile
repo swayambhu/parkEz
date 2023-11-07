@@ -15,6 +15,7 @@ pipeline {
         stage('Install and Build Frontend') {
             steps {
                 dir('frontend') {  
+                    sh 'cp /home/tom/web/.env.productionQA .env.production'
                     sh 'npm install'
                     sh '''
                         unset CI
