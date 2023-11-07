@@ -5,20 +5,21 @@ import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import Footer from "../layouts/Footer"
 
+
 const BrowseParkingLot = () => {
   const [businesses, setBusinesses] = useState([]);
-  const [selectedBusiness, setSelectedBusiness] = useState(null);
+  const [search, setSearch] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
     const API_URL = process.env.REACT_APP_API_URL;
-    axios.get(API_URL + "lot/all")
+    axios.get(API_URL + 'lot/all')
       .then((res) => {
         console.log(res);
-        const lots = res.data.map(lot => ({
+        const lots = res.data.map((lot) => ({
           name: lot.name,
           address: `${lot.city}, ${lot.state}${lot.zip ? ' ' + lot.zip : ''}`,
-          url: lot.url_name
+          url: lot.url_name,
         }));
         setBusinesses(lots);
       })
@@ -27,12 +28,21 @@ const BrowseParkingLot = () => {
       });
   }, []);
 
+  const handleSearchChange = (event) => {
+    setSearch(event.target.value);
+  };
+
+  const filteredBusinesses = businesses.filter((business) =>
+    business.name.toLowerCase().includes(search.toLowerCase()) ||
+    business.address.toLowerCase().includes(search.toLowerCase())
+  );
+
   const handleClick = (urlName) => {
     let url = urlName[0];
     let name = urlName[1];
-    if(name.includes("(fake lot)")){
+    if (name.includes('(fake lot)')) {
       navigate(`/fakelot/${url}`);
-    }else {
+    } else {
       navigate(`/lot/${url}`);
     }
   };
@@ -41,13 +51,20 @@ const BrowseParkingLot = () => {
     <>
       <BusinessListWrapper>
         <h2>Choose a Parking Lot</h2>
+        <input
+          type="text"
+          value={search}
+          onChange={handleSearchChange}
+          placeholder="Search"
+          style={{background:'#EEE', padding:'0.2em'}}
+        />
         <ul>
-          {businesses.map((business, idx) => (
+          {filteredBusinesses.map((business, idx) => (
             <li key={`${business.name}-${idx}`}>
               <BusinessLink
                 as="button"
                 onClick={() => handleClick([business.url, business.name])}
-                selected={selectedBusiness === business.name}
+                selected={business.name === search}
               >
                 {business.name}
                 <br />
