@@ -4,6 +4,7 @@
 backend/.env
 backend/app/ads/
 backend/app/__pycache__/
+frontend/.env.production
 MachineLearning/lot_image_uploader/venv
 MachineLearning/lot_image_uploader/to_upload
 MachineLearning/build_training_data/venv
