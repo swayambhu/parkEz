@@ -14,8 +14,6 @@ const BusinessDashboard = () => {
     const [bestSpot, setBestSpot] = useState('');
     const [lotName, setLotName] = useState('');
     const [humanTime, setHumanTime] = useState('');
-    const [ad, setAd] = useState(null);
-    const [currentTopImageIndex, setCurrentTopImageIndex] = useState(1);
     const [previousImageName, setPreviousImageName] = useState('');
 
     useEffect(() => {
@@ -26,7 +24,19 @@ const BusinessDashboard = () => {
         axios.get(`${API_URL}lot/business_dashboard/`, { withCredentials: true })
             .then(response => {
                 const data = response.data;
-                const trueLabels = Object.entries(data.human_labels)
+                let imagesData = response.data.images_data;
+
+                // Function to parse the timestamp string into a Date object
+                const parseTimestamp = (timestampString) => new Date(timestampString);
+
+                // Using reduce to find the most recent image
+                const mostRecentImage = imagesData.reduce((latest, current) => {
+                    return parseTimestamp(current.timestamp) > parseTimestamp(latest.timestamp) ? current : latest;
+                });
+
+                console.log(mostRecentImage); // This will log the object with the most recent timestamp
+                console.log(data);
+                const trueLabels = Object.entries(mostRecentImage.human_labels)
                     .filter(([key, value]) => value === true)
                     .map(([key]) => key)
                     .join(", ");
@@ -34,19 +44,19 @@ const BusinessDashboard = () => {
                 let bestSpotString = 'None available';
                 let BestSpotSoFarKey = 99999;
                 for (let spot in Object.keys(data.bestspots)) {
-                    if (!data.human_labels[data.bestspots[spot]] & Number(spot) < BestSpotSoFarKey) {
+                    if (!mostRecentImage.human_labels[data.bestspots[spot]] & Number(spot) < BestSpotSoFarKey) {
                         bestSpotString = data.bestspots[spot];
                         BestSpotSoFarKey = Number(spot);
                     }
                 }
-                setLotName(data.name);
+                setLotName(mostRecentImage.name);
                 setBestSpot(bestSpotString);
                 setHumanLabels(trueLabels);
-                setHumanTime(data.timestamp);
+                setHumanTime(mostRecentImage.timestamp);
                 setPreviousImageName(data.previous_image_name_part);
 
                 const image = new Image();
-                image.src = API_URL + data.image_url;
+                image.src = API_URL + mostRecentImage.image_url;
                 image.onload = () => {
                     canvas.width = image.width;
                     canvas.height = image.height;
@@ -61,7 +71,7 @@ const BusinessDashboard = () => {
                         if (key === bestSpotString) {
                             context.strokeStyle = 'green';
                             context.fillStyle = 'green';
-                        } else if (data.human_labels[key]) {
+                        } else if (mostRecentImage.human_labels[key]) {
                             context.strokeStyle = 'red';
                             context.fillStyle = 'red';
                         } else {
@@ -70,23 +80,17 @@ const BusinessDashboard = () => {
                         }
                         context.lineWidth = 7;
                         context.strokeRect(x1, y1, width, height);
-                        context.strokeStyle = 'black'; 
+                        context.strokeStyle = 'black';
                         context.fillStyle = 'white';
-                        context.font = "40px Arial";     
+                        context.font = "40px Arial";
                         context.strokeText(key, x1, y1 - 5);
-                        context.fillText(key, x1, y1 - 5);  
-                    
+                        context.fillText(key, x1, y1 - 5);
+
                     });
                 }
 
-                return axios.post(`${API_URL}ads/serve_ad/`, { lot_id: lot || 'colltown' });
             })
-            .then(response => {
-                setAd(response.data);
-            })
-            .catch(error => {
-                console.error('Error fetching data:', error);
-            });
+
 
     }, [lot]);
 
@@ -94,44 +98,11 @@ const BusinessDashboard = () => {
         navigate(`/image/${lot || 'colltown'}/${previousImageName}`);
     };
 
-    useEffect(() => {
-        if (ad && ad.seconds) {
-            // Set the interval for changing images
-            const interval = setInterval(() => {
-                setCurrentTopImageIndex(prevIndex =>
-                    (prevIndex + 1) % 3
-                );
-            }, ad.seconds * 1000); // Convert seconds to milliseconds
-
-            // Clear the interval when the component unmounts or ad changes
-            return () => clearInterval(interval);
-        }
-    }, [ad]);
-
-    const handleAdClick = () => {
-        if (ad && ad.advert_id) {
-            axios.post(`${API_URL}ads/increment_clicks/`, { advert_id: ad.advert_id })
-            .then(response => {
-                console.log('Click incremented successfully:', response.data);
-            })
-            .catch(error => {
-                console.error('Error incrementing click:', error);
-            });
-        }
-    };
-
     return (
         <div style={{ minHeight: '95vh' }}>
-            {ad && (
-                <AdBanner>
-                    <a href={ad.url} target="_blank" rel="noopener noreferrer" onClick={handleAdClick}>
-                        <AdImage style={{width: '100%', height: 'auto'}} src={[ad.top_banner_image1_path,ad.top_banner_image2_path,ad.top_banner_image3_path][currentTopImageIndex]} />
-                    </a>
-                </AdBanner>
-            )}
             <TimeH2>{lotName} - {formatDate(humanTime)}</TimeH2>
             <ImageDiv>
-            <LotCanvas ref={canvasRef} />
+                <LotCanvas ref={canvasRef} />
             </ImageDiv>
             <ButtonsDiv>
                 <Button onClick={handlePrevious}>Previous</Button>

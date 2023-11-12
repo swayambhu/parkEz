@@ -320,66 +320,46 @@ def get_business_dashboard(db: Session = Depends(get_db), user_data = Depends(ge
     if user_data['entitlement_category'] != 'BUSINESS':
         raise HTTPException(status_code=403, detail="Access not allowed. User must be of type BUSINESS.")
 
-    # Get the user's ID from the users table
-    user = db.query(Business).filter(Business.email == user_data['username']).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found.")
+    # Get the business record using the user's email
+    business = db.query(Business).filter(Business.email == user_data['username']).first()
+    if not business:
+        raise HTTPException(status_code=404, detail="Business not found.")
 
-    # Fetch all lots owned by the user
-    owned_lots = db.query(LotMetadata).filter(LotMetadata.owner_id == user.id).all()
+    # Fetch all lots owned by the business
+    owned_lots = db.query(LotMetadata).filter(LotMetadata.owner_id == business.id).all()
     if not owned_lots:
-        raise HTTPException(status_code=404, detail="No lots found for this user.")
+        raise HTTPException(status_code=404, detail="No lots found for this business.")
 
-    # For each owned lot, find associated cameras and collect their url_names
-    url_names = []
-    for lot in owned_lots:
-        url_names.append(lot.url_name)
-    url_name = url_names[0]
-    if not url_name:
-        raise HTTPException(status_code=400, detail="Lot URL name not specified.")
-
-
-    # Fetching lot and cameras data
+    # For the first lot, find associated cameras and process images
+    url_name = owned_lots[0].url_name
     lot_instance = db.query(LotMetadata).filter(LotMetadata.url_name == url_name).first()
-    if not lot_instance:
-        raise HTTPException(status_code=404, detail="No such lot found based on the given URL name.")
-
     cameras = db.query(CamMetadata).filter(CamMetadata.lot_id == lot_instance.id).all()
-    camera_names = [camera.name for camera in cameras]
+    
+    images_data = []
+    for camera in cameras:
+        cam_images = db.query(CamImage).filter(CamImage.camera_name == camera.name).order_by(CamImage.timestamp.desc()).all()
+        for image in cam_images:
+            images_data.append({
+                'image_url': os.path.join('lots', camera.name, 'photos', image.image),
+                'name': lot_instance.name,
+                'timestamp': image.timestamp,
+                'human_labels': json.loads(image.human_labels),
+                'model_labels': json.loads(image.model_labels)
+            })
 
-    # Fetching latest image for the camera
-    lot_image = db.query(CamImage).filter(CamImage.camera_name == camera_names[0]).order_by(CamImage.timestamp.desc()).first()
-    if not lot_image:
-        raise HTTPException(status_code=404, detail="No images found for this camera.")
+    # Fetching previous image, spots, and bestspots data once
+    previous_image = db.query(CamImage).filter(CamImage.camera_name == cameras[0].name, CamImage.timestamp < cam_images[0].timestamp).order_by(CamImage.timestamp.desc()).first()
+    previous_image_name_part = previous_image.image.split('_')[-1].replace('.jpg', '') if previous_image else cam_images[0].image.split('_')[-1].replace('.jpg', '')
 
-    # Assuming the image is stored in some storage system, replace 'path_to_storage' with appropriate method
-    image_url = os.path.join('lots', camera_names[0], 'photos', lot_image.image)
-
-    # Fetching previous image
-    previous_image = db.query(CamImage).filter(CamImage.camera_name == camera_names[0], CamImage.timestamp < lot_image.timestamp).order_by(CamImage.timestamp.desc()).first()
-    if previous_image:
-        previous_image_name_part = previous_image.image.split('_')[-1].replace('.jpg', '')
-    else:
-        previous_image_name_part = lot_image.image.split('_')[-1].replace('.jpg', '')
-
-    # Assuming the spots and bestspots JSON files are located in a folder named 'models'
-    spots_path = os.path.join('app', 'lots', camera_names[0], 'spots.json')
-    bestspots_path = os.path.join('app','lots', camera_names[0], 'bestspots.json')
-
+    spots_path = os.path.join('app', 'lots', cameras[0].name, 'spots.json')
+    bestspots_path = os.path.join('app', 'lots', cameras[0].name, 'bestspots.json')
     with open(spots_path, 'r') as spots_file:
         spots_data = json.load(spots_file)
     with open(bestspots_path, 'r') as bestspots_file:
         bestspots_data = json.load(bestspots_file)
 
-    human_labels = json.loads(lot_image.human_labels)
-    model_labels = json.loads(lot_image.model_labels)
-
     return {
-        'image_url': image_url,
-        'name' : lot_instance.name,
-        'timestamp': lot_image.timestamp,
-        'human_labels': human_labels,
-        'model_labels': model_labels,
+        'images_data': images_data,
         'previous_image_name_part': previous_image_name_part,
         'spots': spots_data,
         'bestspots': bestspots_data

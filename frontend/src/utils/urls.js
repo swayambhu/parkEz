@@ -9,7 +9,6 @@ const PublicUrls = [
 const LotOperatorUrls = [
     { path: "/business-dashboard", text: "Parking Lot Dashboard" },
     { path: "/archive", text: "Archive" },
-    { path: "/plate-data", text: "Plates" },
     { path: "/my-tickets", text: "Support" },
     { path: "/billing", text: "Billing" }
 ];
