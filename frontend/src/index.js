@@ -30,6 +30,7 @@ import AdminCreateAd from './pages/AdminCreateAd';
 import LotLatest from './pages/LotLatest';
 import SpecificImage from './pages/SpecificImage';
 import FakeLot from './pages/FakeLot';
+import BusinessDashboard from './pages/BusinessDashboard';
 
 const container = document.getElementById('root');
 const root = createRoot(container);
@@ -62,5 +63,6 @@ export const Pages = {
   AdminCreateAd,
   LotLatest,
   SpecificImage,
-  FakeLot
+  FakeLot,
+  BusinessDashboard
 }

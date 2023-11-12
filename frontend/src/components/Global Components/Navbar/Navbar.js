@@ -57,7 +57,7 @@ const Navbar = () => {
 
     useEffect(() => {
         switch (userType) {
-            case 'CUSTOMER_SUPPORT':
+            case 'CUSTOMER_SUPPORT': 
                 setUrls(CustomerSupportUrls);
                 break;
             case 'LOT_SPECIALIST':
