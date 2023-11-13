@@ -3,9 +3,7 @@
 
 ParkEZ is a parking lot monitoring platform with different webpages for both the public and parking lot operators to monitor lot occupancy, provide security, stop overparking and recommend customers the best spots. Advertisers are also able to place ads on the public facing webpages. This repository is part of a 2-semester course progression, and it currently implements functional requirement module 1: Account Management, with all its subfeatures. The remaining modules will be implemented in the next semester's class.
 
-Livecam from backend with current models (models are still in development)
-[![Liveshot](https://qaapi.gruevy.com/lot/latest-image-jpg?cam=colltown)](https://qa.gruevy.com/lot/colltown)
-[![Liveinfo](https://qaapi.gruevy.com/lot/latest-image-info-jpg?cam=colltown)](https://qa.gruevy.com/lot/colltown)
+
 
 
 ## Table of Contents
