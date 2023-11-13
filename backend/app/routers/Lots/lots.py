@@ -1,14 +1,15 @@
-import os, json, torch, shutil
+import os, io, json, torch, shutil
 from datetime import datetime
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 from sqlalchemy.orm import Session
 from fastapi.templating import Jinja2Templates
 from torch import nn, optim
 import torchvision.transforms as transforms
-from fastapi import APIRouter, HTTPException, UploadFile, File, Depends, Query
+from fastapi import APIRouter, HTTPException, UploadFile, File, Depends, Query, Response
 from app.database.database import get_db
-from app.database.Models.Models import LotMetadata, CamImage, CamMetadata
+from app.database.Models.Models import LotMetadata, CamImage, CamMetadata, Business
 from app.database.schemas.Lots import CamImageCreate, CamImageInDB, LotMetadataInDB
+from app.routers.Authentication.authentication import get_current_authenticated_user;
 from typing import List, Dict, Optional
 
 
@@ -312,4 +313,261 @@ def get_latest_image(url_name: str, db: Session = Depends(get_db)) -> Dict:
         'bestspots': bestspots_data
     }
 
+@router.get("/business_dashboard/")
+def get_business_dashboard(
+        db: Session = Depends(get_db), 
+        user_data = Depends(get_current_authenticated_user),
+        business_email: str = Query(None) 
+    ) -> Dict:
+
+    print(user_data)
+
+    # Handle BUSINESS entitlement category
+    if user_data['entitlement_category'] == 'BUSINESS':
+        business_email = user_data['username']  # Use the logged in user's email for BUSINESS
+    elif user_data['entitlement_category'] in ['CUSTOMER_SUPPORT', 'LOT_SPECIALIST']:
+        if not business_email:
+            raise HTTPException(status_code=400, detail="Business email is required for CUSTOMER_SUPPORT and LOT_SPECIALIST.")
+    else:
+        raise HTTPException(status_code=403, detail="Access not allowed. User must be of type BUSINESS, CUSTOMER_SUPPORT, or LOT_SPECIALIST.")
+
+    # Get the business record using the provided or derived email
+    business = db.query(Business).filter(Business.email == business_email).first()
+    if not business:
+        raise HTTPException(status_code=404, detail="Business not found.")
+    # Fetch all lots owned by the business
+    owned_lots = db.query(LotMetadata).filter(LotMetadata.owner_id == business.id).all()
+    if not owned_lots:
+        raise HTTPException(status_code=404, detail="No lots found for this business.")
+
+    # For the first lot, find associated cameras and process images
+    url_name = owned_lots[0].url_name
+    lot_instance = db.query(LotMetadata).filter(LotMetadata.url_name == url_name).first()
+    cameras = db.query(CamMetadata).filter(CamMetadata.lot_id == lot_instance.id).all()
     
+    images_data = []
+    for camera in cameras:
+        cam_images = db.query(CamImage).filter(CamImage.camera_name == camera.name).order_by(CamImage.timestamp.desc()).all()
+        for image in cam_images:
+            images_data.append({
+                'image_url': os.path.join('lots', camera.name, 'photos', image.image),
+                'name': lot_instance.name,
+                'timestamp': image.timestamp,
+                'human_labels': json.loads(image.human_labels),
+                'model_labels': json.loads(image.model_labels)
+            })
+
+    # Fetching previous image, spots, and bestspots data once
+    previous_image = db.query(CamImage).filter(CamImage.camera_name == cameras[0].name, CamImage.timestamp < cam_images[0].timestamp).order_by(CamImage.timestamp.desc()).first()
+    previous_image_name_part = previous_image.image.split('_')[-1].replace('.jpg', '') if previous_image else cam_images[0].image.split('_')[-1].replace('.jpg', '')
+
+    spots_path = os.path.join('app', 'lots', cameras[0].name, 'spots.json')
+    bestspots_path = os.path.join('app', 'lots', cameras[0].name, 'bestspots.json')
+    with open(spots_path, 'r') as spots_file:
+        spots_data = json.load(spots_file)
+    with open(bestspots_path, 'r') as bestspots_file:
+        bestspots_data = json.load(bestspots_file)
+
+    return {
+        'images_data': images_data,
+        'previous_image_name_part': previous_image_name_part,
+        'spots': spots_data,
+        'bestspots': bestspots_data
+    }
+
+@router.get("/all_businesses/")
+def get_all_businesses(
+        db: Session = Depends(get_db), 
+        user_data = Depends(get_current_authenticated_user)
+    ) -> List[Dict]:
+
+    # Check if the user is either CUSTOMER_SUPPORT or LOT_SPECIALIST
+    if user_data['entitlement_category'] not in ['CUSTOMER_SUPPORT', 'LOT_SPECIALIST']:
+        raise HTTPException(status_code=403, detail="Access not allowed. User must be of type CUSTOMER_SUPPORT or LOT_SPECIALIST.")
+
+    # Querying all businesses from the database
+    businesses = db.query(Business).all()
+    if not businesses:
+        raise HTTPException(status_code=404, detail="No businesses found.")
+
+    # Extracting required information from each business
+    business_data = []
+    for business in businesses:
+        business_info = {
+            'id': business.id,
+            'email': business.email,
+            'name': business.name
+        }
+        business_data.append(business_info)
+
+    return business_data
+
+@router.get("/latest-image-jpg/", response_class=Response)
+def get_latest_jpg_image(
+        cam: str = Query(..., description="The name of the camera"),
+        db: Session = Depends(get_db)
+    ):
+    if not cam:
+        raise HTTPException(status_code=400, detail="Camera not specified.")
+
+    try:
+        lot_image = db.query(CamImage).filter(CamImage.camera_name == cam, CamImage.image.endswith('.jpg')).order_by(CamImage.timestamp.desc()).first()
+        if not lot_image:
+            raise HTTPException(status_code=404, detail="No JPG images found for this camera.")
+    except Exception as e:
+        # Log the exception e
+        raise HTTPException(status_code=500, detail="An error occurred while fetching the image.")
+
+    image_path = os.path.join('app','lots', cam, 'photos', lot_image.image)
+    image = Image.open(image_path)
+
+    human_labels = json.loads(lot_image.human_labels)
+
+    spots_path = os.path.join('app','lots', cam, 'spots.json')
+    best_spots_path = os.path.join('app','lots', cam, 'bestspots.json')
+    with open(spots_path, 'r') as spots_file:
+        spots_data_view = json.load(spots_file)
+    with open(best_spots_path, 'r') as bestspots_file:
+        best_spots = json.load(bestspots_file)
+
+    # Determine the best vacant spot
+    best_vacant_spot = None
+    for rank, spot in sorted(best_spots.items(), key=lambda item: int(item[0])):
+        if not human_labels.get(spot, False):  # Spot is vacant
+            best_vacant_spot = spot
+            break
+
+    # Resize the image
+    base_width = 900
+    w_percent = (base_width / float(image.size[0]))
+    h_size = int((float(image.size[1]) * float(w_percent)))
+    image = image.resize((base_width, h_size), Image.LANCZOS)
+
+    # Create a draw object
+    draw = ImageDraw.Draw(image)
+    spot_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 24) 
+    shadow_color = 'black'
+
+    for spot, coordinates in reversed(spots_data_view.items()):
+        x1, y1, x2, y2 = coordinates
+        correct_coordinates = [x1 * w_percent, x2 * w_percent, y1 * w_percent, y2 * w_percent]
+        if human_labels.get(spot, False):
+            color = 'red'  # Occupied spots
+        elif spot == best_vacant_spot:
+            color = 'green'  # Best vacant spot
+        else:
+            color = 'blue'  # Other vacant spots
+        draw.rectangle(correct_coordinates, outline=color, width=5)
+
+        # Calculate position for the spot label
+        label_x = (correct_coordinates[2] - 25)
+        label_y = (correct_coordinates[1] - 25)
+
+        # Draw shadow/outline
+        for offset in [(1, 1), (-1, -1), (1, -1), (-1, 1)]:
+            shadow_position = (label_x + offset[0], label_y + offset[1])
+            draw.text(shadow_position, spot, font=spot_font, fill=shadow_color)
+
+        # Draw original text
+        draw.text((label_x, label_y), spot, font=spot_font, fill=color)
+
+    # Draw the text and rectangles
+    text = lot_image.timestamp.strftime("%l:%M%p %-m/%-d/%Y").lower().strip()
+    text_position = (image.width - 450, image.height - 50)
+    font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 30)
+
+    shadow_color = 'black'
+    for offset in [(2, 2), (-2, -2), (2, -2), (-2, 2)]:
+        shadow_position = (text_position[0] + offset[0], text_position[1] + offset[1])
+        draw.text(shadow_position, text, font=font, fill=shadow_color)
+
+    draw.text(text_position, text, font=font, fill="white")  # Change "white" to your desired text color
+
+    byte_arr = io.BytesIO()
+    image.save(byte_arr, format='JPEG')
+    byte_arr.seek(0)
+
+    return Response(content=byte_arr.getvalue(), media_type="image/jpeg")
+
+@router.get("/latest-image-info-jpg/", response_class=Response)
+def get_vacant_spots_info(
+        cam: str = Query(..., description="The name of the camera"),
+        db: Session = Depends(get_db)
+    ):
+    if not cam:
+        raise HTTPException(status_code=400, detail="Camera not specified.")
+
+    try:
+        lot_image = db.query(CamImage).filter(CamImage.camera_name == cam).order_by(CamImage.timestamp.desc()).first()
+        if not lot_image:
+            raise HTTPException(status_code=404, detail="Camera data not found.")
+    except Exception as e:
+        # Log the exception e
+        raise HTTPException(status_code=500, detail="An error occurred while fetching the camera data.")
+
+    human_labels = json.loads(lot_image.human_labels)
+
+    best_spots_path = os.path.join('app','lots', cam, 'bestspots.json')
+    with open(best_spots_path, 'r') as bestspots_file:
+        best_spots = json.load(bestspots_file)
+
+    vacant_spots = [spot for spot, occupied in human_labels.items() if not occupied]
+    best_vacant_spot = None
+    for rank, spot in sorted(best_spots.items(), key=lambda item: int(item[0])):
+        if spot in vacant_spots:
+            best_vacant_spot = spot
+            break
+
+    # Create an image for text
+    img_width, img_height = 900, 200
+    image = Image.new('RGB', (img_width, img_height), color='white')
+    draw = ImageDraw.Draw(image)
+
+    # Text setup
+    font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 20)
+    vacant_spots_text = "Vacant Spots: " + ", ".join(vacant_spots)
+    best_spot_text = "Best Vacant Spot: " + best_vacant_spot if best_vacant_spot else "No vacant spots available"
+
+    # Draw text
+    text_position_vacant = (10, 50)
+    text_position_best = (10, 100)
+    draw.text(text_position_vacant, vacant_spots_text, font=font, fill="black")
+    draw.text(text_position_best, best_spot_text, font=font, fill="black")
+
+    byte_arr = io.BytesIO()
+    image.save(byte_arr, format='JPEG')
+    byte_arr.seek(0)
+
+    return Response(content=byte_arr.getvalue(), media_type="image/jpeg")
+
+@router.get("/latest-image-info/")
+def get_vacant_spots_text(
+        cam: str = Query(..., description="The name of the camera"),
+        db: Session = Depends(get_db)
+    ):
+    if not cam:
+        raise HTTPException(status_code=400, detail="Camera not specified.")
+
+    try:
+        lot_image = db.query(CamImage).filter(CamImage.camera_name == cam).order_by(CamImage.timestamp.desc()).first()
+        if not lot_image:
+            raise HTTPException(status_code=404, detail="Camera data not found.")
+    except Exception as e:
+        # Log the exception e
+        raise HTTPException(status_code=500, detail="An error occurred while fetching the camera data.")
+
+    human_labels = json.loads(lot_image.human_labels)
+
+    best_spots_path = os.path.join('app','lots', cam, 'bestspots.json')
+    with open(best_spots_path, 'r') as bestspots_file:
+        best_spots = json.load(bestspots_file)
+
+    vacant_spots = [spot for spot, occupied in human_labels.items() if not occupied]
+    best_vacant_spot = None
+    for rank, spot in sorted(best_spots.items(), key=lambda item: int(item[0])):
+        if spot in vacant_spots:
+            best_vacant_spot = spot
+            break
+
+    response_text = f"Vacant Spots: {', '.join(vacant_spots)}\nBest Vacant Spot: {best_vacant_spot if best_vacant_spot else 'None'}"
+    return response_text

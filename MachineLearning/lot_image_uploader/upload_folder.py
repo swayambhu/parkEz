@@ -2,8 +2,8 @@ import requests
 import os
 import sys
 
-url = "http://localhost:8000/lot/upload-image/"  # this endpoint hasn't been made yet
-# url = "https://devapi.gruevy.com/lot/upload-image/"  # this endpoint hasn't been made yet
+url = "http://localhost:8000/lot/upload-image/"  #local
+# url = "https://devapi.gruevy.com/lot/upload-image/"  #dev / qa online
 
 def upload_jpg(filename):
     try:

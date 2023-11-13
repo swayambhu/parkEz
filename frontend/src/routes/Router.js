@@ -9,6 +9,7 @@ const Router = () => {
         <Routes>
             <Route path="/" element={<Pages.Home/>} />
             <Route path="/dashboard" element={<Pages.Dashboard />} />
+            <Route path="/business-dashboard" element={<Pages.BusinessDashboard />} />
             <Route path="/browse-parking-lot" element={<Pages.BrowseParkingLot />} />   
             <Route path="/about" element={<Pages.About/>} />
             <Route path="/contact" element={<Pages.Contact/>} />
@@ -31,6 +32,7 @@ const Router = () => {
                 ))}
             </Route>
             <Route path="/ad-admin" element={<Pages.AdAdmin />} />
+            <Route path="/lot-admin" element={<Pages.LotAdmin />} />
             <Route path="/admin-create-ad" element={<Pages.AdminCreateAd />} />
             <Route path="/image/:lot/:imageName" element={<Pages.SpecificImage />} />
             <Route path="/fakelot/:lot" element={<Pages.FakeLot />} />
