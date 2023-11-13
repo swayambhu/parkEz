@@ -22,7 +22,7 @@ const AdvertiserUrls = [
 
 const CustomerSupportUrls = [
     { path: "/dashboard", text: "Support Dashboard" },
-    { path: "/choose-lot-dashboard", text: "Lot Admin" },
+    { path: "/lot-admin", text: "Lot Admin" },
     { path: "/ad-admin", text: "Ad Admin" },
     { path: "/admin-create-ad", text: "Create Ad" },
     { path: "/manage-accounts", text: "Manage User Accounts" }
@@ -30,7 +30,7 @@ const CustomerSupportUrls = [
 
 const LotSpecialistUrls = [
     { path: "/dashboard", text: "Lot Support Dashboard" },
-    { path: "/choose-lot-dashboard", text: "Lot Admin" },
+    { path: "/lot-admin", text: "Lot Admin" },
     { path: "/manage-accounts", text: "Manage Lot Accounts" }
 ];
 

@@ -314,17 +314,27 @@ def get_latest_image(url_name: str, db: Session = Depends(get_db)) -> Dict:
     }
 
 @router.get("/business_dashboard/")
-def get_business_dashboard(db: Session = Depends(get_db), user_data = Depends(get_current_authenticated_user)) -> Dict:
+def get_business_dashboard(
+        db: Session = Depends(get_db), 
+        user_data = Depends(get_current_authenticated_user),
+        business_email: str = Query(None) 
+    ) -> Dict:
+
     print(user_data)
 
-    if user_data['entitlement_category'] != 'BUSINESS':
-        raise HTTPException(status_code=403, detail="Access not allowed. User must be of type BUSINESS.")
+    # Handle BUSINESS entitlement category
+    if user_data['entitlement_category'] == 'BUSINESS':
+        business_email = user_data['username']  # Use the logged in user's email for BUSINESS
+    elif user_data['entitlement_category'] in ['CUSTOMER_SUPPORT', 'LOT_SPECIALIST']:
+        if not business_email:
+            raise HTTPException(status_code=400, detail="Business email is required for CUSTOMER_SUPPORT and LOT_SPECIALIST.")
+    else:
+        raise HTTPException(status_code=403, detail="Access not allowed. User must be of type BUSINESS, CUSTOMER_SUPPORT, or LOT_SPECIALIST.")
 
-    # Get the business record using the user's email
-    business = db.query(Business).filter(Business.email == user_data['username']).first()
+    # Get the business record using the provided or derived email
+    business = db.query(Business).filter(Business.email == business_email).first()
     if not business:
         raise HTTPException(status_code=404, detail="Business not found.")
-
     # Fetch all lots owned by the business
     owned_lots = db.query(LotMetadata).filter(LotMetadata.owner_id == business.id).all()
     if not owned_lots:
@@ -365,4 +375,29 @@ def get_business_dashboard(db: Session = Depends(get_db), user_data = Depends(ge
         'bestspots': bestspots_data
     }
 
-    
+@router.get("/all_businesses/")
+def get_all_businesses(
+        db: Session = Depends(get_db), 
+        user_data = Depends(get_current_authenticated_user)
+    ) -> List[Dict]:
+
+    # Check if the user is either CUSTOMER_SUPPORT or LOT_SPECIALIST
+    if user_data['entitlement_category'] not in ['CUSTOMER_SUPPORT', 'LOT_SPECIALIST']:
+        raise HTTPException(status_code=403, detail="Access not allowed. User must be of type CUSTOMER_SUPPORT or LOT_SPECIALIST.")
+
+    # Querying all businesses from the database
+    businesses = db.query(Business).all()
+    if not businesses:
+        raise HTTPException(status_code=404, detail="No businesses found.")
+
+    # Extracting required information from each business
+    business_data = []
+    for business in businesses:
+        business_info = {
+            'id': business.id,
+            'email': business.email,
+            'name': business.name
+        }
+        business_data.append(business_info)
+
+    return business_data
