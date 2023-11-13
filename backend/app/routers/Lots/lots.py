@@ -402,29 +402,29 @@ def get_all_businesses(
 
     return business_data
 
-@router.get("/latest-jpg-image/", response_class=Response)
+@router.get("/latest-image-jpg/", response_class=Response)
 def get_latest_jpg_image(
-        camera_name: str = Query(..., description="The name of the camera"),
+        cam: str = Query(..., description="The name of the camera"),
         db: Session = Depends(get_db)
     ):
-    if not camera_name:
+    if not cam:
         raise HTTPException(status_code=400, detail="Camera not specified.")
 
     try:
-        lot_image = db.query(CamImage).filter(CamImage.camera_name == camera_name, CamImage.image.endswith('.jpg')).order_by(CamImage.timestamp.desc()).first()
+        lot_image = db.query(CamImage).filter(CamImage.camera_name == cam, CamImage.image.endswith('.jpg')).order_by(CamImage.timestamp.desc()).first()
         if not lot_image:
             raise HTTPException(status_code=404, detail="No JPG images found for this camera.")
     except Exception as e:
         # Log the exception e
         raise HTTPException(status_code=500, detail="An error occurred while fetching the image.")
 
-    image_path = os.path.join('app','lots', camera_name, 'photos', lot_image.image)
+    image_path = os.path.join('app','lots', cam, 'photos', lot_image.image)
     image = Image.open(image_path)
 
     human_labels = json.loads(lot_image.human_labels)
 
-    spots_path = os.path.join('app','lots', camera_name, 'spots.json')
-    best_spots_path = os.path.join('app','lots', camera_name, 'bestspots.json')
+    spots_path = os.path.join('app','lots', cam, 'spots.json')
+    best_spots_path = os.path.join('app','lots', cam, 'bestspots.json')
     with open(spots_path, 'r') as spots_file:
         spots_data_view = json.load(spots_file)
     with open(best_spots_path, 'r') as bestspots_file:
@@ -489,16 +489,16 @@ def get_latest_jpg_image(
 
     return Response(content=byte_arr.getvalue(), media_type="image/jpeg")
 
-@router.get("/vacant-spots-info/", response_class=Response)
+@router.get("/latest-image-info-jpg/", response_class=Response)
 def get_vacant_spots_info(
-        camera_name: str = Query(..., description="The name of the camera"),
+        cam: str = Query(..., description="The name of the camera"),
         db: Session = Depends(get_db)
     ):
-    if not camera_name:
+    if not cam:
         raise HTTPException(status_code=400, detail="Camera not specified.")
 
     try:
-        lot_image = db.query(CamImage).filter(CamImage.camera_name == camera_name).order_by(CamImage.timestamp.desc()).first()
+        lot_image = db.query(CamImage).filter(CamImage.camera_name == cam).order_by(CamImage.timestamp.desc()).first()
         if not lot_image:
             raise HTTPException(status_code=404, detail="Camera data not found.")
     except Exception as e:
@@ -507,7 +507,7 @@ def get_vacant_spots_info(
 
     human_labels = json.loads(lot_image.human_labels)
 
-    best_spots_path = os.path.join('app','lots', camera_name, 'bestspots.json')
+    best_spots_path = os.path.join('app','lots', cam, 'bestspots.json')
     with open(best_spots_path, 'r') as bestspots_file:
         best_spots = json.load(bestspots_file)
 
@@ -540,16 +540,16 @@ def get_vacant_spots_info(
 
     return Response(content=byte_arr.getvalue(), media_type="image/jpeg")
 
-@router.get("/vacant-spots-text/")
+@router.get("/latest-image-info/")
 def get_vacant_spots_text(
-        camera_name: str = Query(..., description="The name of the camera"),
+        cam: str = Query(..., description="The name of the camera"),
         db: Session = Depends(get_db)
     ):
-    if not camera_name:
+    if not cam:
         raise HTTPException(status_code=400, detail="Camera not specified.")
 
     try:
-        lot_image = db.query(CamImage).filter(CamImage.camera_name == camera_name).order_by(CamImage.timestamp.desc()).first()
+        lot_image = db.query(CamImage).filter(CamImage.camera_name == cam).order_by(CamImage.timestamp.desc()).first()
         if not lot_image:
             raise HTTPException(status_code=404, detail="Camera data not found.")
     except Exception as e:
@@ -558,7 +558,7 @@ def get_vacant_spots_text(
 
     human_labels = json.loads(lot_image.human_labels)
 
-    best_spots_path = os.path.join('app','lots', camera_name, 'bestspots.json')
+    best_spots_path = os.path.join('app','lots', cam, 'bestspots.json')
     with open(best_spots_path, 'r') as bestspots_file:
         best_spots = json.load(bestspots_file)
 
