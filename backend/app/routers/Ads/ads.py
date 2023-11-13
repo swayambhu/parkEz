@@ -526,27 +526,12 @@ async def serve_ad_view(request: Request, db: Session = Depends(get_db)):
     # Current date
     current_date = date.today()
 
-    # Get all the ads pointing to the provided lot id
-    # eligible_ads = db.query(Ad).filter(Ad.lots.any(id=lot_id))
-    all_ads = db.query(Ad).all()
-    print('lot id: ' + lot_id)
-    print('all ads: ')
-    print(all_ads)
-    
-    eligible_ads = db.query(Ad).join(Models.ad_lot_association).filter(Models.ad_lot_association.c.lot_id == lot_id).all()
-    print('lot id: ' + lot_id)
-    print('eligible ads: ')
-    print(eligible_ads)
-
     # Filter the ads further to only include ads where the current date is between the start date and the end date
     eligible_active_ads = db.query(Ad).join(Models.ad_lot_association).filter(
         Models.ad_lot_association.c.lot_id == lot_id,
         Ad.start_date <= current_date,
         Ad.end_date >= current_date
     ).all()
-    print('lot id: ' + lot_id)
-    print('eligible active ads: ')
-    print(eligible_active_ads)
 
 
     # Randomly select one valid ad and increment its impressions

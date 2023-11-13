@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import AdvertiserDashboard from '../components/Pages/AdvertiserDashboard';
 
@@ -6,6 +7,7 @@ const API_URL = process.env.REACT_APP_API_URL;
 
 const TempDashboard = () => {
     const [userType, setUserType] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         axios.get(API_URL + "auth/me", { withCredentials: true })
@@ -21,6 +23,10 @@ const TempDashboard = () => {
         if (!type) return "";
         return type.toLowerCase().split('_').map(word => word.charAt(0).toUpperCase() + word.substring(1)).join(' ');
     };
+
+    const NavBusiness = () => {
+        navigate('/business-dashboard'); 
+    }
 
     const renderContent = () => {
         switch(userType) {
@@ -133,19 +139,7 @@ const TempDashboard = () => {
                     </div>
                 );
             case 'BUSINESS':
-                return (
-                    <div>
-                        <h2>Business Dashboard</h2>
-                        <p>Welcome to the business overview. Monitor sales, collaborate with teams, and strategize for future growth.</p>
-                        <h3>Quarterly Sales</h3>
-                        <ul>
-                            <li>Q1: $100,000</li>
-                            <li>Q2: $120,000</li>
-                        </ul>
-                        <h3>Team Collaboration</h3>
-                        <p>We're collaborating with the sales team on the next product launch. Expect updates by next week.</p>
-                    </div>
-                );
+                NavBusiness()
             default:
                 return <div>Select a role to view content.</div>;
             }

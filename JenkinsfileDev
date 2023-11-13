@@ -4,17 +4,16 @@ pipeline {
     tools {
         nodejs 'node' 
     }
-
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-
         stage('Install and Build Frontend') {
             steps {
                 dir('frontend') {  
+                    sh 'cp /home/tom/web/.env.productionDEV .env.production'
                     sh 'npm install'
                     sh '''
                         unset CI
@@ -23,16 +22,19 @@ pipeline {
                 }
             }
         }
-
         stage('Deploy Frontend') {
             steps {
-                sh 'cp -r frontend/build/* /home/jenkinsagent/web/dev.gruevy.com/'
+                sh 'cp -r frontend/build/* /home/tom/web/dev.gruevy.com/'
             }
         }
-
         stage('Deploy Backend') {
             steps {
-                sh 'cp -r backend/* /home/tom/jenkinsagent/devapi.gruevy.com/'
+                sh 'cp -r backend/* /home/tom/web/backend_dev/'
+            }
+        }
+        stage('Restart Service') { 
+            steps {
+                sh 'sudo systemctl restart devback.service'
             }
         }
     }
