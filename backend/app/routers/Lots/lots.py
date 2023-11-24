@@ -402,7 +402,7 @@ def get_all_businesses(
 
     return business_data
 
-@router.get("/latest-image-jpg/", response_class=Response)
+@router.get("/latest-jpg/", response_class=Response)
 def get_latest_jpg_image(
         cam: str = Query(..., description="The name of the camera"),
         db: Session = Depends(get_db)
@@ -483,17 +483,24 @@ def get_latest_jpg_image(
 
     draw.text(text_position, text, font=font, fill="white")  # Change "white" to your desired text color
 
+    # Save the image to a BytesIO object
     byte_arr = io.BytesIO()
     image.save(byte_arr, format='JPEG')
-    byte_arr.seek(0)
+    byte_arr.seek(0)  # seek back to the start after saving
 
-    return Response(content=byte_arr.getvalue(), media_type="image/jpeg")
+    # Create a response
+    response = Response(content=byte_arr.getvalue(), media_type="image/jpeg")
 
-@router.get("/latest-image-info-jpg/", response_class=Response)
-def get_vacant_spots_info(
-        cam: str = Query(..., description="The name of the camera"),
-        db: Session = Depends(get_db)
-    ):
+    # Add anti-caching headers
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+
+    # Return the image data as a response
+    return response
+
+@router.get("/latest-info-jpg/", response_class=Response)
+def get_vacant_spots_info(cam: str = Query(..., description="The name of the camera"), db: Session = Depends(get_db)):
     if not cam:
         raise HTTPException(status_code=400, detail="Camera not specified.")
 
@@ -507,7 +514,7 @@ def get_vacant_spots_info(
 
     human_labels = json.loads(lot_image.human_labels)
 
-    best_spots_path = os.path.join('app','lots', cam, 'bestspots.json')
+    best_spots_path = os.path.join('app', 'lots', cam, 'bestspots.json')
     with open(best_spots_path, 'r') as bestspots_file:
         best_spots = json.load(bestspots_file)
 
@@ -534,11 +541,21 @@ def get_vacant_spots_info(
     draw.text(text_position_vacant, vacant_spots_text, font=font, fill="black")
     draw.text(text_position_best, best_spot_text, font=font, fill="black")
 
+    # Save the image to a BytesIO object
     byte_arr = io.BytesIO()
     image.save(byte_arr, format='JPEG')
-    byte_arr.seek(0)
+    byte_arr.seek(0)  # seek back to the start after saving
 
-    return Response(content=byte_arr.getvalue(), media_type="image/jpeg")
+    # Create a response
+    response = Response(content=byte_arr.getvalue(), media_type="image/jpeg")
+
+    # Add anti-caching headers
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+
+    # Return the image data as a response
+    return response
 
 @router.get("/latest-image-info/")
 def get_vacant_spots_text(
