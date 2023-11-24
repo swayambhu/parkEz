@@ -26,7 +26,7 @@ import sys
 import requests
 
 # url = "http://localhost:8000/lot/upload-image/"  
-url = "https://devapi.gruevy.com/lot/upload-image/"  
+url = "https://qaapi.gruevy.com/lot/upload-image/"  
 cam_url = "https://www.youtube.com/watch?v=EPKWu223XEg"
 
 def capture_frame(video_url):
