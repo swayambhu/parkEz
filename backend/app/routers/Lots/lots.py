@@ -402,7 +402,7 @@ def get_all_businesses(
 
     return business_data
 
-@router.get("/latest-image-jpg/", response_class=Response)
+@router.get("/latest-jpg/", response_class=Response)
 def get_latest_jpg_image(
         cam: str = Query(..., description="The name of the camera"),
         db: Session = Depends(get_db)
@@ -499,7 +499,7 @@ def get_latest_jpg_image(
     # Return the image data as a response
     return response
 
-@router.get("/latest-image-info-jpg/", response_class=Response)
+@router.get("/latest-info-jpg/", response_class=Response)
 def get_vacant_spots_info(cam: str = Query(..., description="The name of the camera"), db: Session = Depends(get_db)):
     if not cam:
         raise HTTPException(status_code=400, detail="Camera not specified.")
