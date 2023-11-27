@@ -6,18 +6,11 @@ import { formatDate } from '../shared/tools';
 
 const API_URL = process.env.REACT_APP_API_URL;
 
-const BusinessDashboard = () => {
+const ArchiveHome = () => {
     const canvasRef = useRef(null);
     const [selectedTimestamp, setSelectedTimestamp] = useState("");
     const [comboBoxChoices, setComboBoxChoices] = useState([]);
-    const [comboBoxChoicesLinks, setComboBoxChoicesLinks] = useState([]); 
-    const [currentOccupancy, setCurrentOccupancy] = useState('');
-    const [totalSpots, setTotalSpots] = useState('0');
-    const [avgToday, setAvgToday] = useState('');
-    const [totalToday, setTotalTotal] = useState('');
-    const [past7Days, setPast7Days] = useState(['','','','','','','']); 
-    const [past7DaysTotal, setPast7DaysTotal] = useState(['','','','','','','']); 
-    const [past7DaysAverage, setPast7DaysAverage] = useState(['','','','','','','']); 
+    const [comboBoxChoicesLinks, setComboBoxChoicesLinks] = useState([]);  
     const [overparkingData, setOverparkingData] = useState({});
     const [overparkingConfirmLinks, setOverparkingConfirmLinks] = useState({});
 
@@ -69,18 +62,7 @@ const BusinessDashboard = () => {
             }
           }
         }
-        let current_datetime = '';
-        let match = sortedData[sortedData.length-1].image_url.match(/_(\d+)\./);
-        if (match) {
-          current_datetime = match[1];
-        }
-        console.log('where do I get the url at yo?');
-        console.log(sortedData[0]);
-        occupancyCheckLink = {};
-        spotNames.forEach(spotNames => {
-          occupancyCheckLink[spotNames] = sortedData[0].url_name + '/' + spotNames + '/' + lastFreeSpace[spotNames] + '/' + current_datetime + '/';
-          // overparking_confirm/<str:lot>/<str:cam>/<str:spot>/<str:startdatetime>/<str:enddatetime>/
-        });
+
         let choices = [];
         let choicesString = [];
         for (let a of sortedData){
@@ -103,6 +85,18 @@ const BusinessDashboard = () => {
         }
         setComboBoxChoices(choices);
         setComboBoxChoicesLinks(choicesString);
+
+        let current_datetime = '';
+        let match = sortedData[sortedData.length-1].image_url.match(/_(\d+)\./);
+        if (match) {
+          current_datetime = match[1];
+        }
+
+        occupancyCheckLink = {};
+        spotNames.forEach(spotNames => {
+          occupancyCheckLink[spotNames] = sortedData[0].url_name + '/' + spotNames + '/' + lastFreeSpace[spotNames] + '/' + current_datetime + '/';
+          // overparking_confirm/<str:lot>/<str:cam>/<str:spot>/<str:startdatetime>/<str:enddatetime>/
+        });
         return [spotOccupancyTime, occupancyCheckLink];
     }      
     
@@ -157,12 +151,8 @@ const BusinessDashboard = () => {
         const canvas = canvasRef.current;
         const context = canvas.getContext('2d');
 
-        const dashboardUrl = bis 
-        ? `${API_URL}lot/business_dashboard/?business_email=${bis}` 
-        : `${API_URL}lot/business_dashboard/`;
-
         // Fetch data using axios
-        axios.get(dashboardUrl, { withCredentials: true })
+        axios.get(`${API_URL}lot/business_dashboard/`, { withCredentials: true })
             .then(response => {
                 const data = response.data;
                 let imagesData = response.data.images_data;
@@ -177,15 +167,6 @@ const BusinessDashboard = () => {
                     return parseTimestamp(current.timestamp) > parseTimestamp(latest.timestamp) ? current : latest;
                 });
   
-                setCurrentOccupancy(countCarsParkedAtTimestamp(mostRecentImage.human_labels));
-                setTotalSpots(Object.keys(mostRecentImage.human_labels).length);
-                setAvgToday(parseFloat(metrics.dailyMetrics[0].averageOccupancy.toFixed(1)));
-                setPast7DaysAverage(
-                    metrics.dailyMetrics.map(item => parseFloat(item.averageOccupancy.toFixed(1)))
-                );
-                setTotalTotal(metrics.dailyMetrics[0].totalCars);
-                setPast7DaysTotal([metrics.dailyMetrics[0].totalCars,metrics.dailyMetrics[1].totalCars,metrics.dailyMetrics[2].totalCars,metrics.dailyMetrics[3].totalCars,metrics.dailyMetrics[4].totalCars,metrics.dailyMetrics[5].totalCars,metrics.dailyMetrics[6].totalCars]);
-                setPast7Days([metrics.dailyMetrics[0].day,metrics.dailyMetrics[1].day,metrics.dailyMetrics[2].day,metrics.dailyMetrics[3].day,metrics.dailyMetrics[4].day,metrics.dailyMetrics[5].day,metrics.dailyMetrics[6].day]);
 
                 const [occupancyTime, occupancyLinks] = findOverparking(imagesData);
                 setOverparkingData(occupancyTime);
@@ -235,13 +216,11 @@ const BusinessDashboard = () => {
     const handlePrevious = () => {
         navigate(`/archive/${lotUrlName}/${previousImageName}`);
     };
-
     const handleTimestampChange = (event) => {
         setSelectedTimestamp(event.target.value);
         const choiceNumber = comboBoxChoices.indexOf(event.target.value);
         navigate(`/archive/${lotUrlName}/${comboBoxChoicesLinks[choiceNumber]}/`);
       };
-
     return (
         <div style={{ minHeight: '95vh', width:'fit-content',marginLeft:'auto', marginRight:'auto', textAlign:'center' }}>
             <strong>Jump to date/time in archive:</strong> <select value={selectedTimestamp} onChange={handleTimestampChange}>
@@ -252,91 +231,51 @@ const BusinessDashboard = () => {
             ))}
             </select>
             <TimeH2>{lotName} - {formatDate(humanTime)}</TimeH2>
-            <ImageDiv>
-                <LotCanvas ref={canvasRef} />
-            </ImageDiv>
-            <div style={{textAlign:'center'}}>
-                Current Occupancy: {currentOccupancy} / {totalSpots}<br />
-                Total car hours today: {totalToday}<br />
-                Average occupancy today: {avgToday}%<br />
-            </div>
-            <div style={{ overflowX: 'auto', textAlign: 'center' }}>
-                <table style={{ margin: 'auto', borderCollapse: 'collapse', border: '1px solid black' }}>
-                    <thead>
-                        <tr>
-                            <th style={{ padding: '0 10px' }}>Date</th>
-                            <th style={{ padding: '0 10px' }}>{past7Days[0].substring(5) + ' '}</th>
-                            <th style={{ padding: '0 10px' }}>{past7Days[1].substring(5) + ' '}</th>
-                            <th style={{ padding: '0 10px' }}>{past7Days[2].substring(5) + ' '}</th>
-                            <th style={{ padding: '0 10px' }}>{past7Days[3].substring(5) + ' '}</th>
-                            <th style={{ padding: '0 10px' }}>{past7Days[4].substring(5) + ' '}</th>
-                            <th style={{ padding: '0 10px' }}>{past7Days[5].substring(5) + ' '}</th>
-                            <th style={{ padding: '0 10px' }}>{past7Days[6].substring(5)}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td style={{ padding: '0 10px' }}>7-Day Average Occupancy</td>
-                            <td style={{ padding: '0 10px' }}>{past7DaysAverage[0]}</td>
-                            <td style={{ padding: '0 10px' }}>{past7DaysAverage[1]}</td>
-                            <td style={{ padding: '0 10px' }}>{past7DaysAverage[2]}</td>
-                            <td style={{ padding: '0 10px' }}>{past7DaysAverage[3]}</td>
-                            <td style={{ padding: '0 10px' }}>{past7DaysAverage[4]}</td>
-                            <td style={{ padding: '0 10px' }}>{past7DaysAverage[5]}</td>
-                            <td style={{ padding: '0 10px' }}>{past7DaysAverage[6]}</td>
-                        </tr>
-                        <tr>
-                            <td style={{ padding: '0 10px' }}>7-Day Total Cars Parked</td>
-                            <td style={{ padding: '0 10px' }}>{past7DaysTotal[0]}</td>
-                            <td style={{ padding: '0 10px' }}>{past7DaysTotal[1]}</td>
-                            <td style={{ padding: '0 10px' }}>{past7DaysTotal[2]}</td>
-                            <td style={{ padding: '0 10px' }}>{past7DaysTotal[3]}</td>
-                            <td style={{ padding: '0 10px' }}>{past7DaysTotal[4]}</td>
-                            <td style={{ padding: '0 10px' }}>{past7DaysTotal[5]}</td>
-                            <td style={{ padding: '0 10px' }}>{past7DaysTotal[6]}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            <table style={overparkingStyle}>
-            <thead>
-              <tr>
-                <th>Spot Name |</th>
-                <th>Hours Parked</th>
-              </tr>
-            </thead>
-            <tbody>
-                {Object.keys(overparkingData).map((key) => 
-                    overparkingData[key] !== 0 && (
-                        <tr key={key}>
-                            <td>
-                                <Link 
-                                    to={`/overpark-confirm/${overparkingConfirmLinks[key]}`}
-                                    style={{ color: overparkingData[key] > 5 ? "red" : "black", fontWeight: overparkingData[key] > 5 ? "bold" : "normal" }}
-                                >
-                                    {key}
-                                </Link>
-                            </td>
-                            <td>
-                                <Link 
-                                    to={`/overpark-confirm/${overparkingConfirmLinks[key]}`}
-                                    style={{ color: overparkingData[key] > 5 ? "red" : "black", fontWeight: overparkingData[key] > 5 ? "bold" : "normal" }}
-                                >
-                                    {parseFloat(overparkingData[key].toFixed(1))}
-                                </Link>
-                            </td> 
-                        </tr>
-                    )
-                )}
-            </tbody>
-          </table>  
-
-            </div>
             <ButtonsDiv>
                 <Button onClick={handlePrevious}>Previous</Button>
             </ButtonsDiv>
+            <ImageDiv>
+                <LotCanvas ref={canvasRef} />
+            </ImageDiv>
+
+            <div style={{ overflowX: 'auto', textAlign: 'center' }}>
+                <table style={overparkingStyle}>
+                <thead>
+                <tr>
+                    <th>Spot Name </th>
+                    <th>Hours Parked</th>
+                </tr>
+                </thead>
+                <tbody>
+                    {Object.keys(overparkingData).map((key) => 
+                        overparkingData[key] !== 0 && (
+                            <tr key={key}>
+                                <td>
+                                    <Link 
+                                        to={`/overpark-confirm/${overparkingConfirmLinks[key]}`}
+                                        style={{ color: overparkingData[key] > 5 ? "red" : "black", fontWeight: overparkingData[key] > 5 ? "bold" : "normal" }}
+                                    >
+                                        {key}
+                                    </Link>
+                                </td>
+                                <td>
+                                    <Link 
+                                        to={`/overpark-confirm/${overparkingConfirmLinks[key]}`}
+                                        style={{ color: overparkingData[key] > 5 ? "red" : "black", fontWeight: overparkingData[key] > 5 ? "bold" : "normal" }}
+                                    >
+                                        {parseFloat(overparkingData[key].toFixed(1))}
+                                    </Link>
+                                </td> 
+                            </tr>
+                        )
+                    )}
+                </tbody>
+                </table>  
+
+            </div>
 
         </div>
     );
 };
 
-export default BusinessDashboard;
+export default ArchiveHome;
