@@ -351,6 +351,7 @@ def get_business_dashboard(
         for image in cam_images:
             images_data.append({
                 'image_url': os.path.join('lots', camera.name, 'photos', image.image),
+                'url_name': lot_instance.url_name,
                 'name': lot_instance.name,
                 'timestamp': image.timestamp,
                 'human_labels': json.loads(image.human_labels),
@@ -588,3 +589,82 @@ def get_vacant_spots_text(
 
     response_text = f"Vacant Spots: {', '.join(vacant_spots)}\nBest Vacant Spot: {best_vacant_spot if best_vacant_spot else 'None'}"
     return response_text
+
+@router.get("/get_lot_history/")
+def get_lot_history(
+        url_name: str,
+        db: Session = Depends(get_db), 
+        user_data = Depends(get_current_authenticated_user),
+    ) -> Dict:
+
+    # Handle BUSINESS entitlement category
+    if user_data['entitlement_category'] == 'BUSINESS':
+        pass
+    elif user_data['entitlement_category'] in ['CUSTOMER_SUPPORT', 'LOT_SPECIALIST']:
+        if not url_name:
+            raise HTTPException(status_code=400, detail="Business email is required for CUSTOMER_SUPPORT and LOT_SPECIALIST.")
+    else:
+        raise HTTPException(status_code=403, detail="Access not allowed. User must be of type BUSINESS, CUSTOMER_SUPPORT, or LOT_SPECIALIST.")
+
+    lot_instance = db.query(LotMetadata).filter(LotMetadata.url_name == url_name).first()
+    cameras = db.query(CamMetadata).filter(CamMetadata.lot_id == lot_instance.id).all()
+    
+    images_data = []
+    for camera in cameras:
+        cam_images = db.query(CamImage).filter(CamImage.camera_name == camera.name).order_by(CamImage.timestamp.desc()).all()
+        for image in cam_images:
+            images_data.append({
+                'image_url': os.path.join('lots', camera.name, 'photos', image.image),
+                'url_name': lot_instance.url_name,
+                'name': lot_instance.name,
+                'timestamp': image.timestamp,
+                'human_labels': json.loads(image.human_labels),
+                'model_labels': json.loads(image.model_labels)
+            })
+
+    return {
+        'images_data': images_data,
+    }
+
+@router.get("/overparking-confirm/{url_name}/{spot}/{startdatetime}/{enddatetime}")
+async def overparking_confirm(
+    url_name: str,  spot: str, startdatetime: str, enddatetime: str, 
+    db: Session = Depends(get_db)
+):
+    # Fetching lot and cameras data
+    lot_instance = db.query(LotMetadata).filter(LotMetadata.url_name == url_name).first()
+    if not lot_instance:
+        raise HTTPException(status_code=404, detail="No such lot found based on the given URL name.")
+
+    cameras = db.query(CamMetadata).filter(CamMetadata.lot_id == lot_instance.id).all()
+    camera_names = [camera.name for camera in cameras]
+
+
+    # Convert startdatetime and enddatetime from string to datetime
+    startdatetime = datetime.strptime(startdatetime, '%Y%m%d%H%M')
+    enddatetime = datetime.strptime(enddatetime, '%Y%m%d%H%M')
+
+    # Query the CamImage model
+    cam_images = db.query(CamImage).filter(
+        CamImage.timestamp.between(startdatetime, enddatetime),
+        CamImage.camera_name == camera_names[0]
+    ).all()
+
+    spots_file_path = os.path.join('app', 'lots', camera_names[0], 'spots.json')
+    with open(spots_file_path, 'r') as spots_file:
+        spots_data = json.load(spots_file)
+
+    # Manually build the response
+    response_data = {
+        'crop': spots_data.get(spot, {}),
+        'cam_images': [
+            {
+                'image': image.image,
+                'timestamp': image.timestamp,
+                'camera_name': image.camera_name,
+                'human_labels': json.loads(image.human_labels),
+                'model_labels': json.loads(image.model_labels)
+            } for image in cam_images
+        ]
+    }
+    return response_data

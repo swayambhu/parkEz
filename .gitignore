@@ -11,6 +11,10 @@ MachineLearning/build_training_data/venv
 backend/app/routers/Authentication/authentication.py
 backend/app/lots/colltown
 MachineLearning/build_training_data/training_images
+MachineLearning/build_training_data/finaltraining
+MachineLearning/build_training_data/old_training_images
+MachineLearning/build_training_data/model2_training_images
+MachineLearning/lot_image_uploader/recenthistory
 MachineLearning/venv
 MachineLearning/models
 MachineLearning/.ipynb_checkpoints

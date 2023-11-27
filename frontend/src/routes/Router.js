@@ -34,8 +34,11 @@ const Router = () => {
             <Route path="/ad-admin" element={<Pages.AdAdmin />} />
             <Route path="/lot-admin" element={<Pages.LotAdmin />} />
             <Route path="/admin-create-ad" element={<Pages.AdminCreateAd />} />
+            <Route path="/archive-home/" element={<Pages.ArchiveHome />} />
+            <Route path="/archive/:lot/:imageName" element={<Pages.Archive />} />
             <Route path="/image/:lot/:imageName" element={<Pages.SpecificImage />} />
             <Route path="/fakelot/:lot" element={<Pages.FakeLot />} />
+            <Route path="/overpark-confirm/:lot/:space/:starttime/:endtime" element={<Pages.OverparkingConfirm />} />
 
         </Routes>
     )
