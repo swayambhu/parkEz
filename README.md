@@ -21,7 +21,7 @@ Livecam from backend with current models (updated every 30 minutes)
 
 ParkEz utilizes AI-powered analysis of parking lot camera footage to offer value to parking lot owners, local businesses, and customers. The platform is designed to help businesses maximize revenue, minimize crime, and ease the burden of parking lot management.
 
-## Features
+## Implemented Features
 
 ParkEz consists of 5 major functional requirement modules:
 
@@ -39,6 +39,8 @@ ParkEz consists of 5 major functional requirement modules:
 
 ### Module 2: Parking Lot Management
 - **2.1 Track Occupancy**: Tracking of how many spots are taken at what times, presented for individuals who manage parking lots
+- **2.2 Access Footage Archive**: Lot owners can access archived footage of their parking lots.
+- **2.3 Detect Overparking**: Notification of whenever a space is occupied longer than a specified period of time.
 
 ### Module 3: Parking Lot Status
 - **3.1 Search and Select Lot**: Unsubscribed users can browse and search parking lots using ParkEZ. 
@@ -53,11 +55,6 @@ ParkEz consists of 5 major functional requirement modules:
 ### Module 5: Payment Gateway
 - **5.1 Define Payment Method**: Users decide how they pay for their subscription (ad or lot manger).
 - **5.2 Validate Payment**: Checks that customer payment method can be billed correctly.
-
-
-## Upcoming Requirements
-- **2.2 Access Footage Archive**: Lot owners can access archived footage of their parking lots.
-- **2.3 Detect Overparking**: Notification of whenever a space is occupied longer than a specified period of time.
 
 ## Usage Scenarios
 

@@ -2,8 +2,8 @@ import requests
 import os
 import sys
 
-url = "http://localhost:8000/lot/upload-image/"  #local
-# url = "https://devapi.gruevy.com/lot/upload-image/"  #dev / qa online
+# url = "http://localhost:8000/lot/upload-image/"  #local
+url = "https://qaapi.gruevy.com/lot/upload-image/"  #dev / qa online
 
 def upload_jpg(filename):
     try:

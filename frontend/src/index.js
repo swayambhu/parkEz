@@ -32,6 +32,9 @@ import SpecificImage from './pages/SpecificImage';
 import FakeLot from './pages/FakeLot';
 import BusinessDashboard from './pages/BusinessDashboard';
 import LotAdmin from './pages/LotAdmin';
+import Archive from './pages/Archive';
+import OverparkingConfirm from './pages/OverparkingConfirm';
+import ArchiveHome from './pages/ArchiveHome';
 
 const container = document.getElementById('root');
 const root = createRoot(container);
@@ -66,5 +69,8 @@ export const Pages = {
   SpecificImage,
   FakeLot,
   BusinessDashboard,
-  LotAdmin
+  LotAdmin,
+  Archive,
+  ArchiveHome,
+  OverparkingConfirm
 }
