@@ -226,7 +226,7 @@ const Archive = () => {
             <table style={overparkingStyle}>
             <thead>
               <tr>
-                <th>Spot Name </th>
+                <th>Spot Name &nbsp;&nbsp;&nbsp;</th>
                 <th>Hours Parked</th>
               </tr>
             </thead>
@@ -236,7 +236,7 @@ const Archive = () => {
                         <tr key={key}>
                             <td>
                                 <Link 
-                                    to={`/overpark-confirm/${overparkingConfirmLinks[key]}`}
+                                    to={`#`}
                                     style={{ color: overparkingData[key] > 5 ? "red" : "black", fontWeight: overparkingData[key] > 5 ? "bold" : "normal" }}
                                 >
                                     {key}
@@ -244,7 +244,7 @@ const Archive = () => {
                             </td>
                             <td>
                                 <Link 
-                                    to={`/overpark-confirm/${overparkingConfirmLinks[key]}`}
+                                    to={`#`}
                                     style={{ color: overparkingData[key] > 5 ? "red" : "black", fontWeight: overparkingData[key] > 5 ? "bold" : "normal" }}
                                 >
                                     {parseFloat(overparkingData[key].toFixed(1))}

@@ -397,7 +397,8 @@ def get_all_businesses(
         business_info = {
             'id': business.id,
             'email': business.email,
-            'name': business.name
+            'name': business.name,
+            'type': business.type
         }
         business_data.append(business_info)
 

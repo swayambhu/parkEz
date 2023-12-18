@@ -1,22 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
 const AdvertiserDashboard = () => {
   const [ads, setAds] = useState([]);
-  const deleteAd = (advert_id) => {
-    axios
-        .delete(API_URL + `ads/delete/${advert_id}`, { withCredentials: true })
-        .then((res) => {
-            console.log(res.data.message);
-            fetchAds();
-        })
-        .catch((err) => {
-            console.error(err);
-        });
-};
+
 
   const fetchAds = () => {
     axios
@@ -41,17 +30,8 @@ const AdvertiserDashboard = () => {
             <div key={ad.advert_id} style={{ marginBottom: "30px" }}>
                 <h2>
                   Advertisement {index + 1}: {ad.name} 
-                  <Link style={{ marginLeft: '10px'}} to={`/edit-ad/${ad.advert_id}`}>(Edit)</Link>
-                  <a 
-                      href="#"
-                      onClick={(event) => {
-                          event.preventDefault();
-                          deleteAd(ad.advert_id);
-                      }}
-                      style={{ marginLeft: '10px',  textDecoration: 'underline', cursor: 'pointer' }}
-                  >
+                     (Edit)  
                       (Delete)
-                  </a> 
                 </h2>
 
                 <p><strong>Name:</strong> {ad.name}</p>
@@ -110,6 +90,7 @@ const AdvertiserDashboard = () => {
                 )}
             </div>
         ))}
+                    <p>*Delete and Edit functions removed for archived project</p>
     </div>
   );
 };

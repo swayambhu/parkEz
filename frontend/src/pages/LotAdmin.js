@@ -7,9 +7,11 @@ const API_URL = process.env.REACT_APP_API_URL;
 const LotAdmin = () => {
     const [businesses, setBusinesses] = useState([]);
     const navigate = useNavigate();
+
     useEffect(() => {
         axios.get(`${API_URL}lot/all_businesses/`, { withCredentials: true })
             .then(response => {
+                console.log(response.data);
                 setBusinesses(response.data);
             })
             .catch(error => {
@@ -32,11 +34,11 @@ const LotAdmin = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {businesses.map(business => (
-                        <tr key={business.id} onClick={() => handleRowClick(business.email)} style={{ cursor: 'pointer' }}>
-                            <td style={{ padding: '0 10px' }}>{business.id}</td>
-                            <td style={{ padding: '0 10px' }}>{business.email}</td>
-                            <td style={{ padding: '0 10px' }}>{business.name}</td>
+                    {businesses.filter(business => business.type === "BUSINESS").map(filteredBusiness => (
+                        <tr key={filteredBusiness.id} onClick={() => handleRowClick(filteredBusiness.email)} style={{ cursor: 'pointer' }}>
+                            <td style={{ padding: '0 10px' }}>{filteredBusiness.id}</td>
+                            <td style={{ padding: '0 10px' }}>{filteredBusiness.email}</td>
+                            <td style={{ padding: '0 10px' }}>{filteredBusiness.name}</td>
                         </tr>
                     ))}
                 </tbody>
