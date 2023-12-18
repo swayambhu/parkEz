@@ -1,4 +1,4 @@
-import stripe
+# import stripe
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Cookie
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
@@ -21,40 +21,40 @@ router = APIRouter(
     tags=["Authentication"],
 )
 
-@router.post("/create-user", response_model=Users.User)
-async def create_user(user: Users.UserCreate, db: Session = Depends(get_db)):
-    """
-    Create a new user
-    Check first if user already exists or not, if user does not exist then create the password and then create the user.
+# @router.post("/create-user", response_model=Users.User)
+# async def create_user(user: Users.UserCreate, db: Session = Depends(get_db)):
+#     """
+#     Create a new user
+#     Check first if user already exists or not, if user does not exist then create the password and then create the user.
 
-    Args:
-        user (Users.UserCreate): pydantic User model which will contain username and password
-        db (Session, optional): connection pool dependency for database.
+#     Args:
+#         user (Users.UserCreate): pydantic User model which will contain username and password
+#         db (Session, optional): connection pool dependency for database.
 
-    Returns:
-        Pydantic User model: it will share user data from user table except for password
-    """
+#     Returns:
+#         Pydantic User model: it will share user data from user table except for password
+#     """
     
-    user_dict = user_query.get_user(username=user.username, db=db)
+#     user_dict = user_query.get_user(username=user.username, db=db)
     
     
-    if user_dict:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="User already exists"
-        )
+#     if user_dict:
+#         raise HTTPException(
+#             status_code=status.HTTP_409_CONFLICT,
+#             detail="User already exists"
+#         )
     
-    user = Users.UserCreate(username= user.username, password=user.password)
+#     user = Users.UserCreate(username= user.username, password=user.password)
     
-    user_dict = utils.create_user_auth(user=user, db=db)
-    return user_dict
+#     user_dict = utils.create_user_auth(user=user, db=db)
+#     return user_dict
 
 
 
 @router.post("/login", response_model= Users.User)
 async def login(form_data: Auth.LoginForm, db: Session = Depends(get_db)):
-    print("form_data:", form_data)
-    print("db:", db)
+    # print("form_data:", form_data)
+    # print("db:", db)
     user = authenticate_user(username=form_data.username, password=form_data.password,user_type=form_data.user_type.value, db=db)
     
     if not user:

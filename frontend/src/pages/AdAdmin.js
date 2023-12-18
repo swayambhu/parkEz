@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link } from "react-router-dom";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -27,10 +26,7 @@ const AdAdmin = () => {
                     {advertiser.ads.map((ad, index) => (
                         <div key={ad.advert_id} style={{ marginBottom: "30px", marginLeft: "20px" }}>
                             <h3>
-                                Advertisement {index + 1}: {ad.name}
-                                <span>(Edit)</span>
-                                    (Delete)
-                                
+                                Advertisement {index + 1}: {ad.name}                                
                             </h3>
 
                             <p><strong>Name:</strong> {ad.name}</p>

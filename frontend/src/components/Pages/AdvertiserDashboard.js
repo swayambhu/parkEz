@@ -30,8 +30,6 @@ const AdvertiserDashboard = () => {
             <div key={ad.advert_id} style={{ marginBottom: "30px" }}>
                 <h2>
                   Advertisement {index + 1}: {ad.name} 
-                     (Edit)  
-                      (Delete)
                 </h2>
 
                 <p><strong>Name:</strong> {ad.name}</p>
