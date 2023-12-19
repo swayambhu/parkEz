@@ -1,11 +1,12 @@
 # ParkEz 
-## Live Demo: https://qa.gruevy.com/
+## Interactive Demo: https://parkez.gruevy.com/
 
-ParkEZ is a parking lot monitoring platform with different webpages for both the public and parking lot operators to monitor lot occupancy, provide security, stop overparking and recommend customers the best spots. Advertisers are also able to place ads on the public facing webpages. This repository is part of a 2-semester course progression, and it currently implements functional requirement module 1: Account Management, with all its subfeatures. The remaining modules will be implemented in the next semester's class.
+ParkEZ is a parking lot monitoring platform with different webpages for both the public and parking lot operators to monitor lot occupancy, provide security, stop overparking and recommend customers the best spots. This Pace University capstone team project was complete on December 15, 2023
 
-Livecam from backend with current models (updated every 30 minutes)
-[![Liveshot](https://qaapi.gruevy.com/lot/latest-jpg?cam=colltown)](https://qa.gruevy.com/lot/colltown)
-[![Liveinfo](https://qaapi.gruevy.com/lot/latest-info-jpg?cam=colltown)](https://qa.gruevy.com/lot/colltown)
+This final demonstration shows the key parking management features:
+
+[![Click to play ParkEz demo 1.](https://parkez.gruevy.com/images/preclick1.jpg)](https://parkez.gruevy.com/videos/demo1.mp4)
+
 
 ## Table of Contents
 
@@ -13,7 +14,7 @@ Livecam from backend with current models (updated every 30 minutes)
 2. [Features](#features)
 3. [Implemented Module](#implemented-module)
 4. [Upcoming Modules](#upcoming-modules)
-5. [Usage Scenarios](#usage-scenarios)
+5. [Demo of Advertising and Payment Features](#demo-of-advertising-and-payment-features)
 6. [Revenue Generation](#revenue-generation)
 7. [Screenshots](#screenshots)
 
@@ -31,7 +32,7 @@ ParkEz consists of 5 major functional requirement modules:
 4. **Advertising Management**: Enables local businesses to post and modify ads on ParkEZ's parking lot webpages and view impressions and clicks on their ads.
 5. **Payment Gateway**: A module for subscribers (advertisers and parking lot managers) to enter payment method and have their payment validated.
 
-## Implemented Requirements
+## Requirements
 
 ### Module 1: Account Management
 - **1.1 Authenticate Account**: Authentication pages for subscribed customers to log in (both lot operators and advertisers).
@@ -56,9 +57,12 @@ ParkEz consists of 5 major functional requirement modules:
 - **5.1 Define Payment Method**: Users decide how they pay for their subscription (ad or lot manger).
 - **5.2 Validate Payment**: Checks that customer payment method can be billed correctly.
 
-## Usage Scenarios
+## Demo of Advertising and Payment Features
 
-ParkEZ has various usage scenarios for external customers and internal users. External customers include parking customers, business owners, and park lot operators, while internal users consist of employees in various roles, such as customer support.
+This demonstration shows secondary features:
+
+[![Click to play ParkEz demo 2.](https://parkez.gruevy.com/images/preclick2.jpg)](https://parkez.gruevy.com/videos/demo2.mp4)
+
 
 ## Revenue Generation
 
