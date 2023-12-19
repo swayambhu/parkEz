@@ -23,8 +23,6 @@ import Dashboard from './pages/TempDashboard';
 import Billing from './pages/Billing';
 import Success from './pages/Success';
 import CreateAd from './pages/CreateAd';
-import ManagePayments from './pages/ManagePayments';
-import EditAd from './pages/EditAd';
 import AdAdmin from './pages/AdAdmin';
 import AdminCreateAd from './pages/AdminCreateAd';
 import LotLatest from './pages/LotLatest';
@@ -33,7 +31,6 @@ import FakeLot from './pages/FakeLot';
 import BusinessDashboard from './pages/BusinessDashboard';
 import LotAdmin from './pages/LotAdmin';
 import Archive from './pages/Archive';
-import OverparkingConfirm from './pages/OverparkingConfirm';
 import ArchiveHome from './pages/ArchiveHome';
 
 const container = document.getElementById('root');
@@ -60,9 +57,7 @@ export const Pages = {
   Dashboard,
   Billing,
   Success,
-  ManagePayments,
   CreateAd,
-  EditAd,
   AdAdmin,
   AdminCreateAd,
   LotLatest,
@@ -72,5 +67,4 @@ export const Pages = {
   LotAdmin,
   Archive,
   ArchiveHome,
-  OverparkingConfirm
 }

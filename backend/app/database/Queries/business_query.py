@@ -16,19 +16,19 @@ def get_business_by_name(name: str, db:Session):
     return business
 
     
-def create_business(business: BusinessBase, db: Session):
+# def create_business(business: BusinessBase, db: Session):
    
-    business_dict = Business(
-        name= business.name,
-        email= business.email,
-        phone_no= business.phone_no,
-        address= business.address,
-        type= business.type,
-        stripe_customer_id=business.stripe_customer_id
-    )
-    db.add(business_dict)
-    db.commit()
-    db.refresh(business_dict)
+#     business_dict = Business(
+#         name= business.name,
+#         email= business.email,
+#         phone_no= business.phone_no,
+#         address= business.address,
+#         type= business.type,
+#         stripe_customer_id=business.stripe_customer_id
+#     )
+#     db.add(business_dict)
+#     db.commit()
+#     db.refresh(business_dict)
     
 
     

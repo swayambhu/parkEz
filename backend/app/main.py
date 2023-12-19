@@ -1,5 +1,5 @@
 import os
-import stripe
+# import stripe
 import logging
 from starlette.responses import JSONResponse
 from fastapi import FastAPI, HTTPException, Depends
@@ -46,7 +46,7 @@ app.include_router(billing.router)
 app.include_router(lots.router)
 app.include_router(ads.ads_router)
 
-stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+# stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 @app.get("/")
 async def main():

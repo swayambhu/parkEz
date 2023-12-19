@@ -300,7 +300,7 @@ const BusinessDashboard = () => {
             <table style={overparkingStyle}>
             <thead>
               <tr>
-                <th>Spot Name |</th>
+                <th>Spot Name &nbsp;&nbsp;&nbsp;</th>
                 <th>Hours Parked</th>
               </tr>
             </thead>
@@ -310,7 +310,7 @@ const BusinessDashboard = () => {
                         <tr key={key}>
                             <td>
                                 <Link 
-                                    to={`/overpark-confirm/${overparkingConfirmLinks[key]}`}
+                                    to={`#`}
                                     style={{ color: overparkingData[key] > 5 ? "red" : "black", fontWeight: overparkingData[key] > 5 ? "bold" : "normal" }}
                                 >
                                     {key}
@@ -318,7 +318,7 @@ const BusinessDashboard = () => {
                             </td>
                             <td>
                                 <Link 
-                                    to={`/overpark-confirm/${overparkingConfirmLinks[key]}`}
+                                    to={`#`}
                                     style={{ color: overparkingData[key] > 5 ? "red" : "black", fontWeight: overparkingData[key] > 5 ? "bold" : "normal" }}
                                 >
                                     {parseFloat(overparkingData[key].toFixed(1))}
